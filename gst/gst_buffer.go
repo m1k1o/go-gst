@@ -197,6 +197,12 @@ func (b *Buffer) DecodingTimestamp() ClockTime {
 	return ClockTime(dts)
 }
 
+// SetDecodingTimestamp sets the decoding timestamp on the buffer.
+func (b *Buffer) SetDecodingTimestamp(dur ClockTime) {
+	ins := b.Instance()
+	ins.dts = C.GstClockTime(dur)
+}
+
 // Duration returns the length of the data inside this buffer, or a negative duration if not known
 // or relevant.
 func (b *Buffer) Duration() ClockTime {
