@@ -303,6 +303,11 @@ type BusSyncHandler func(msg *Message) BusSyncReply
 //
 // Currently, destroyNotify funcs are not supported.
 func (b *Bus) SetSyncHandler(f BusSyncHandler) {
+	if f == nil {
+		C.gst_bus_set_sync_handler(b.Instance(), nil, nil, nil)
+		return
+	}
+
 	ptr := gopointer.Save(f)
 	C.gst_bus_set_sync_handler(
 		b.Instance(),
