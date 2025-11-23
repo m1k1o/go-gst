@@ -93,7 +93,7 @@ func structForEachCb(fieldID C.GQuark, val *C.GValue, chPtr C.gpointer) C.gboole
 //export goBusSyncHandler
 func goBusSyncHandler(bus *C.GstBus, cMsg *C.GstMessage, userData C.gpointer) C.GstBusSyncReply {
 	// wrap the message
-	msg := wrapMessage(cMsg)
+	msg := FromGstMessageUnsafeNone(unsafe.Pointer(cMsg))
 
 	// retrieve the ptr to the function
 	ptr := unsafe.Pointer(userData)
@@ -104,7 +104,15 @@ func goBusSyncHandler(bus *C.GstBus, cMsg *C.GstMessage, userData C.gpointer) C.
 		return C.GstBusSyncReply(BusPass)
 	}
 
-	return C.GstBusSyncReply(busFunc(msg))
+	reply := busFunc(msg)
+
+	// If the handler returns GST_BUS_DROP, it should unref the message,
+	// else the message should not be unreffed by the sync handler.
+	if reply == BusDrop {
+		msg.Unref()
+	}
+
+	return C.GstBusSyncReply(reply)
 }
 
 //export goBusFunc
