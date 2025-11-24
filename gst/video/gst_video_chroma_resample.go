@@ -3,7 +3,6 @@ package video
 // #include <gst/video/video.h>
 import "C"
 import (
-	"runtime"
 	"unsafe"
 )
 
@@ -67,7 +66,7 @@ func NewChromaResample(method ChromaMethod, site ChromaSite, flags ChromaFlags, 
 		return nil
 	}
 	goResample := &ChromaResample{resample}
-	runtime.SetFinalizer(goResample, func(c *ChromaResample) { C.gst_video_chroma_resample_free(c.instance()) })
+	WrapFinalizer("GstVideoChromaResample", goResample, func(c *ChromaResample) { C.gst_video_chroma_resample_free(c.instance()) })
 	return goResample
 }
 

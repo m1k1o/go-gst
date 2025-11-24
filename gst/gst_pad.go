@@ -81,7 +81,6 @@ import "C"
 
 import (
 	"errors"
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-glib/glib"
@@ -1143,7 +1142,7 @@ func (p *PadProbeInfo) GetEvent() *Event {
 	event := wrapEvent(ev)
 
 	event.Ref()
-	runtime.SetFinalizer(event, (*Event).Unref)
+	WrapFinalizer("GstEvent(None)", event, (*Event).Unref)
 
 	return event
 }

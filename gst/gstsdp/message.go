@@ -26,9 +26,7 @@ func wrapSDPMessageAndFinalize(sdp *C.GstSDPMessage) *Message {
 	}
 
 	// this requires that we copy the SDP message before passing it to any transfer-ownership function
-	runtime.SetFinalizer(msg, func(msg *Message) {
-		msg.Free()
-	})
+	WrapFinalizer("GstSDPMessage", msg, (*Message).Free)
 
 	return msg
 }
@@ -138,7 +136,8 @@ func (msg *Message) Media(i int) *Media {
 	}
 
 	// keep the Message alive while we are handling the media
-	runtime.SetFinalizer(media, func(_ *Media) {
+	WrapFinalizer("GstSDPMedia", media, func(_ *Media) {
+		fmt.Println("Keeping Message alive for Media")
 		runtime.KeepAlive(msg)
 	})
 

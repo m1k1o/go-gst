@@ -4,7 +4,6 @@ package gst
 import "C"
 
 import (
-	"runtime"
 	"unsafe"
 )
 
@@ -18,7 +17,7 @@ type Sample struct {
 func FromGstSampleUnsafeNone(sample unsafe.Pointer) *Sample {
 	s := wrapSample(C.toGstSample(sample))
 	s.Ref()
-	runtime.SetFinalizer(s, (*Sample).Unref)
+	WrapFinalizer("GstSample(None)", s, (*Sample).Unref)
 	return s
 }
 
@@ -26,7 +25,7 @@ func FromGstSampleUnsafeNone(sample unsafe.Pointer) *Sample {
 // This is meant for internal usage and is exported for visibility to other packages.
 func FromGstSampleUnsafeFull(sample unsafe.Pointer) *Sample {
 	s := wrapSample(C.toGstSample(sample))
-	runtime.SetFinalizer(s, (*Sample).Unref)
+	WrapFinalizer("GstSample(Full)", s, (*Sample).Unref)
 	return s
 }
 

@@ -80,9 +80,7 @@ func NewPromise() *Promise {
 		done: done,
 	}
 
-	runtime.SetFinalizer(prom, func(prom *Promise) {
-		prom.Unref()
-	})
+	WrapFinalizer("GstPromise", prom, (*Promise).Unref)
 
 	return prom
 }
@@ -158,7 +156,8 @@ func (p *Promise) GetReply() *Structure {
 
 	// the structure is owned by the promise, so we keep the promise alive
 	// until the structure gets GC'ed
-	runtime.SetFinalizer(structure, func(_ *Structure) {
+	WrapFinalizer("GstPromise", structure, func(_ *Structure) {
+		fmt.Println("Keeping Promise alive for Structure")
 		runtime.KeepAlive(p)
 	})
 
@@ -207,9 +206,7 @@ func marshalPromise(p unsafe.Pointer) (interface{}, error) {
 
 	prom.Ref()
 
-	runtime.SetFinalizer(prom, func(p *Promise) {
-		p.Unref()
-	})
+	WrapFinalizer("GstPromise", prom, (*Promise).Unref)
 
 	return prom, nil
 }

@@ -3,7 +3,6 @@ package gst
 // #include "gst.go.h"
 import "C"
 import (
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-glib/glib"
@@ -173,7 +172,7 @@ func (p *ProxyPad) Instance() *C.GstProxyPad { return C.toGstProxyPad(p.Unsafe()
 func (p *ProxyPad) GetInternal() *ProxyPad {
 	pad := C.gst_proxy_pad_get_internal(p.Instance())
 	proxyPad := wrapProxyPad(toGObject(unsafe.Pointer(pad)))
-	runtime.SetFinalizer(proxyPad, (*ProxyPad).Unref)
+	WrapFinalizer("GstProxyPad", proxyPad, (*ProxyPad).Unref)
 	return proxyPad
 }
 

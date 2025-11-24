@@ -6,7 +6,6 @@ package gst
 import "C"
 
 import (
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-glib/glib"
@@ -27,7 +26,7 @@ type Memory struct {
 func FromGstMemoryUnsafe(mem unsafe.Pointer) *Memory {
 	wrapped := wrapMemory((*C.GstMemory)(mem))
 	wrapped.Ref()
-	runtime.SetFinalizer(wrapped, (*Memory).Unref)
+	WrapFinalizer("GstMemory(None)", wrapped, (*Memory).Unref)
 	return wrapped
 }
 
@@ -39,7 +38,7 @@ func FromGstMemoryUnsafeNone(mem unsafe.Pointer) *Memory {
 // FromGstMemoryUnsafeFull wraps the given memory without taking an additional reference.
 func FromGstMemoryUnsafeFull(mem unsafe.Pointer) *Memory {
 	wrapped := wrapMemory((*C.GstMemory)(mem))
-	runtime.SetFinalizer(wrapped, (*Memory).Unref)
+	WrapFinalizer("GstMemory(Full)", wrapped, (*Memory).Unref)
 	return wrapped
 }
 

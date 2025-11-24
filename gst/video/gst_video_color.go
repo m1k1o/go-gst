@@ -108,7 +108,7 @@ type ColorPrimariesInfo struct {
 // 		Bx:        C.gdouble(c.Bx),
 // 		By:        C.gdouble(c.By),
 // 	}
-// 	runtime.SetFinalizer(c, func(_ *ColorPrimariesInfo) { C.g_free((C.gpointer)(unsafe.Pointer(i))) })
+// 	WrapFinalizer("GstVideoColorPrimariesInfo", c, func(_ *ColorPrimariesInfo) { C.g_free((C.gpointer)(unsafe.Pointer(i))) })
 // 	return i
 // }
 
@@ -131,7 +131,7 @@ type Colorimetry struct {
 // 		transfer:  C.GstVideoTransferFunction(c.Transfer),
 // 		primaries: C.GstVideoColorPrimaries(c.Primaries),
 // 	}
-// 	runtime.SetFinalizer(c, func(_ *Colorimetry) { C.g_free((C.gpointer)(unsafe.Pointer(i))) })
+// 	WrapFinalizer("GstVideoColorimetry", c, func(_ *Colorimetry) { C.g_free((C.gpointer)(unsafe.Pointer(i))) })
 // 	return i
 // }
 

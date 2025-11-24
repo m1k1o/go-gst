@@ -38,9 +38,7 @@ func wrapSessionDescriptionAndFinalize(sdp *C.GstWebRTCSessionDescription) *Sess
 	}
 
 	// this requires that we copy the SDP message before passing it to any transfer-ownership function
-	runtime.SetFinalizer(sd, func(sd *SessionDescription) {
-		sd.Free()
-	})
+	WrapFinalizer("GstWebRTCSessionDescription", sd, (*SessionDescription).Free)
 
 	return sd
 }
@@ -127,7 +125,8 @@ func marshalSessionDescription(p unsafe.Pointer) (interface{}, error) {
 func (sd *SessionDescription) SDP() *gstsdp.Message {
 	sdp := gstsdp.NewMessageFromUnsafe(unsafe.Pointer(sd.ptr.sdp))
 
-	runtime.SetFinalizer(sdp, func(sdp *gstsdp.Message) {
+	WrapFinalizer("GstSDPMessage", sdp, func(sdp *gstsdp.Message) {
+		fmt.Println("Keeping SessionDescription alive for SDP Message")
 		runtime.KeepAlive(sd)
 	})
 

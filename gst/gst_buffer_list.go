@@ -12,7 +12,6 @@ gboolean cgoBufferListForEachCb (GstBuffer ** buffer, guint idx, gpointer user_d
 */
 import "C"
 import (
-	"runtime"
 	"unsafe"
 
 	gopointer "github.com/go-gst/go-pointer"
@@ -45,14 +44,14 @@ func NewBufferListSized(size uint) *BufferList {
 func FromGstBufferListUnsafeNone(buf unsafe.Pointer) *BufferList {
 	wrapped := wrapBufferList((*C.GstBufferList)(buf))
 	wrapped.Ref()
-	runtime.SetFinalizer(wrapped, (*BufferList).Unref)
+	WrapFinalizer("BufferList(None)", wrapped, (*BufferList).Unref)
 	return wrapped
 }
 
 // FromGstBufferListUnsafeFull wraps the given buffer without taking an additional reference.
 func FromGstBufferListUnsafeFull(buf unsafe.Pointer) *BufferList {
 	wrapped := wrapBufferList((*C.GstBufferList)(buf))
-	runtime.SetFinalizer(wrapped, (*BufferList).Unref)
+	WrapFinalizer("BufferList(Full)", wrapped, (*BufferList).Unref)
 	return wrapped
 }
 

@@ -33,7 +33,6 @@ import "C"
 import (
 	"image/color"
 	"math"
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-glib/glib"
@@ -321,7 +320,7 @@ func (f Format) ToGValue() (*glib.Value, error) {
 func (f Format) Info() *FormatInfo {
 	finfo := C.gst_video_format_get_info(C.GstVideoFormat(f))
 	info := &FormatInfo{ptr: finfo}
-	runtime.SetFinalizer(info, func(_ *FormatInfo) { C.g_free((C.gpointer)(unsafe.Pointer(finfo))) })
+	WrapFinalizer("GstVideoFormatInfo", info, func(_ *FormatInfo) { C.g_free((C.gpointer)(unsafe.Pointer(finfo))) })
 	return info
 }
 

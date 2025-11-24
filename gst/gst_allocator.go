@@ -4,7 +4,6 @@ package gst
 import "C"
 
 import (
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-glib/glib"
@@ -27,7 +26,7 @@ func NewAllocationParams() *AllocationParams {
 		ptr: &C.GstAllocationParams{},
 	}
 	params.Init()
-	runtime.SetFinalizer(params, (*AllocationParams).Free)
+	WrapFinalizer("AllocationParams", params, (*AllocationParams).Free)
 	return params
 }
 

@@ -4,7 +4,6 @@ package gst
 import "C"
 
 import (
-	"runtime"
 	"strings"
 	"time"
 	"unsafe"
@@ -23,7 +22,7 @@ type Message struct {
 func FromGstMessageUnsafeNone(msg unsafe.Pointer) *Message {
 	gomsg := ToGstMessage(msg)
 	gomsg.Ref()
-	runtime.SetFinalizer(gomsg, (*Message).Unref)
+	WrapFinalizer("GstMessage(None)", gomsg, (*Message).Unref)
 	return gomsg
 }
 
@@ -31,7 +30,7 @@ func FromGstMessageUnsafeNone(msg unsafe.Pointer) *Message {
 // and a finalizer is placed on the resulting object.
 func FromGstMessageUnsafeFull(msg unsafe.Pointer) *Message {
 	gomsg := ToGstMessage(msg)
-	runtime.SetFinalizer(gomsg, (*Message).Unref)
+	WrapFinalizer("GstMessage(Full)", gomsg, (*Message).Unref)
 	return gomsg
 }
 

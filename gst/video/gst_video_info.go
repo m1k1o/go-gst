@@ -35,7 +35,6 @@ gint                   infoWidth             (GstVideoInfo * info)              
 */
 import "C"
 import (
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-gst/gst"
@@ -164,7 +163,7 @@ type Info struct {
 
 func wrapInfo(vinfo *C.GstVideoInfo) *Info {
 	info := &Info{vinfo}
-	runtime.SetFinalizer(info, (*Info).Free)
+	WrapFinalizer("GstVideoInfo", info, (*Info).Free)
 	return info
 }
 

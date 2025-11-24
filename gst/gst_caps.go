@@ -14,6 +14,7 @@ gboolean cgoCapsMapFunc (GstCapsFeatures * features, GstStructure * structure, g
 import "C"
 
 import (
+	"fmt"
 	"runtime"
 	"unsafe"
 
@@ -40,7 +41,7 @@ func FromGstCapsUnsafeNone(caps unsafe.Pointer) *Caps {
 	}
 	gocaps := ToGstCaps(caps)
 	gocaps.Ref()
-	runtime.SetFinalizer(gocaps, (*Caps).Unref)
+	WrapFinalizer("GstCaps(None)", gocaps, (*Caps).Unref)
 	return gocaps
 }
 
@@ -52,7 +53,7 @@ func FromGstCapsUnsafeFull(caps unsafe.Pointer) *Caps {
 		return nil
 	}
 	gocaps := ToGstCaps(caps)
-	runtime.SetFinalizer(gocaps, (*Caps).Unref)
+	WrapFinalizer("GstCaps(Full)", gocaps, (*Caps).Unref)
 	return gocaps
 }
 
@@ -271,7 +272,8 @@ func (c *Caps) GetStructureAt(idx int) *Structure {
 
 	// we don't own the structure, so keep the caps alive until we
 	// don't need the structure anymore
-	runtime.SetFinalizer(s, func(_ *Structure) {
+	WrapFinalizer("GstCapsStructure", s, func(_ *Structure) {
+		fmt.Println("Keeping Caps alive for Structure")
 		runtime.KeepAlive(c)
 	})
 

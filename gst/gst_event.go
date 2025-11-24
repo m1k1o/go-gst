@@ -4,7 +4,6 @@ package gst
 import "C"
 
 import (
-	"runtime"
 	"time"
 	"unsafe"
 )
@@ -22,7 +21,7 @@ type Event struct {
 func FromGstEventUnsafeNone(ev unsafe.Pointer) *Event {
 	event := ToGstEvent(ev)
 	event.Ref()
-	runtime.SetFinalizer(event, (*Event).Unref)
+	WrapFinalizer("GstEvent(None)", event, (*Event).Unref)
 	return event
 }
 
@@ -30,7 +29,7 @@ func FromGstEventUnsafeNone(ev unsafe.Pointer) *Event {
 // A finalizer is applied.
 func FromGstEventUnsafeFull(ev unsafe.Pointer) *Event {
 	event := ToGstEvent(ev)
-	runtime.SetFinalizer(event, (*Event).Unref)
+	WrapFinalizer("GstEvent(Full)", event, (*Event).Unref)
 	return event
 }
 

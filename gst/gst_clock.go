@@ -21,7 +21,6 @@ import "C"
 
 import (
 	"fmt"
-	"runtime"
 	"time"
 	"unsafe"
 
@@ -294,7 +293,7 @@ func (c *Clock) NewPeriodicID(startTime, interval ClockTime) *ClockID {
 		C.GstClockTime(interval),
 	)
 	clkid := &ClockID{id}
-	runtime.SetFinalizer(clkid, (*ClockID).Unref)
+	WrapFinalizer("ClockID(Periodic)", clkid, (*ClockID).Unref)
 	return clkid
 }
 
@@ -305,7 +304,7 @@ func (c *Clock) NewSingleShotID(at ClockTime) *ClockID {
 		C.GstClockTime(at),
 	)
 	clkid := &ClockID{id}
-	runtime.SetFinalizer(clkid, (*ClockID).Unref)
+	WrapFinalizer("ClockID(SingleShot)", clkid, (*ClockID).Unref)
 	return clkid
 }
 

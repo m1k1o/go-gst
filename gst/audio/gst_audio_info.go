@@ -11,7 +11,6 @@ gint channels(GstAudioInfo * info)
 import "C"
 import (
 	"math"
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-gst/gst"
@@ -28,7 +27,7 @@ const (
 
 func wrapInfoFull(ptr *C.GstAudioInfo) *Info {
 	info := &Info{ptr}
-	runtime.SetFinalizer(info, (*Info).Free)
+	WrapFinalizer("GstAudioInfo", info, (*Info).Free)
 	return info
 }
 

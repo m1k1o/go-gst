@@ -3,7 +3,6 @@ package gst
 // #include "gst.go.h"
 import "C"
 import (
-	"runtime"
 	"unsafe"
 )
 
@@ -15,7 +14,7 @@ type Context struct {
 // FromGstContextUnsafeFull wraps the given context and places a runtime finalizer on it.
 func FromGstContextUnsafeFull(ctx unsafe.Pointer) *Context {
 	wrapped := wrapContext((*C.GstContext)(ctx))
-	runtime.SetFinalizer(wrapped, (*Context).Unref)
+	WrapFinalizer("GstContext(Full)", wrapped, (*Context).Unref)
 	return wrapped
 }
 
@@ -23,7 +22,7 @@ func FromGstContextUnsafeFull(ctx unsafe.Pointer) *Context {
 func FromGstContextUnsafeNone(ctx unsafe.Pointer) *Context {
 	wrapped := wrapContext((*C.GstContext)(ctx))
 	wrapped.Ref()
-	runtime.SetFinalizer(wrapped, (*Context).Unref)
+	WrapFinalizer("GstContext(None)", wrapped, (*Context).Unref)
 	return wrapped
 }
 

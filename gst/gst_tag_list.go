@@ -14,7 +14,6 @@ void cgoTagForEachFunc (const GstTagList * tagList, const gchar * tag, gpointer 
 import "C"
 
 import (
-	"runtime"
 	"time"
 	"unsafe"
 
@@ -33,7 +32,7 @@ type TagList struct {
 func FromGstTagListUnsafeNone(tags unsafe.Pointer) *TagList {
 	tl := wrapTagList(C.toGstTagList(tags))
 	tl.Ref()
-	runtime.SetFinalizer(tl, (*TagList).Unref)
+	WrapFinalizer("GstTagList(None)", tl, (*TagList).Unref)
 	return tl
 }
 
@@ -41,7 +40,7 @@ func FromGstTagListUnsafeNone(tags unsafe.Pointer) *TagList {
 // This is meant for internal usage and is exported for visibility to other packages.
 func FromGstTagListUnsafeFull(tags unsafe.Pointer) *TagList {
 	tl := wrapTagList(C.toGstTagList(tags))
-	runtime.SetFinalizer(tl, (*TagList).Unref)
+	WrapFinalizer("GstTagList(Full)", tl, (*TagList).Unref)
 	return tl
 }
 

@@ -4,7 +4,6 @@ package video
 import "C"
 
 import (
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-gst/gst"
@@ -55,7 +54,7 @@ func (a *Alignment) instance() *C.GstVideoAlignment {
 		padding_left:   C.guint(a.PaddingLeft),
 		padding_right:  C.guint(a.PaddingRight),
 	}
-	runtime.SetFinalizer(a, func(_ *Alignment) { C.g_free((C.gpointer)(unsafe.Pointer(g))) })
+	WrapFinalizer("GstVideoAlignment", a, func(_ *Alignment) { C.g_free((C.gpointer)(unsafe.Pointer(g))) })
 	return g
 }
 

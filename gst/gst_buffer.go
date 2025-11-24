@@ -22,7 +22,6 @@ import "C"
 import (
 	"bytes"
 	"io"
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-glib/glib"
@@ -47,7 +46,7 @@ func FromGstBufferUnsafeNone(buf unsafe.Pointer) *Buffer {
 
 	wrapped := ToGstBuffer(buf)
 	wrapped.Ref()
-	runtime.SetFinalizer(wrapped, (*Buffer).Unref)
+	WrapFinalizer("Buffer(None)", wrapped, (*Buffer).Unref)
 	return wrapped
 }
 
@@ -58,7 +57,7 @@ func FromGstBufferUnsafeFull(buf unsafe.Pointer) *Buffer {
 	}
 
 	wrapped := ToGstBuffer(buf)
-	runtime.SetFinalizer(wrapped, (*Buffer).Unref)
+	WrapFinalizer("Buffer(Full)", wrapped, (*Buffer).Unref)
 	return wrapped
 }
 

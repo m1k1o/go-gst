@@ -5,7 +5,6 @@ package audio
 // */
 // import "C"
 // import (
-// 	"runtime"
 // 	"unsafe"
 // )
 
@@ -29,7 +28,7 @@ package audio
 // 		return nil
 // 	}
 // 	wrapped := &ChannelMixer{mixer}
-// 	runtime.SetFinalizer(wrapped, (*ChannelMixer).Free)
+// 	WrapFinalizer("GstAudioChannelMixer", wrapped, (*ChannelMixer).Free)
 // 	return wrapped
 // }
 

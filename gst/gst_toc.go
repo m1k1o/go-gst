@@ -3,7 +3,6 @@ package gst
 // #include "gst.go.h"
 import "C"
 import (
-	"runtime"
 	"unsafe"
 )
 
@@ -17,7 +16,7 @@ type TOC struct {
 func FromGstTOCUnsafeNone(toc unsafe.Pointer) *TOC {
 	gotoc := wrapTOC((*C.GstToc)(toc))
 	gotoc.Ref()
-	runtime.SetFinalizer(gotoc, (*TOC).Unref)
+	WrapFinalizer("GstTOC(None)", gotoc, (*TOC).Unref)
 	return gotoc
 }
 
@@ -25,7 +24,7 @@ func FromGstTOCUnsafeNone(toc unsafe.Pointer) *TOC {
 // This is meant for internal usage and is exported for visibility to other packages.
 func FromGstTOCUnsafeFull(toc unsafe.Pointer) *TOC {
 	gotoc := wrapTOC((*C.GstToc)(toc))
-	runtime.SetFinalizer(gotoc, (*TOC).Unref)
+	WrapFinalizer("GstTOC(Full)", gotoc, (*TOC).Unref)
 	return gotoc
 }
 
@@ -133,14 +132,14 @@ type TOCEntry struct {
 func FromGstTocEntryUnsafeNone(entry unsafe.Pointer) *TOCEntry {
 	t := wrapTOCEntry((*C.GstTocEntry)(entry))
 	t.Ref()
-	runtime.SetFinalizer(t, (*TOCEntry).Unref)
+	WrapFinalizer("GstTOCEntry(None)", t, (*TOCEntry).Unref)
 	return t
 }
 
 // FromGstTocEntryUnsafeFull wraps the given TOCEntry.
 func FromGstTocEntryUnsafeFull(entry unsafe.Pointer) *TOCEntry {
 	t := wrapTOCEntry((*C.GstTocEntry)(entry))
-	runtime.SetFinalizer(t, (*TOCEntry).Unref)
+	WrapFinalizer("GstTOCEntry(Full)", t, (*TOCEntry).Unref)
 	return t
 }
 

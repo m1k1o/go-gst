@@ -3,7 +3,6 @@ package gst
 // #include "gst.go.h"
 import "C"
 import (
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gst/go-glib/glib"
@@ -22,7 +21,7 @@ func (q *Query) Type() QueryType { return QueryType(q.ptr._type) }
 func FromGstQueryUnsafeNone(query unsafe.Pointer) *Query {
 	q := ToGstQuery(query)
 	q.Ref()
-	runtime.SetFinalizer(q, (*Query).Unref)
+	WrapFinalizer("GstQuery(None)", q, (*Query).Unref)
 	return q
 }
 
@@ -30,7 +29,7 @@ func FromGstQueryUnsafeNone(query unsafe.Pointer) *Query {
 // This is meant for internal usage and is exported for visibility to other packages.
 func FromGstQueryUnsafeFull(query unsafe.Pointer) *Query {
 	q := ToGstQuery(query)
-	runtime.SetFinalizer(q, (*Query).Unref)
+	WrapFinalizer("GstQuery(Full)", q, (*Query).Unref)
 	return q
 }
 

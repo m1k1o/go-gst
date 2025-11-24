@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"runtime"
 	"sync"
 	"unsafe"
 
@@ -238,9 +237,7 @@ func structureFromGlibNone(st *C.GstStructure) *Structure {
 func structureFromGlibFull(st *C.GstStructure) *Structure {
 	s := wrapStructure(st)
 
-	runtime.SetFinalizer(s, func(s *Structure) {
-		s.Free()
-	})
+	WrapFinalizer("GstStructure", s, (*Structure).Free)
 
 	return s
 }
