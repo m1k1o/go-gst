@@ -422,10 +422,6 @@ const VIDEO_COMP_Y = 0
 //
 // Default maximum number of errors tolerated before signaling error.
 const VIDEO_DECODER_MAX_ERRORS = -1
-// VIDEO_FORMAT_LAST wraps GST_VIDEO_FORMAT_LAST
-//
-// Number of video formats in #GstVideoFormat.
-const VIDEO_FORMAT_LAST = 140
 // VIDEO_MAX_COMPONENTS wraps GST_VIDEO_MAX_COMPONENTS
 const VIDEO_MAX_COMPONENTS = 4
 // VIDEO_MAX_PLANES wraps GST_VIDEO_MAX_PLANES
@@ -731,12 +727,6 @@ const (
 	//
 	// An event cancelling all currently active touch points.
 	NavigationEventTouchCancel NavigationEventType = 12
-	// NavigationEventMouseDoubleClick wraps GST_NAVIGATION_EVENT_MOUSE_DOUBLE_CLICK
-	//
-	// A mouse button double click event.
-	// Use gst_navigation_event_parse_mouse_button_event() to extract the details
-	// from the event.
-	NavigationEventMouseDoubleClick NavigationEventType = 13
 )
 
 func marshalNavigationEventType(p unsafe.Pointer) (any, error) {
@@ -761,7 +751,6 @@ func (e NavigationEventType) String() string {
 		case NavigationEventKeyRelease: return "NavigationEventKeyRelease"
 		case NavigationEventMouseButtonPress: return "NavigationEventMouseButtonPress"
 		case NavigationEventMouseButtonRelease: return "NavigationEventMouseButtonRelease"
-		case NavigationEventMouseDoubleClick: return "NavigationEventMouseDoubleClick"
 		case NavigationEventMouseMove: return "NavigationEventMouseMove"
 		case NavigationEventMouseScroll: return "NavigationEventMouseScroll"
 		case NavigationEventTouchCancel: return "NavigationEventTouchCancel"
@@ -2597,26 +2586,6 @@ const (
 	//
 	// packed RGB with alpha, 8 bits per channel
 	VideoFormatRbga VideoFormat = 133
-	// VideoFormatY216Le wraps GST_VIDEO_FORMAT_Y216_LE
-	//
-	// packed 4:2:2 YUV, 16 bits per channel (Y-U-Y-V)
-	VideoFormatY216Le VideoFormat = 134
-	// VideoFormatY216Be wraps GST_VIDEO_FORMAT_Y216_BE
-	//
-	// packed 4:2:2 YUV, 16 bits per channel (Y-U-Y-V)
-	VideoFormatY216Be VideoFormat = 135
-	// VideoFormatY416Le wraps GST_VIDEO_FORMAT_Y416_LE
-	//
-	// packed 4:4:4:4 YUV, 16 bits per channel(U-Y-V-A)
-	VideoFormatY416Le VideoFormat = 136
-	// VideoFormatY416Be wraps GST_VIDEO_FORMAT_Y416_BE
-	//
-	// packed 4:4:4:4 YUV, 16 bits per channel(U-Y-V-A)
-	VideoFormatY416Be VideoFormat = 137
-	// VideoFormatGray10Le16 wraps GST_VIDEO_FORMAT_GRAY10_LE16
-	//
-	// 10-bit grayscale, packed into 16bit words (6 bits left padding)
-	VideoFormatGray10Le16 VideoFormat = 138
 )
 
 func marshalVideoFormat(p unsafe.Pointer) (any, error) {
@@ -2689,7 +2658,6 @@ func (e VideoFormat) String() string {
 		case VideoFormatGbra10le: return "VideoFormatGbra10le"
 		case VideoFormatGbra12be: return "VideoFormatGbra12be"
 		case VideoFormatGbra12le: return "VideoFormatGbra12le"
-		case VideoFormatGray10Le16: return "VideoFormatGray10Le16"
 		case VideoFormatGray10Le32: return "VideoFormatGray10Le32"
 		case VideoFormatGray16Be: return "VideoFormatGray16Be"
 		case VideoFormatGray16Le: return "VideoFormatGray16Le"
@@ -2753,13 +2721,9 @@ func (e VideoFormat) String() string {
 		case VideoFormatY210: return "VideoFormatY210"
 		case VideoFormatY212Be: return "VideoFormatY212Be"
 		case VideoFormatY212Le: return "VideoFormatY212Le"
-		case VideoFormatY216Be: return "VideoFormatY216Be"
-		case VideoFormatY216Le: return "VideoFormatY216Le"
 		case VideoFormatY410: return "VideoFormatY410"
 		case VideoFormatY412Be: return "VideoFormatY412Be"
 		case VideoFormatY412Le: return "VideoFormatY412Le"
-		case VideoFormatY416Be: return "VideoFormatY416Be"
-		case VideoFormatY416Le: return "VideoFormatY416Le"
 		case VideoFormatY41b: return "VideoFormatY41b"
 		case VideoFormatY42b: return "VideoFormatY42b"
 		case VideoFormatY444: return "VideoFormatY444"
@@ -6664,75 +6628,6 @@ func VideoCropMetaAPIGetType() gobject.Type {
 	return goret
 }
 
-// VideoDmaDrmFormatFromGstFormat wraps gst_video_dma_drm_format_from_gst_format
-// 
-// The function takes the following parameters:
-// 
-// 	- format VideoFormat: a #GstVideoFormat 
-// 	- modifier *uint64 (nullable): return location for the modifier 
-// 
-// The function returns the following values:
-// 
-// 	- goret uint32 
-//
-// Converting the video format into dma drm fourcc/modifier pair.
-// If no matching fourcc found, then DRM_FORMAT_INVALID is returned
-// and @modifier will be set to DRM_FORMAT_MOD_INVALID.
-func VideoDmaDrmFormatFromGstFormat(format VideoFormat, modifier *uint64) uint32 {
-	var carg1 C.GstVideoFormat // in, none, casted
-	var carg2 *C.guint64       // in, transfer: none, C Pointers: 1, Name: guint64, nullable, nullable
-	var cret  C.guint32        // return, none, casted
-
-	carg1 = C.GstVideoFormat(format)
-	if modifier != nil {
-		_ = modifier
-		_ = carg2
-		panic("unimplemented conversion of *uint64 (guint64*) because of no basic converter found")
-	}
-
-	cret = C.gst_video_dma_drm_format_from_gst_format(carg1, carg2)
-	runtime.KeepAlive(format)
-	runtime.KeepAlive(modifier)
-
-	var goret uint32
-
-	goret = uint32(cret)
-
-	return goret
-}
-
-// VideoDmaDrmFormatToGstFormat wraps gst_video_dma_drm_format_to_gst_format
-// 
-// The function takes the following parameters:
-// 
-// 	- fourcc uint32: the dma drm fourcc value. 
-// 	- modifier uint64: the dma drm modifier. 
-// 
-// The function returns the following values:
-// 
-// 	- goret VideoFormat 
-//
-// Converting a dma drm fourcc and modifier pair into a #GstVideoFormat. If
-// no matching video format is found, then GST_VIDEO_FORMAT_UNKNOWN is returned.
-func VideoDmaDrmFormatToGstFormat(fourcc uint32, modifier uint64) VideoFormat {
-	var carg1 C.guint32        // in, none, casted
-	var carg2 C.guint64        // in, none, casted
-	var cret  C.GstVideoFormat // return, none, casted
-
-	carg1 = C.guint32(fourcc)
-	carg2 = C.guint64(modifier)
-
-	cret = C.gst_video_dma_drm_format_to_gst_format(carg1, carg2)
-	runtime.KeepAlive(fourcc)
-	runtime.KeepAlive(modifier)
-
-	var goret VideoFormat
-
-	goret = VideoFormat(cret)
-
-	return goret
-}
-
 // VideoDmaDrmFourccFromFormat wraps gst_video_dma_drm_fourcc_from_format
 // 
 // The function takes the following parameters:
@@ -8394,46 +8289,6 @@ func NavigationEventNewMouseButtonRelease(button int32, x float64, y float64, st
 	carg4 = C.GstNavigationModifierType(state)
 
 	cret = C.gst_navigation_event_new_mouse_button_release(carg1, carg2, carg3, carg4)
-	runtime.KeepAlive(button)
-	runtime.KeepAlive(x)
-	runtime.KeepAlive(y)
-	runtime.KeepAlive(state)
-
-	var goret *gst.Event
-
-	goret = gst.UnsafeEventFromGlibFull(unsafe.Pointer(cret))
-
-	return goret
-}
-
-// NavigationEventNewMouseDoubleClick wraps gst_navigation_event_new_mouse_double_click
-// 
-// The function takes the following parameters:
-// 
-// 	- button int32: The number of the pressed mouse button. 
-// 	- x float64: The x coordinate of the mouse cursor. 
-// 	- y float64: The y coordinate of the mouse cursor. 
-// 	- state NavigationModifierType: a bit-mask representing the state of the modifier keys (e.g. Control,
-// Shift and Alt). 
-// 
-// The function returns the following values:
-// 
-// 	- goret *gst.Event 
-//
-// Create a new navigation event for the given key mouse double click.
-func NavigationEventNewMouseDoubleClick(button int32, x float64, y float64, state NavigationModifierType) *gst.Event {
-	var carg1 C.gint                      // in, none, casted
-	var carg2 C.gdouble                   // in, none, casted
-	var carg3 C.gdouble                   // in, none, casted
-	var carg4 C.GstNavigationModifierType // in, none, casted
-	var cret  *C.GstEvent                 // return, full, converted
-
-	carg1 = C.gint(button)
-	carg2 = C.gdouble(x)
-	carg3 = C.gdouble(y)
-	carg4 = C.GstNavigationModifierType(state)
-
-	cret = C.gst_navigation_event_new_mouse_double_click(carg1, carg2, carg3, carg4)
 	runtime.KeepAlive(button)
 	runtime.KeepAlive(x)
 	runtime.KeepAlive(y)
@@ -16068,19 +15923,6 @@ type VideoEncoder interface {
 	// The buffer allocated here is owned by the frame and you should only
 	// keep references to the frame, not the buffer.
 	AllocateOutputFrame(*VideoCodecFrame, uint) gst.FlowReturn
-	// DropFrame wraps gst_video_encoder_drop_frame
-	// 
-	// The function takes the following parameters:
-	// 
-	// 	- frame *VideoCodecFrame: a #GstVideoCodecFrame 
-	//
-	// Removes @frame from the list of pending frames, releases it
-	// and posts a QoS message with the frame's details on the bus.
-	// Similar to calling gst_video_encoder_finish_frame() without a buffer
-	// attached to @frame, but this function additionally stores events
-	// from @frame as pending, to be pushed out alongside the next frame
-	// submitted via gst_video_encoder_finish_frame().
-	DropFrame(*VideoCodecFrame)
 	// FinishFrame wraps gst_video_encoder_finish_frame
 	// 
 	// The function takes the following parameters:
@@ -16265,17 +16107,6 @@ type VideoEncoder interface {
 	// restricted to resolution/format/... combinations supported by downstream
 	// elements (e.g. muxers).
 	ProxyGetcaps(*gst.Caps, *gst.Caps) *gst.Caps
-	// ReleaseFrame wraps gst_video_encoder_release_frame
-	// 
-	// The function takes the following parameters:
-	// 
-	// 	- frame *VideoCodecFrame: a #GstVideoCodecFrame 
-	//
-	// Removes @frame from list of pending frames and releases it, similar
-	// to calling gst_video_encoder_finish_frame() without a buffer attached
-	// to the frame, but does not post a QoS message or do any additional
-	// processing. Events from @frame are moved to the pending events list.
-	ReleaseFrame(*VideoCodecFrame)
 	// SetLatency wraps gst_video_encoder_set_latency
 	// 
 	// The function takes the following parameters:
@@ -16754,30 +16585,6 @@ func (encoder *VideoEncoderInstance) AllocateOutputFrame(frame *VideoCodecFrame,
 	return goret
 }
 
-// DropFrame wraps gst_video_encoder_drop_frame
-// 
-// The function takes the following parameters:
-// 
-// 	- frame *VideoCodecFrame: a #GstVideoCodecFrame 
-//
-// Removes @frame from the list of pending frames, releases it
-// and posts a QoS message with the frame's details on the bus.
-// Similar to calling gst_video_encoder_finish_frame() without a buffer
-// attached to @frame, but this function additionally stores events
-// from @frame as pending, to be pushed out alongside the next frame
-// submitted via gst_video_encoder_finish_frame().
-func (encoder *VideoEncoderInstance) DropFrame(frame *VideoCodecFrame) {
-	var carg0 *C.GstVideoEncoder    // in, none, converted
-	var carg1 *C.GstVideoCodecFrame // in, full, converted
-
-	carg0 = (*C.GstVideoEncoder)(UnsafeVideoEncoderToGlibNone(encoder))
-	carg1 = (*C.GstVideoCodecFrame)(UnsafeVideoCodecFrameToGlibFull(frame))
-
-	C.gst_video_encoder_drop_frame(carg0, carg1)
-	runtime.KeepAlive(encoder)
-	runtime.KeepAlive(frame)
-}
-
 // FinishFrame wraps gst_video_encoder_finish_frame
 // 
 // The function takes the following parameters:
@@ -17220,28 +17027,6 @@ func (enc *VideoEncoderInstance) ProxyGetcaps(caps *gst.Caps, filter *gst.Caps) 
 	goret = gst.UnsafeCapsFromGlibFull(unsafe.Pointer(cret))
 
 	return goret
-}
-
-// ReleaseFrame wraps gst_video_encoder_release_frame
-// 
-// The function takes the following parameters:
-// 
-// 	- frame *VideoCodecFrame: a #GstVideoCodecFrame 
-//
-// Removes @frame from list of pending frames and releases it, similar
-// to calling gst_video_encoder_finish_frame() without a buffer attached
-// to the frame, but does not post a QoS message or do any additional
-// processing. Events from @frame are moved to the pending events list.
-func (encoder *VideoEncoderInstance) ReleaseFrame(frame *VideoCodecFrame) {
-	var carg0 *C.GstVideoEncoder    // in, none, converted
-	var carg1 *C.GstVideoCodecFrame // in, full, converted
-
-	carg0 = (*C.GstVideoEncoder)(UnsafeVideoEncoderToGlibNone(encoder))
-	carg1 = (*C.GstVideoCodecFrame)(UnsafeVideoCodecFrameToGlibFull(frame))
-
-	C.gst_video_encoder_release_frame(carg0, carg1)
-	runtime.KeepAlive(encoder)
-	runtime.KeepAlive(frame)
 }
 
 // SetLatency wraps gst_video_encoder_set_latency

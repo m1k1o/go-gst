@@ -92,8 +92,8 @@ var Data = genmain.Data{
 	Config: typesystem.Config{
 		Namespaces: map[string]typesystem.NamespaceConfig{
 			"Gst-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 				ManualTypes: []typesystem.Type{
 					&typesystem.Alias{
 						BaseType: typesystem.BaseType{
@@ -170,28 +170,28 @@ var Data = genmain.Data{
 				},
 			},
 			"GstApp-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstAllocators-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstWebRTC-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstBase-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 				IgnoredDefinitions: []typesystem.IgnoreFunc{
 					// has unexported free function that crashes the linker when compiling the examples:
 					typesystem.IgnoreMatching("TypeFindData"),
 				},
 			},
 			"GstVideo-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 				IgnoredDefinitions: []typesystem.IgnoreFunc{
 					// must be implemented manually
 					typesystem.IgnoreMatching("VideoCodecFrame.set_user_data"),

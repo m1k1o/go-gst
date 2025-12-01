@@ -2941,23 +2941,6 @@ type Aggregator interface {
 	// a #GstAggregator::samples-selected handler, and can be used to precisely
 	// control aggregating parameters for a given set of input samples.
 	PeekNextSample(AggregatorPad) *gst.Sample
-	// PushSrcEvent wraps gst_aggregator_push_src_event
-	// 
-	// The function takes the following parameters:
-	// 
-	// 	- event *gst.Event: the #GstEvent to push. 
-	// 
-	// The function returns the following values:
-	// 
-	// 	- goret bool 
-	//
-	// This method will push the provided event downstream. If needed, mandatory
-	// events such as stream-start, caps, and segment events will be sent before
-	// pushing the event.
-	// 
-	// This API does not allow pushing stream-start, caps, segment and EOS events.
-	// Specific API like gst_aggregator_set_src_caps() should be used for these.
-	PushSrcEvent(*gst.Event) bool
 	// SelectedSamples wraps gst_aggregator_selected_samples
 	// 
 	// The function takes the following parameters:
@@ -3698,43 +3681,6 @@ func (self *AggregatorInstance) PeekNextSample(pad AggregatorPad) *gst.Sample {
 
 	if cret != nil {
 		goret = gst.UnsafeSampleFromGlibFull(unsafe.Pointer(cret))
-	}
-
-	return goret
-}
-
-// PushSrcEvent wraps gst_aggregator_push_src_event
-// 
-// The function takes the following parameters:
-// 
-// 	- event *gst.Event: the #GstEvent to push. 
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// This method will push the provided event downstream. If needed, mandatory
-// events such as stream-start, caps, and segment events will be sent before
-// pushing the event.
-// 
-// This API does not allow pushing stream-start, caps, segment and EOS events.
-// Specific API like gst_aggregator_set_src_caps() should be used for these.
-func (aggregator *AggregatorInstance) PushSrcEvent(event *gst.Event) bool {
-	var carg0 *C.GstAggregator // in, none, converted
-	var carg1 *C.GstEvent      // in, full, converted
-	var cret  C.gboolean       // return
-
-	carg0 = (*C.GstAggregator)(UnsafeAggregatorToGlibNone(aggregator))
-	carg1 = (*C.GstEvent)(gst.UnsafeEventToGlibFull(event))
-
-	cret = C.gst_aggregator_push_src_event(carg0, carg1)
-	runtime.KeepAlive(aggregator)
-	runtime.KeepAlive(event)
-
-	var goret bool
-
-	if cret != 0 {
-		goret = true
 	}
 
 	return goret

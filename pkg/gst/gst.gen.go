@@ -32,9 +32,9 @@ import (
 // extern gboolean _goglib_gst1_PluginFeatureFilter(GstPluginFeature*, gpointer);
 // extern gboolean _goglib_gst1_PluginFilter(GstPlugin*, gpointer);
 // extern gboolean _goglib_gst1_PluginInitFullFunc(GstPlugin*, gpointer);
-// extern gboolean _goglib_gst1_StructureFilterMapIdStrFunc(const GstIdStr*, GValue*, gpointer);
-// extern gboolean _goglib_gst1_StructureForeachIdStrFunc(const GstIdStr*, const GValue*, gpointer);
-// extern gboolean _goglib_gst1_StructureMapIdStrFunc(const GstIdStr*, GValue*, gpointer);
+// extern gboolean _goglib_gst1_StructureFilterMapFunc(GQuark, GValue*, gpointer);
+// extern gboolean _goglib_gst1_StructureForeachFunc(GQuark, const GValue*, gpointer);
+// extern gboolean _goglib_gst1_StructureMapFunc(GQuark, GValue*, gpointer);
 // extern void _goglib_gst1_ElementCallAsyncFunc(GstElement*, gpointer);
 // extern void _goglib_gst1_IteratorForeachFunction(const GValue*, gpointer);
 // extern void _goglib_gst1_LogFunction(GstDebugCategory*, GstDebugLevel, const gchar*, const gchar*, gint, GObject*, GstDebugMessage*, gpointer);
@@ -406,7 +406,6 @@ var (
 	TypeContext                = gobject.Type(C.gst_context_get_type())
 	TypeDateTime               = gobject.Type(C.gst_date_time_get_type())
 	TypeEvent                  = gobject.Type(C.gst_event_get_type())
-	TypeIdStr                  = gobject.Type(C.gst_id_str_get_type())
 	TypeIterator               = gobject.Type(C.gst_iterator_get_type())
 	TypeMemory                 = gobject.Type(C.gst_memory_get_type())
 	TypeMessage                = gobject.Type(C.gst_message_get_type())
@@ -559,7 +558,6 @@ func init() {
 		gobject.TypeMarshaler{T: TypeContext, F: marshalContext},
 		gobject.TypeMarshaler{T: TypeDateTime, F: marshalDateTime},
 		gobject.TypeMarshaler{T: TypeEvent, F: marshalEvent},
-		gobject.TypeMarshaler{T: TypeIdStr, F: marshalIdStr},
 		gobject.TypeMarshaler{T: TypeIterator, F: marshalIterator},
 		gobject.TypeMarshaler{T: TypeMemory, F: marshalMemory},
 		gobject.TypeMarshaler{T: TypeMessage, F: marshalMessage},
@@ -8067,22 +8065,6 @@ type PromiseChangeFunc func(promise *Promise)
 // the structure if %FALSE is returned.
 type StructureFilterMapFunc func(fieldId glib.Quark, value *gobject.Value) (goret bool)
 
-// StructureFilterMapIdStrFunc wraps GstStructureFilterMapIdStrFunc
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the #GstIdStr field name 
-// 	- value *gobject.Value: the #GValue of the field 
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// A function that will be called in gst_structure_filter_and_map_in_place_id_str().
-// The function may modify @value, and the value will be removed from the
-// structure if %FALSE is returned.
-type StructureFilterMapIdStrFunc func(fieldname *IdStr, value *gobject.Value) (goret bool)
-
 // StructureForeachFunc wraps GstStructureForeachFunc
 // 
 // The function takes the following parameters:
@@ -8098,21 +8080,6 @@ type StructureFilterMapIdStrFunc func(fieldname *IdStr, value *gobject.Value) (g
 // not modify @value.
 type StructureForeachFunc func(fieldId glib.Quark, value *gobject.Value) (goret bool)
 
-// StructureForeachIdStrFunc wraps GstStructureForeachIdStrFunc
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the #GstIdStr field name 
-// 	- value *gobject.Value: the #GValue of the field 
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// A function that will be called in gst_structure_foreach_id_str(). The
-// function may not modify @value.
-type StructureForeachIdStrFunc func(fieldname *IdStr, value *gobject.Value) (goret bool)
-
 // StructureMapFunc wraps GstStructureMapFunc
 // 
 // The function takes the following parameters:
@@ -8127,21 +8094,6 @@ type StructureForeachIdStrFunc func(fieldname *IdStr, value *gobject.Value) (gor
 // A function that will be called in gst_structure_map_in_place(). The function
 // may modify @value.
 type StructureMapFunc func(fieldId glib.Quark, value *gobject.Value) (goret bool)
-
-// StructureMapIdStrFunc wraps GstStructureMapIdStrFunc
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the #GstIdStr field name 
-// 	- value *gobject.Value: the #GValue of the field 
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// A function that will be called in gst_structure_map_in_place_id_str(). The
-// function may modify @value.
-type StructureMapIdStrFunc func(fieldname *IdStr, value *gobject.Value) (goret bool)
 
 // TagForeachFunc wraps GstTagForeachFunc
 // 
@@ -8729,39 +8681,6 @@ func DebugLogLiteral(category *DebugCategory, level DebugLevel, file string, fun
 	runtime.KeepAlive(line)
 	runtime.KeepAlive(object)
 	runtime.KeepAlive(messageString)
-}
-
-// DebugPrintSegment wraps gst_debug_print_segment
-// 
-// The function takes the following parameters:
-// 
-// 	- segment *Segment (nullable): the %GstSegment 
-// 
-// The function returns the following values:
-// 
-// 	- goret string 
-//
-// Returns a string that represents @segments.
-// 
-// The string representation is meant to be used for debugging purposes and
-// might change between GStreamer versions.
-func DebugPrintSegment(segment *Segment) string {
-	var carg1 *C.GstSegment // in, none, converted, nullable
-	var cret  *C.gchar      // return, full, string
-
-	if segment != nil {
-		carg1 = (*C.GstSegment)(UnsafeSegmentToGlibNone(segment))
-	}
-
-	cret = C.gst_debug_print_segment(carg1)
-	runtime.KeepAlive(segment)
-
-	var goret string
-
-	goret = C.GoString((*C.char)(unsafe.Pointer(cret)))
-	defer C.free(unsafe.Pointer(cret))
-
-	return goret
 }
 
 // DebugPrintStackTrace wraps gst_debug_print_stack_trace
@@ -10209,33 +10128,6 @@ func UtilFilenameCompare(a string, b string) int32 {
 	return goret
 }
 
-// UtilFloorLog2 wraps gst_util_floor_log2
-// 
-// The function takes the following parameters:
-// 
-// 	- v uint32: a #guint32 value. 
-// 
-// The function returns the following values:
-// 
-// 	- goret uint 
-//
-// Returns smallest integral value not bigger than log2(v).
-func UtilFloorLog2(v uint32) uint {
-	var carg1 C.guint32 // in, none, casted
-	var cret  C.guint   // return, none, casted
-
-	carg1 = C.guint32(v)
-
-	cret = C.gst_util_floor_log2(carg1)
-	runtime.KeepAlive(v)
-
-	var goret uint
-
-	goret = uint(cret)
-
-	return goret
-}
-
 // UtilFractionAdd wraps gst_util_fraction_add
 // 
 // The function takes the following parameters:
@@ -10369,56 +10261,6 @@ func UtilFractionMultiply(aN int32, aD int32, bN int32, bD int32) (int32, int32,
 
 	resN = int32(carg5)
 	resD = int32(carg6)
-	if cret != 0 {
-		goret = true
-	}
-
-	return resN, resD, goret
-}
-
-// UtilFractionMultiplyInt64 wraps gst_util_fraction_multiply_int64
-// 
-// The function takes the following parameters:
-// 
-// 	- aN int64: Numerator of first value 
-// 	- aD int64: Denominator of first value 
-// 	- bN int64: Numerator of second value 
-// 	- bD int64: Denominator of second value 
-// 
-// The function returns the following values:
-// 
-// 	- resN int64: Pointer to #gint to hold the result numerator 
-// 	- resD int64: Pointer to #gint to hold the result denominator 
-// 	- goret bool 
-//
-// Multiplies the fractions @a_n/@a_d and @b_n/@b_d and stores
-// the result in @res_n and @res_d.
-func UtilFractionMultiplyInt64(aN int64, aD int64, bN int64, bD int64) (int64, int64, bool) {
-	var carg1 C.gint64   // in, none, casted
-	var carg2 C.gint64   // in, none, casted
-	var carg3 C.gint64   // in, none, casted
-	var carg4 C.gint64   // in, none, casted
-	var carg5 C.gint64   // out, full, casted
-	var carg6 C.gint64   // out, full, casted
-	var cret  C.gboolean // return
-
-	carg1 = C.gint64(aN)
-	carg2 = C.gint64(aD)
-	carg3 = C.gint64(bN)
-	carg4 = C.gint64(bD)
-
-	cret = C.gst_util_fraction_multiply_int64(carg1, carg2, carg3, carg4, &carg5, &carg6)
-	runtime.KeepAlive(aN)
-	runtime.KeepAlive(aD)
-	runtime.KeepAlive(bN)
-	runtime.KeepAlive(bD)
-
-	var resN  int64
-	var resD  int64
-	var goret bool
-
-	resN = int64(carg5)
-	resD = int64(carg6)
 	if cret != 0 {
 		goret = true
 	}
@@ -45131,66 +44973,6 @@ func NewCapsEmptySimple(mediaType string) *Caps {
 	return goret
 }
 
-// NewCapsIDStrEmptySimple wraps gst_caps_new_id_str_empty_simple
-// 
-// The function takes the following parameters:
-// 
-// 	- mediaType *IdStr: the media type of the structure 
-// 
-// The function returns the following values:
-// 
-// 	- goret *Caps 
-//
-// Creates a new #GstCaps that contains one #GstStructure with name
-// @media_type.
-func NewCapsIDStrEmptySimple(mediaType *IdStr) *Caps {
-	var carg1 *C.GstIdStr // in, none, converted
-	var cret  *C.GstCaps  // return, full, converted
-
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(mediaType))
-
-	cret = C.gst_caps_new_id_str_empty_simple(carg1)
-	runtime.KeepAlive(mediaType)
-
-	var goret *Caps
-
-	goret = UnsafeCapsFromGlibFull(unsafe.Pointer(cret))
-
-	return goret
-}
-
-// NewCapsStaticStrEmptySimple wraps gst_caps_new_static_str_empty_simple
-// 
-// The function takes the following parameters:
-// 
-// 	- mediaType string: the media type of the structure 
-// 
-// The function returns the following values:
-// 
-// 	- goret *Caps 
-//
-// Creates a new #GstCaps that contains one #GstStructure with name
-// @media_type.
-// 
-// @media_type needs to be valid for the remaining lifetime of the process, e.g.
-// has to be a static string.
-func NewCapsStaticStrEmptySimple(mediaType string) *Caps {
-	var carg1 *C.char    // in, none, string
-	var cret  *C.GstCaps // return, full, converted
-
-	carg1 = (*C.char)(unsafe.Pointer(C.CString(mediaType)))
-	defer C.free(unsafe.Pointer(carg1))
-
-	cret = C.gst_caps_new_static_str_empty_simple(carg1)
-	runtime.KeepAlive(mediaType)
-
-	var goret *Caps
-
-	goret = UnsafeCapsFromGlibFull(unsafe.Pointer(cret))
-
-	return goret
-}
-
 // CapsFromString wraps gst_caps_from_string
 // 
 // The function takes the following parameters:
@@ -45583,31 +45365,6 @@ func (caps *Caps) GetStructure(index uint) *Structure {
 	runtime.AddCleanup(goret, func(_ *Caps) {}, caps)
 
 	return goret
-}
-
-// IDStrSetValue wraps gst_caps_id_str_set_value
-// 
-// The function takes the following parameters:
-// 
-// 	- field *IdStr: name of the field to set 
-// 	- value *gobject.Value: value to set the field to 
-//
-// Sets the given @field on all structures of @caps to the given @value.
-// This is a convenience function for calling gst_structure_set_value() on
-// all structures of @caps.
-func (caps *Caps) IDStrSetValue(field *IdStr, value *gobject.Value) {
-	var carg0 *C.GstCaps  // in, none, converted
-	var carg1 *C.GstIdStr // in, none, converted
-	var carg2 *C.GValue   // in, none, converted
-
-	carg0 = (*C.GstCaps)(UnsafeCapsToGlibNone(caps))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(field))
-	carg2 = (*C.GValue)(gobject.UnsafeValueToGlibUseAnyInstead(value))
-
-	C.gst_caps_id_str_set_value(carg0, carg1, carg2)
-	runtime.KeepAlive(caps)
-	runtime.KeepAlive(field)
-	runtime.KeepAlive(value)
 }
 
 // Intersect wraps gst_caps_intersect
@@ -46285,35 +46042,6 @@ func (caps *Caps) SetValue(field string, value *gobject.Value) {
 	runtime.KeepAlive(value)
 }
 
-// SetValueStaticStr wraps gst_caps_set_value_static_str
-// 
-// The function takes the following parameters:
-// 
-// 	- field string: name of the field to set 
-// 	- value *gobject.Value: value to set the field to 
-//
-// Sets the given @field on all structures of @caps to the given @value.
-// This is a convenience function for calling gst_structure_set_value() on
-// all structures of @caps.
-// 
-// @field needs to be valid for the remaining lifetime of the process, e.g.
-// has to be a static string.
-func (caps *Caps) SetValueStaticStr(field string, value *gobject.Value) {
-	var carg0 *C.GstCaps // in, none, converted
-	var carg1 *C.char    // in, none, string
-	var carg2 *C.GValue  // in, none, converted
-
-	carg0 = (*C.GstCaps)(UnsafeCapsToGlibNone(caps))
-	carg1 = (*C.char)(unsafe.Pointer(C.CString(field)))
-	defer C.free(unsafe.Pointer(carg1))
-	carg2 = (*C.GValue)(gobject.UnsafeValueToGlibUseAnyInstead(value))
-
-	C.gst_caps_set_value_static_str(carg0, carg1, carg2)
-	runtime.KeepAlive(caps)
-	runtime.KeepAlive(field)
-	runtime.KeepAlive(value)
-}
-
 // Simplify wraps gst_caps_simplify
 // 
 // The function returns the following values:
@@ -46660,37 +46388,6 @@ func NewCapsFeaturesSingle(feature string) *CapsFeatures {
 	return goret
 }
 
-// NewCapsFeaturesSingleStaticStr wraps gst_caps_features_new_single_static_str
-// 
-// The function takes the following parameters:
-// 
-// 	- feature string: The feature 
-// 
-// The function returns the following values:
-// 
-// 	- goret *CapsFeatures 
-//
-// Creates a new #GstCapsFeatures with a single feature.
-// 
-// @feature needs to be valid for the remaining lifetime of the process, e.g. has
-// to be a static string.
-func NewCapsFeaturesSingleStaticStr(feature string) *CapsFeatures {
-	var carg1 *C.gchar           // in, none, string
-	var cret  *C.GstCapsFeatures // return, full, converted
-
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(feature)))
-	defer C.free(unsafe.Pointer(carg1))
-
-	cret = C.gst_caps_features_new_single_static_str(carg1)
-	runtime.KeepAlive(feature)
-
-	var goret *CapsFeatures
-
-	goret = UnsafeCapsFeaturesFromGlibFull(unsafe.Pointer(cret))
-
-	return goret
-}
-
 // CapsFeaturesFromString wraps gst_caps_features_from_string
 // 
 // The function takes the following parameters:
@@ -46741,44 +46438,23 @@ func (features *CapsFeatures) Add(feature string) {
 	runtime.KeepAlive(feature)
 }
 
-// AddIDStr wraps gst_caps_features_add_id_str
+// AddID wraps gst_caps_features_add_id
 // 
 // The function takes the following parameters:
 // 
-// 	- feature *IdStr: a feature. 
+// 	- feature glib.Quark: a feature. 
 //
 // Adds @feature to @features.
-func (features *CapsFeatures) AddIDStr(feature *IdStr) {
-	var carg0 *C.GstCapsFeatures // in, none, converted
-	var carg1 *C.GstIdStr        // in, none, converted
-
-	carg0 = (*C.GstCapsFeatures)(UnsafeCapsFeaturesToGlibNone(features))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(feature))
-
-	C.gst_caps_features_add_id_str(carg0, carg1)
-	runtime.KeepAlive(features)
-	runtime.KeepAlive(feature)
-}
-
-// AddStaticStr wraps gst_caps_features_add_static_str
-// 
-// The function takes the following parameters:
-// 
-// 	- feature string: a feature. 
 //
-// Adds @feature to @features.
-// 
-// @feature needs to be valid for the remaining lifetime of the process, e.g. has
-// to be a static string.
-func (features *CapsFeatures) AddStaticStr(feature string) {
+// Deprecated: (since 1.26.0) Use gst_caps_features_add_id_str().
+func (features *CapsFeatures) AddID(feature glib.Quark) {
 	var carg0 *C.GstCapsFeatures // in, none, converted
-	var carg1 *C.gchar           // in, none, string
+	var carg1 C.GQuark           // in, none, casted, alias
 
 	carg0 = (*C.GstCapsFeatures)(UnsafeCapsFeaturesToGlibNone(features))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(feature)))
-	defer C.free(unsafe.Pointer(carg1))
+	carg1 = C.GQuark(feature)
 
-	C.gst_caps_features_add_static_str(carg0, carg1)
+	C.gst_caps_features_add_id(carg0, carg1)
 	runtime.KeepAlive(features)
 	runtime.KeepAlive(feature)
 }
@@ -46816,26 +46492,28 @@ func (features *CapsFeatures) Contains(feature string) bool {
 	return goret
 }
 
-// ContainsIDStr wraps gst_caps_features_contains_id_str
+// ContainsID wraps gst_caps_features_contains_id
 // 
 // The function takes the following parameters:
 // 
-// 	- feature *IdStr: a feature 
+// 	- feature glib.Quark: a feature 
 // 
 // The function returns the following values:
 // 
 // 	- goret bool 
 //
 // Checks if @features contains @feature.
-func (features *CapsFeatures) ContainsIDStr(feature *IdStr) bool {
+//
+// Deprecated: (since 1.26.0) Use gst_caps_features_contains_id_str().
+func (features *CapsFeatures) ContainsID(feature glib.Quark) bool {
 	var carg0 *C.GstCapsFeatures // in, none, converted
-	var carg1 *C.GstIdStr        // in, none, converted
+	var carg1 C.GQuark           // in, none, casted, alias
 	var cret  C.gboolean         // return
 
 	carg0 = (*C.GstCapsFeatures)(UnsafeCapsFeaturesToGlibNone(features))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(feature))
+	carg1 = C.GQuark(feature)
 
-	cret = C.gst_caps_features_contains_id_str(carg0, carg1)
+	cret = C.gst_caps_features_contains_id(carg0, carg1)
 	runtime.KeepAlive(features)
 	runtime.KeepAlive(feature)
 
@@ -46903,7 +46581,7 @@ func (features *CapsFeatures) GetNth(i uint) string {
 	return goret
 }
 
-// GetNthIDStr wraps gst_caps_features_get_nth_id_str
+// GetNthID wraps gst_caps_features_get_nth_id
 // 
 // The function takes the following parameters:
 // 
@@ -46911,24 +46589,26 @@ func (features *CapsFeatures) GetNth(i uint) string {
 // 
 // The function returns the following values:
 // 
-// 	- goret *IdStr 
+// 	- goret glib.Quark 
 //
 // Returns the @i-th feature of @features.
-func (features *CapsFeatures) GetNthIDStr(i uint) *IdStr {
+//
+// Deprecated: (since 1.26.0) Use gst_caps_features_get_nth_id_str().
+func (features *CapsFeatures) GetNthID(i uint) glib.Quark {
 	var carg0 *C.GstCapsFeatures // in, none, converted
 	var carg1 C.guint            // in, none, casted
-	var cret  *C.GstIdStr        // return, none, converted
+	var cret  C.GQuark           // return, none, casted, alias
 
 	carg0 = (*C.GstCapsFeatures)(UnsafeCapsFeaturesToGlibNone(features))
 	carg1 = C.guint(i)
 
-	cret = C.gst_caps_features_get_nth_id_str(carg0, carg1)
+	cret = C.gst_caps_features_get_nth_id(carg0, carg1)
 	runtime.KeepAlive(features)
 	runtime.KeepAlive(i)
 
-	var goret *IdStr
+	var goret glib.Quark
 
-	goret = UnsafeIdStrFromGlibNone(unsafe.Pointer(cret))
+	goret = glib.Quark(cret)
 
 	return goret
 }
@@ -47033,21 +46713,23 @@ func (features *CapsFeatures) Remove(feature string) {
 	runtime.KeepAlive(feature)
 }
 
-// RemoveIDStr wraps gst_caps_features_remove_id_str
+// RemoveID wraps gst_caps_features_remove_id
 // 
 // The function takes the following parameters:
 // 
-// 	- feature *IdStr: a feature. 
+// 	- feature glib.Quark: a feature. 
 //
 // Removes @feature from @features.
-func (features *CapsFeatures) RemoveIDStr(feature *IdStr) {
+//
+// Deprecated: (since 1.26.0) Use gst_caps_features_remove_id_str().
+func (features *CapsFeatures) RemoveID(feature glib.Quark) {
 	var carg0 *C.GstCapsFeatures // in, none, converted
-	var carg1 *C.GstIdStr        // in, none, converted
+	var carg1 C.GQuark           // in, none, casted, alias
 
 	carg0 = (*C.GstCapsFeatures)(UnsafeCapsFeaturesToGlibNone(features))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(feature))
+	carg1 = C.GQuark(feature)
 
-	C.gst_caps_features_remove_id_str(carg0, carg1)
+	C.gst_caps_features_remove_id(carg0, carg1)
 	runtime.KeepAlive(features)
 	runtime.KeepAlive(feature)
 }
@@ -51358,6 +51040,41 @@ func (event *Event) HasName(name string) bool {
 	return goret
 }
 
+// HasNameID wraps gst_event_has_name_id
+// 
+// The function takes the following parameters:
+// 
+// 	- name glib.Quark: name to check as a GQuark 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Checks if @event has the given @name. This function is usually used to
+// check the name of a custom event.
+//
+// Deprecated: (since 1.26.0) Use gst_event_has_name().
+func (event *Event) HasNameID(name glib.Quark) bool {
+	var carg0 *C.GstEvent // in, none, converted
+	var carg1 C.GQuark    // in, none, casted, alias
+	var cret  C.gboolean  // return
+
+	carg0 = (*C.GstEvent)(UnsafeEventToGlibNone(event))
+	carg1 = C.GQuark(name)
+
+	cret = C.gst_event_has_name_id(carg0, carg1)
+	runtime.KeepAlive(event)
+	runtime.KeepAlive(name)
+
+	var goret bool
+
+	if cret != 0 {
+		goret = true
+	}
+
+	return goret
+}
+
 // ParseBufferSize wraps gst_event_parse_buffer_size
 // 
 // The function returns the following values:
@@ -52374,465 +52091,6 @@ func (g *GhostPadClass) ParentClass() *ProxyPadClass {
 	// attach a cleanup to keep the instance alive as long as the parent is referenced
 	runtime.AddCleanup(parent, func(_ *GhostPadClass) {}, g)
 	return parent
-}
-
-// IdStr wraps GstIdStr
-//
-// A #GstIdStr is string type optimized for short strings and used for structure
-// names, structure field names and in other places.
-// 
-// Strings up to 16 bytes (including NUL terminator) are stored inline, other
-// strings are stored on the heap.
-// 
-// ```cpp
-// GstIdStr s = GST_ID_STR_INIT;
-// 
-// gst_id_str_set (&amp;s, "Hello, World!");
-// g_print ("%s\n", gst_id_str_as_str (&amp;s));
-// 
-// gst_id_str_clear (&amp;s);
-// ```
-type IdStr struct {
-	*idStr
-}
-
-// idStr is the struct that's finalized
-type idStr struct {
-	native *C.GstIdStr
-}
-
-// UnsafeIdStrToGlibNone returns the underlying C pointer. This is used by the bindings internally.
-func (i *IdStr) instance() *C.GstIdStr {
-	if i == nil {
-		return nil
-	}
-	return i.native
-}
-
-var _ gobject.GoValueInitializer = (*IdStr)(nil)
-
-func marshalIdStr(p unsafe.Pointer) (interface{}, error) {
-	b := gobject.ValueFromNative(p).Boxed()
-	return UnsafeIdStrFromGlibNone(b), nil
-}
-
-func (r *IdStr) GoValueType() gobject.Type {
-	return TypeIdStr
-}
-
-func (r *IdStr) SetGoValue(v *gobject.Value) {
-	v.SetBoxed(unsafe.Pointer(r.instance()))
-}
-
-// UnsafeIdStrFromGlibBorrow is used to convert raw C.GstIdStr pointers to go. This is used by the bindings internally.
-func UnsafeIdStrFromGlibBorrow(p unsafe.Pointer) *IdStr {
-	if p == nil {
-		return nil
-	}
-	return &IdStr{&idStr{(*C.GstIdStr)(p)}}
-}
-
-// UnsafeIdStrFromGlibNone is used to convert raw C.GstIdStr pointers to go without transferring ownership. This is used by the bindings internally.
-func UnsafeIdStrFromGlibNone(p unsafe.Pointer) *IdStr {
-	wrapped := UnsafeIdStrFromGlibBorrow(p)
-	if wrapped == nil {
-		return nil
-	}
-
-	return wrapped.Copy() // create an owned copy
-
-}
-
-// UnsafeIdStrFromGlibFull is used to convert raw C.GstIdStr pointers to go while taking ownership. This is used by the bindings internally.
-func UnsafeIdStrFromGlibFull(p unsafe.Pointer) *IdStr {
-	wrapped := UnsafeIdStrFromGlibBorrow(p)
-	if wrapped == nil {
-		return nil
-	}
-	runtime.SetFinalizer(
-		wrapped.idStr,
-		func (intern *idStr) {
-			C.gst_id_str_free(intern.native)
-		},
-	)
-	return wrapped
-}
-
-// UnsafeIdStrFree unrefs/frees the underlying resource. This is used by the bindings internally.
-// 
-// After this is called, no other method on [IdStr] is expected to work anymore.
-func UnsafeIdStrFree(i *IdStr) {
-	C.gst_id_str_free(i.native)
-}
-
-// UnsafeIdStrToGlibNone returns the underlying C pointer. This is used by the bindings internally.
-func UnsafeIdStrToGlibNone(i *IdStr) unsafe.Pointer {
-	if i == nil {
-		return nil
-	}
-	return unsafe.Pointer(i.native)
-}
-
-// UnsafeIdStrToGlibFull returns the underlying C pointer and gives up ownership.
-// This is used by the bindings internally.
-func UnsafeIdStrToGlibFull(i *IdStr) unsafe.Pointer {
-	if i == nil {
-		return nil
-	}
-	runtime.SetFinalizer(i.idStr, nil)
-	_p := unsafe.Pointer(i.native)
-	i.native = nil // IdStr is invalid from here on
-	return _p
-}
-
-// NewIdStr wraps gst_id_str_new
-// 
-// The function returns the following values:
-// 
-// 	- goret *IdStr 
-//
-// Returns a newly heap allocated empty string.
-func NewIdStr() *IdStr {
-	var cret *C.GstIdStr // return, full, converted
-
-	cret = C.gst_id_str_new()
-
-	var goret *IdStr
-
-	goret = UnsafeIdStrFromGlibFull(unsafe.Pointer(cret))
-
-	return goret
-}
-
-// AsStr wraps gst_id_str_as_str
-// 
-// The function returns the following values:
-// 
-// 	- goret string 
-func (s *IdStr) AsStr() string {
-	var carg0 *C.GstIdStr // in, none, converted
-	var cret  *C.gchar    // return, none, string
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-
-	cret = C.gst_id_str_as_str(carg0)
-	runtime.KeepAlive(s)
-
-	var goret string
-
-	goret = C.GoString((*C.char)(unsafe.Pointer(cret)))
-
-	return goret
-}
-
-// Clear wraps gst_id_str_clear
-//
-// Clears @s and sets it to the empty string.
-func (s *IdStr) Clear() {
-	var carg0 *C.GstIdStr // in, none, converted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-
-	C.gst_id_str_clear(carg0)
-	runtime.KeepAlive(s)
-}
-
-// Copy wraps gst_id_str_copy
-// 
-// The function returns the following values:
-// 
-// 	- goret *IdStr 
-//
-// Copies @s into newly allocated heap memory.
-func (s *IdStr) Copy() *IdStr {
-	var carg0 *C.GstIdStr // in, none, converted
-	var cret  *C.GstIdStr // return, full, converted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-
-	cret = C.gst_id_str_copy(carg0)
-	runtime.KeepAlive(s)
-
-	var goret *IdStr
-
-	goret = UnsafeIdStrFromGlibFull(unsafe.Pointer(cret))
-
-	return goret
-}
-
-// CopyInto wraps gst_id_str_copy_into
-// 
-// The function takes the following parameters:
-// 
-// 	- s *IdStr: The source %GstIdStr 
-//
-// Copies @s into @d.
-func (d *IdStr) CopyInto(s *IdStr) {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.GstIdStr // in, none, converted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(d))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-
-	C.gst_id_str_copy_into(carg0, carg1)
-	runtime.KeepAlive(d)
-	runtime.KeepAlive(s)
-}
-
-// GetLen wraps gst_id_str_get_len
-// 
-// The function returns the following values:
-// 
-// 	- goret uint 
-//
-// Returns the length of @s, exluding the NUL-terminator. This is equivalent to
-// calling `strcmp()` but potentially faster.
-func (s *IdStr) GetLen() uint {
-	var carg0 *C.GstIdStr // in, none, converted
-	var cret  C.gsize     // return, none, casted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-
-	cret = C.gst_id_str_get_len(carg0)
-	runtime.KeepAlive(s)
-
-	var goret uint
-
-	goret = uint(cret)
-
-	return goret
-}
-
-// Init wraps gst_id_str_init
-//
-// Initializes a (usually stack-allocated) id string @s. The newly-initialized
-// id string will contain an empty string by default as value.
-func (s *IdStr) Init() {
-	var carg0 *C.GstIdStr // in, none, converted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-
-	C.gst_id_str_init(carg0)
-	runtime.KeepAlive(s)
-}
-
-// IsEqual wraps gst_id_str_is_equal
-// 
-// The function takes the following parameters:
-// 
-// 	- s2 *IdStr: A %GstIdStr 
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// Compares @s1 and @s2 for equality.
-func (s1 *IdStr) IsEqual(s2 *IdStr) bool {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.GstIdStr // in, none, converted
-	var cret  C.gboolean  // return
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s1))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s2))
-
-	cret = C.gst_id_str_is_equal(carg0, carg1)
-	runtime.KeepAlive(s1)
-	runtime.KeepAlive(s2)
-
-	var goret bool
-
-	if cret != 0 {
-		goret = true
-	}
-
-	return goret
-}
-
-// IsEqualToStr wraps gst_id_str_is_equal_to_str
-// 
-// The function takes the following parameters:
-// 
-// 	- s2 string: A string 
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// Compares @s1 and @s2 for equality.
-func (s1 *IdStr) IsEqualToStr(s2 string) bool {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.gchar    // in, none, string
-	var cret  C.gboolean  // return
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s1))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(s2)))
-	defer C.free(unsafe.Pointer(carg1))
-
-	cret = C.gst_id_str_is_equal_to_str(carg0, carg1)
-	runtime.KeepAlive(s1)
-	runtime.KeepAlive(s2)
-
-	var goret bool
-
-	if cret != 0 {
-		goret = true
-	}
-
-	return goret
-}
-
-// IsEqualToStrWithLen wraps gst_id_str_is_equal_to_str_with_len
-// 
-// The function takes the following parameters:
-// 
-// 	- s2 string: A string 
-// 	- len uint: Length of @s2. 
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// Compares @s1 and @s2 with length @len for equality. @s2 does not have to be
-// NUL-terminated and @len should not include the NUL-terminator.
-// 
-// This is generally faster than gst_id_str_is_equal_to_str() if the length is
-// already known.
-func (s1 *IdStr) IsEqualToStrWithLen(s2 string, len uint) bool {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.gchar    // in, none, string
-	var carg2 C.gsize     // in, none, casted
-	var cret  C.gboolean  // return
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s1))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(s2)))
-	defer C.free(unsafe.Pointer(carg1))
-	carg2 = C.gsize(len)
-
-	cret = C.gst_id_str_is_equal_to_str_with_len(carg0, carg1, carg2)
-	runtime.KeepAlive(s1)
-	runtime.KeepAlive(s2)
-	runtime.KeepAlive(len)
-
-	var goret bool
-
-	if cret != 0 {
-		goret = true
-	}
-
-	return goret
-}
-
-// Move wraps gst_id_str_move
-// 
-// The function takes the following parameters:
-// 
-// 	- s *IdStr: The source %GstIdStr 
-//
-// Moves @s into @d and resets @s.
-func (d *IdStr) Move(s *IdStr) {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.GstIdStr // in, none, converted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(d))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-
-	C.gst_id_str_move(carg0, carg1)
-	runtime.KeepAlive(d)
-	runtime.KeepAlive(s)
-}
-
-// Set wraps gst_id_str_set
-// 
-// The function takes the following parameters:
-// 
-// 	- value string: A NUL-terminated string 
-//
-// Sets @s to the string @value.
-func (s *IdStr) Set(value string) {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.gchar    // in, none, string
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(value)))
-	defer C.free(unsafe.Pointer(carg1))
-
-	C.gst_id_str_set(carg0, carg1)
-	runtime.KeepAlive(s)
-	runtime.KeepAlive(value)
-}
-
-// SetStaticStr wraps gst_id_str_set_static_str
-// 
-// The function takes the following parameters:
-// 
-// 	- value string: A NUL-terminated string 
-//
-// Sets @s to the string @value. @value needs to be valid for the remaining
-// lifetime of the process, e.g. has to be a static string.
-func (s *IdStr) SetStaticStr(value string) {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.gchar    // in, none, string
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(value)))
-	defer C.free(unsafe.Pointer(carg1))
-
-	C.gst_id_str_set_static_str(carg0, carg1)
-	runtime.KeepAlive(s)
-	runtime.KeepAlive(value)
-}
-
-// SetStaticStrWithLen wraps gst_id_str_set_static_str_with_len
-// 
-// The function takes the following parameters:
-// 
-// 	- value string: A string 
-// 	- len uint: Length of the string 
-//
-// Sets @s to the string @value of length @len. @value needs to be valid for the
-// remaining lifetime of the process, e.g. has to be a static string.
-// 
-// @value must be NUL-terminated and @len should not include the
-// NUL-terminator.
-func (s *IdStr) SetStaticStrWithLen(value string, len uint) {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.gchar    // in, none, string
-	var carg2 C.gsize     // in, none, casted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(value)))
-	defer C.free(unsafe.Pointer(carg1))
-	carg2 = C.gsize(len)
-
-	C.gst_id_str_set_static_str_with_len(carg0, carg1, carg2)
-	runtime.KeepAlive(s)
-	runtime.KeepAlive(value)
-	runtime.KeepAlive(len)
-}
-
-// SetWithLen wraps gst_id_str_set_with_len
-// 
-// The function takes the following parameters:
-// 
-// 	- value string: A string 
-// 	- len uint: Length of the string 
-//
-// Sets @s to the string @value of length @len. @value does not have to be
-// NUL-terminated and @len should not include the NUL-terminator.
-func (s *IdStr) SetWithLen(value string, len uint) {
-	var carg0 *C.GstIdStr // in, none, converted
-	var carg1 *C.gchar    // in, none, string
-	var carg2 C.gsize     // in, none, casted
-
-	carg0 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(s))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(value)))
-	defer C.free(unsafe.Pointer(carg1))
-	carg2 = C.gsize(len)
-
-	C.gst_id_str_set_with_len(carg0, carg1, carg2)
-	runtime.KeepAlive(s)
-	runtime.KeepAlive(value)
-	runtime.KeepAlive(len)
 }
 
 // Iterator wraps GstIterator
@@ -55140,34 +54398,6 @@ func (msg *Message) Copy() *Message {
 	return goret
 }
 
-// GetDetails wraps gst_message_get_details
-// 
-// The function returns the following values:
-// 
-// 	- goret *Structure (nullable) 
-//
-// Returns the optional details structure of the message. May be NULL if none.
-// 
-// The returned structure must not be freed.
-func (message *Message) GetDetails() *Structure {
-	var carg0 *C.GstMessage   // in, none, converted
-	var cret  *C.GstStructure // return, borrow, converted, nullable
-
-	carg0 = (*C.GstMessage)(UnsafeMessageToGlibNone(message))
-
-	cret = C.gst_message_get_details(carg0)
-	runtime.KeepAlive(message)
-
-	var goret *Structure
-
-	if cret != nil {
-		goret = UnsafeStructureFromGlibBorrow(unsafe.Pointer(cret))
-		runtime.AddCleanup(goret, func(_ *Message) {}, message)
-	}
-
-	return goret
-}
-
 // GetNumRedirectEntries wraps gst_message_get_num_redirect_entries
 // 
 // The function returns the following values:
@@ -55623,32 +54853,6 @@ func (message *Message) ParseErrorDetails() *Structure {
 	return structure
 }
 
-// ParseErrorWritableDetails wraps gst_message_parse_error_writable_details
-// 
-// The function returns the following values:
-// 
-// 	- structure *Structure (nullable): A pointer to the returned details 
-//
-// Returns the details structure if present or will create one if not present.
-// The returned structure must not be freed.
-func (message *Message) ParseErrorWritableDetails() *Structure {
-	var carg0 *C.GstMessage   // in, none, converted
-	var carg1 *C.GstStructure // out, none, converted, nullable
-
-	carg0 = (*C.GstMessage)(UnsafeMessageToGlibNone(message))
-
-	C.gst_message_parse_error_writable_details(carg0, &carg1)
-	runtime.KeepAlive(message)
-
-	var structure *Structure
-
-	if carg1 != nil {
-		structure = UnsafeStructureFromGlibNone(unsafe.Pointer(carg1))
-	}
-
-	return structure
-}
-
 // ParseGroupID wraps gst_message_parse_group_id
 // 
 // The function returns the following values:
@@ -55754,32 +54958,6 @@ func (message *Message) ParseInfoDetails() *Structure {
 	carg0 = (*C.GstMessage)(UnsafeMessageToGlibNone(message))
 
 	C.gst_message_parse_info_details(carg0, &carg1)
-	runtime.KeepAlive(message)
-
-	var structure *Structure
-
-	if carg1 != nil {
-		structure = UnsafeStructureFromGlibNone(unsafe.Pointer(carg1))
-	}
-
-	return structure
-}
-
-// ParseInfoWritableDetails wraps gst_message_parse_info_writable_details
-// 
-// The function returns the following values:
-// 
-// 	- structure *Structure (nullable): A pointer to the returned details 
-//
-// Returns the details structure if present or will create one if not present.
-// The returned structure must not be freed.
-func (message *Message) ParseInfoWritableDetails() *Structure {
-	var carg0 *C.GstMessage   // in, none, converted
-	var carg1 *C.GstStructure // out, none, converted, nullable
-
-	carg0 = (*C.GstMessage)(UnsafeMessageToGlibNone(message))
-
-	C.gst_message_parse_info_writable_details(carg0, &carg1)
 	runtime.KeepAlive(message)
 
 	var structure *Structure
@@ -56571,32 +55749,6 @@ func (message *Message) ParseWarningDetails() *Structure {
 	return structure
 }
 
-// ParseWarningWritableDetails wraps gst_message_parse_warning_writable_details
-// 
-// The function returns the following values:
-// 
-// 	- structure *Structure (nullable): A pointer to the returned details 
-//
-// Returns the details structure if present or will create one if not present.
-// The returned structure must not be freed.
-func (message *Message) ParseWarningWritableDetails() *Structure {
-	var carg0 *C.GstMessage   // in, none, converted
-	var carg1 *C.GstStructure // out, none, converted, nullable
-
-	carg0 = (*C.GstMessage)(UnsafeMessageToGlibNone(message))
-
-	C.gst_message_parse_warning_writable_details(carg0, &carg1)
-	runtime.KeepAlive(message)
-
-	var structure *Structure
-
-	if carg1 != nil {
-		structure = UnsafeStructureFromGlibNone(unsafe.Pointer(carg1))
-	}
-
-	return structure
-}
-
 // SetBufferingStats wraps gst_message_set_buffering_stats
 // 
 // The function takes the following parameters:
@@ -56626,28 +55778,6 @@ func (message *Message) SetBufferingStats(mode BufferingMode, avgIn int32, avgOu
 	runtime.KeepAlive(avgIn)
 	runtime.KeepAlive(avgOut)
 	runtime.KeepAlive(bufferingLeft)
-}
-
-// SetDetails wraps gst_message_set_details
-// 
-// The function takes the following parameters:
-// 
-// 	- details *Structure (nullable): A GstStructure with details 
-//
-// Add @details to @message. Will fail if the message already has details set on
-// it or if it is not writable.
-func (message *Message) SetDetails(details *Structure) {
-	var carg0 *C.GstMessage   // in, none, converted
-	var carg1 *C.GstStructure // in, full, converted, nullable
-
-	carg0 = (*C.GstMessage)(UnsafeMessageToGlibNone(message))
-	if details != nil {
-		carg1 = (*C.GstStructure)(UnsafeStructureToGlibFull(details))
-	}
-
-	C.gst_message_set_details(carg0, carg1)
-	runtime.KeepAlive(message)
-	runtime.KeepAlive(details)
 }
 
 // SetGroupID wraps gst_message_set_group_id
@@ -56860,34 +55990,6 @@ func (message *Message) StreamsSelectedGetStream(idx uint) Stream {
 	if cret != nil {
 		goret = UnsafeStreamFromGlibFull(unsafe.Pointer(cret))
 	}
-
-	return goret
-}
-
-// WritableDetails wraps gst_message_writable_details
-// 
-// The function returns the following values:
-// 
-// 	- goret *Structure 
-//
-// Returns the details structure of the @message. If not present it will be
-// created. Use this function (instead of gst_message_get_details()) if you
-// want to write to the @details structure.
-// 
-// The returned structure must not be freed.
-func (message *Message) WritableDetails() *Structure {
-	var carg0 *C.GstMessage   // in, none, converted
-	var cret  *C.GstStructure // return, borrow, converted
-
-	carg0 = (*C.GstMessage)(UnsafeMessageToGlibNone(message))
-
-	cret = C.gst_message_writable_details(carg0)
-	runtime.KeepAlive(message)
-
-	var goret *Structure
-
-	goret = UnsafeStructureFromGlibBorrow(unsafe.Pointer(cret))
-	runtime.AddCleanup(goret, func(_ *Message) {}, message)
 
 	return goret
 }
@@ -64446,62 +63548,29 @@ func NewStructureFromString(str string) *Structure {
 	return goret
 }
 
-// NewStructureIDStrEmpty wraps gst_structure_new_id_str_empty
+// NewStructureIDEmpty wraps gst_structure_new_id_empty
 // 
 // The function takes the following parameters:
 // 
-// 	- name *IdStr: name of new structure 
+// 	- quark glib.Quark: name of new structure 
 // 
 // The function returns the following values:
 // 
 // 	- goret *Structure 
 //
-// Creates a new, empty #GstStructure with the given name.
+// Creates a new, empty #GstStructure with the given name as a GQuark.
 // 
 // Free-function: gst_structure_free
-func NewStructureIDStrEmpty(name *IdStr) *Structure {
-	var carg1 *C.GstIdStr     // in, none, converted
-	var cret  *C.GstStructure // return, full, converted
-
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(name))
-
-	cret = C.gst_structure_new_id_str_empty(carg1)
-	runtime.KeepAlive(name)
-
-	var goret *Structure
-
-	goret = UnsafeStructureFromGlibFull(unsafe.Pointer(cret))
-
-	return goret
-}
-
-// NewStructureStaticStrEmpty wraps gst_structure_new_static_str_empty
-// 
-// The function takes the following parameters:
-// 
-// 	- name string: name of new structure 
-// 
-// The function returns the following values:
-// 
-// 	- goret *Structure 
 //
-// Creates a new, empty #GstStructure with the given @name.
-// 
-// See gst_structure_set_name() for constraints on the @name parameter.
-// 
-// @name needs to be valid for the remaining lifetime of the process, e.g. has
-// to be a static string.
-// 
-// Free-function: gst_structure_free
-func NewStructureStaticStrEmpty(name string) *Structure {
-	var carg1 *C.gchar        // in, none, string
+// Deprecated: (since 1.26.0) Use gst_structure_new_id_str_empty().
+func NewStructureIDEmpty(quark glib.Quark) *Structure {
+	var carg1 C.GQuark        // in, none, casted, alias
 	var cret  *C.GstStructure // return, full, converted
 
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(name)))
-	defer C.free(unsafe.Pointer(carg1))
+	carg1 = C.GQuark(quark)
 
-	cret = C.gst_structure_new_static_str_empty(carg1)
-	runtime.KeepAlive(name)
+	cret = C.gst_structure_new_id_empty(carg1)
+	runtime.KeepAlive(quark)
 
 	var goret *Structure
 
@@ -64568,28 +63637,30 @@ func (structure *Structure) Copy() *Structure {
 	return goret
 }
 
-// FilterAndMapInPlaceIDStr wraps gst_structure_filter_and_map_in_place_id_str
+// FilterAndMapInPlace wraps gst_structure_filter_and_map_in_place
 // 
 // The function takes the following parameters:
 // 
-// 	- fn StructureFilterMapIdStrFunc: a function to call for each field 
+// 	- fn StructureFilterMapFunc: a function to call for each field 
 //
 // Calls the provided function once for each field in the #GstStructure. In
-// contrast to gst_structure_foreach_id_str(), the function may modify the fields.
-// In contrast to gst_structure_map_in_place_id_str(), the field is removed from
+// contrast to gst_structure_foreach(), the function may modify the fields.
+// In contrast to gst_structure_map_in_place(), the field is removed from
 // the structure if %FALSE is returned from the function.
 // The structure must be mutable.
-func (structure *Structure) FilterAndMapInPlaceIDStr(fn StructureFilterMapIdStrFunc) {
-	var carg0 *C.GstStructure                  // in, none, converted
-	var carg1 C.GstStructureFilterMapIdStrFunc // callback, scope: call, closure: carg2
-	var carg2 C.gpointer                       // implicit
+//
+// Deprecated: (since 1.26.0) Use gst_structure_filter_and_map_in_place_id_str().
+func (structure *Structure) FilterAndMapInPlace(fn StructureFilterMapFunc) {
+	var carg0 *C.GstStructure             // in, none, converted
+	var carg1 C.GstStructureFilterMapFunc // callback, scope: call, closure: carg2
+	var carg2 C.gpointer                  // implicit
 
 	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*[0]byte)(C._goglib_gst1_StructureFilterMapIdStrFunc)
+	carg1 = (*[0]byte)(C._goglib_gst1_StructureFilterMapFunc)
 	carg2 = C.gpointer(userdata.Register(fn))
 	defer userdata.Delete(unsafe.Pointer(carg2))
 
-	C.gst_structure_filter_and_map_in_place_id_str(carg0, carg1, carg2)
+	C.gst_structure_filter_and_map_in_place(carg0, carg1, carg2)
 	runtime.KeepAlive(structure)
 	runtime.KeepAlive(fn)
 }
@@ -64838,31 +63909,33 @@ func (structure *Structure) FixateFieldString(fieldName string, target string) b
 	return goret
 }
 
-// ForEachIDStr wraps gst_structure_foreach_id_str
+// ForEach wraps gst_structure_foreach
 // 
 // The function takes the following parameters:
 // 
-// 	- fn StructureForeachIdStrFunc: a function to call for each field 
+// 	- fn StructureForeachFunc: a function to call for each field 
 // 
 // The function returns the following values:
 // 
 // 	- goret bool 
 //
 // Calls the provided function once for each field in the #GstStructure. The
-// function must not modify the fields. Also see gst_structure_map_in_place_id_str()
-// and gst_structure_filter_and_map_in_place_id_str().
-func (structure *Structure) ForEachIDStr(fn StructureForeachIdStrFunc) bool {
-	var carg0 *C.GstStructure                // in, none, converted
-	var carg1 C.GstStructureForeachIdStrFunc // callback, scope: call, closure: carg2
-	var carg2 C.gpointer                     // implicit
-	var cret  C.gboolean                     // return
+// function must not modify the fields. Also see gst_structure_map_in_place()
+// and gst_structure_filter_and_map_in_place().
+//
+// Deprecated: (since 1.26.0) Use gst_structure_foreach_id_str().
+func (structure *Structure) ForEach(fn StructureForeachFunc) bool {
+	var carg0 *C.GstStructure           // in, none, converted
+	var carg1 C.GstStructureForeachFunc // callback, scope: call, closure: carg2
+	var carg2 C.gpointer                // implicit
+	var cret  C.gboolean                // return
 
 	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*[0]byte)(C._goglib_gst1_StructureForeachIdStrFunc)
+	carg1 = (*[0]byte)(C._goglib_gst1_StructureForeachFunc)
 	carg2 = C.gpointer(userdata.Register(fn))
 	defer userdata.Delete(unsafe.Pointer(carg2))
 
-	cret = C.gst_structure_foreach_id_str(carg0, carg1, carg2)
+	cret = C.gst_structure_foreach(carg0, carg1, carg2)
 	runtime.KeepAlive(structure)
 	runtime.KeepAlive(fn)
 
@@ -65343,25 +64416,27 @@ func (structure *Structure) GetName() string {
 	return goret
 }
 
-// GetNameIDStr wraps gst_structure_get_name_id_str
+// GetNameID wraps gst_structure_get_name_id
 // 
 // The function returns the following values:
 // 
-// 	- goret *IdStr 
+// 	- goret glib.Quark 
 //
-// Get the name of @structure as a GstIdStr.
-func (structure *Structure) GetNameIDStr() *IdStr {
+// Get the name of @structure as a GQuark.
+//
+// Deprecated: (since 1.26.0) Use gst_structure_get_name_id_str().
+func (structure *Structure) GetNameID() glib.Quark {
 	var carg0 *C.GstStructure // in, none, converted
-	var cret  *C.GstIdStr     // return, none, converted
+	var cret  C.GQuark        // return, none, casted, alias
 
 	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
 
-	cret = C.gst_structure_get_name_id_str(carg0)
+	cret = C.gst_structure_get_name_id(carg0)
 	runtime.KeepAlive(structure)
 
-	var goret *IdStr
+	var goret glib.Quark
 
-	goret = UnsafeIdStrFromGlibNone(unsafe.Pointer(cret))
+	goret = glib.Quark(cret)
 
 	return goret
 }
@@ -65585,92 +64660,30 @@ func (structure *Structure) HasName(name string) bool {
 	return goret
 }
 
-// IDStrGetFieldType wraps gst_structure_id_str_get_field_type
+// IDHasField wraps gst_structure_id_has_field
 // 
 // The function takes the following parameters:
 // 
-// 	- fieldname *IdStr: the name of the field 
-// 
-// The function returns the following values:
-// 
-// 	- goret gobject.Type 
-//
-// Finds the field with the given name, and returns the type of the
-// value it contains.  If the field is not found, G_TYPE_INVALID is
-// returned.
-func (structure *Structure) IDStrGetFieldType(fieldname *IdStr) gobject.Type {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
-	var cret  C.GType         // return, none, casted, alias
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(fieldname))
-
-	cret = C.gst_structure_id_str_get_field_type(carg0, carg1)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
-
-	var goret gobject.Type
-
-	goret = gobject.Type(cret)
-
-	return goret
-}
-
-// IDStrGetValue wraps gst_structure_id_str_get_value
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the name of the field to get 
-// 
-// The function returns the following values:
-// 
-// 	- goret *gobject.Value (nullable) 
-//
-// Get the value of the field with name @fieldname.
-func (structure *Structure) IDStrGetValue(fieldname *IdStr) *gobject.Value {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
-	var cret  *C.GValue       // return, none, converted, nullable
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(fieldname))
-
-	cret = C.gst_structure_id_str_get_value(carg0, carg1)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
-
-	var goret *gobject.Value
-
-	if cret != nil {
-		goret = gobject.UnsafeValueFromGlibUseAnyInstead(unsafe.Pointer(cret))
-	}
-
-	return goret
-}
-
-// IDStrHasField wraps gst_structure_id_str_has_field
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the name of a field 
+// 	- field glib.Quark: #GQuark of the field name 
 // 
 // The function returns the following values:
 // 
 // 	- goret bool 
 //
-// Check if @structure contains a field named @fieldname.
-func (structure *Structure) IDStrHasField(fieldname *IdStr) bool {
+// Check if @structure contains a field named @field.
+//
+// Deprecated: (since 1.26.0) Use gst_structure_id_str_has_field().
+func (structure *Structure) IDHasField(field glib.Quark) bool {
 	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
+	var carg1 C.GQuark        // in, none, casted, alias
 	var cret  C.gboolean      // return
 
 	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(fieldname))
+	carg1 = C.GQuark(field)
 
-	cret = C.gst_structure_id_str_has_field(carg0, carg1)
+	cret = C.gst_structure_id_has_field(carg0, carg1)
 	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
+	runtime.KeepAlive(field)
 
 	var goret bool
 
@@ -65681,31 +64694,33 @@ func (structure *Structure) IDStrHasField(fieldname *IdStr) bool {
 	return goret
 }
 
-// IDStrHasFieldTyped wraps gst_structure_id_str_has_field_typed
+// IDHasFieldTyped wraps gst_structure_id_has_field_typed
 // 
 // The function takes the following parameters:
 // 
-// 	- fieldname *IdStr: the name of a field 
+// 	- field glib.Quark: #GQuark of the field name 
 // 	- typ gobject.Type: the type of a value 
 // 
 // The function returns the following values:
 // 
 // 	- goret bool 
 //
-// Check if @structure contains a field named @fieldname and with GType @type.
-func (structure *Structure) IDStrHasFieldTyped(fieldname *IdStr, typ gobject.Type) bool {
+// Check if @structure contains a field named @field and with GType @type.
+//
+// Deprecated: (since 1.26.0) Use gst_structure_id_str_has_field_typed().
+func (structure *Structure) IDHasFieldTyped(field glib.Quark, typ gobject.Type) bool {
 	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
+	var carg1 C.GQuark        // in, none, casted, alias
 	var carg2 C.GType         // in, none, casted, alias
 	var cret  C.gboolean      // return
 
 	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(fieldname))
+	carg1 = C.GQuark(field)
 	carg2 = C.GType(typ)
 
-	cret = C.gst_structure_id_str_has_field_typed(carg0, carg1, carg2)
+	cret = C.gst_structure_id_has_field_typed(carg0, carg1, carg2)
 	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
+	runtime.KeepAlive(field)
 	runtime.KeepAlive(typ)
 
 	var goret bool
@@ -65717,104 +64732,30 @@ func (structure *Structure) IDStrHasFieldTyped(fieldname *IdStr, typ gobject.Typ
 	return goret
 }
 
-// IDStrNthFieldName wraps gst_structure_id_str_nth_field_name
+// IDSetValue wraps gst_structure_id_set_value
 // 
 // The function takes the following parameters:
 // 
-// 	- index uint: the index to get the name of 
-// 
-// The function returns the following values:
-// 
-// 	- goret *IdStr 
-//
-// Get the name (as a GstIdStr) of the given field number,
-// counting from 0 onwards.
-func (structure *Structure) IDStrNthFieldName(index uint) *IdStr {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 C.guint         // in, none, casted
-	var cret  *C.GstIdStr     // return, none, converted
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = C.guint(index)
-
-	cret = C.gst_structure_id_str_nth_field_name(carg0, carg1)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(index)
-
-	var goret *IdStr
-
-	goret = UnsafeIdStrFromGlibNone(unsafe.Pointer(cret))
-
-	return goret
-}
-
-// IDStrRemoveField wraps gst_structure_id_str_remove_field
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the name of the field to remove 
-//
-// Removes the field with the given name.  If the field with the given
-// name does not exist, the structure is unchanged.
-func (structure *Structure) IDStrRemoveField(fieldname *IdStr) {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(fieldname))
-
-	C.gst_structure_id_str_remove_field(carg0, carg1)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
-}
-
-// IDStrSetValue wraps gst_structure_id_str_set_value
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the name of the field to set 
+// 	- field glib.Quark: a #GQuark representing a field 
 // 	- value *gobject.Value: the new value of the field 
 //
-// Sets the field with the given name @field to @value.  If the field
+// Sets the field with the given GQuark @field to @value.  If the field
 // does not exist, it is created.  If the field exists, the previous
 // value is replaced and freed.
-func (structure *Structure) IDStrSetValue(fieldname *IdStr, value *gobject.Value) {
+//
+// Deprecated: (since 1.26.0) Use gst_structure_id_str_set_value().
+func (structure *Structure) IDSetValue(field glib.Quark, value *gobject.Value) {
 	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
+	var carg1 C.GQuark        // in, none, casted, alias
 	var carg2 *C.GValue       // in, none, converted
 
 	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(fieldname))
+	carg1 = C.GQuark(field)
 	carg2 = (*C.GValue)(gobject.UnsafeValueToGlibUseAnyInstead(value))
 
-	C.gst_structure_id_str_set_value(carg0, carg1, carg2)
+	C.gst_structure_id_set_value(carg0, carg1, carg2)
 	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
-	runtime.KeepAlive(value)
-}
-
-// IDStrTakeValue wraps gst_structure_id_str_take_value
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname *IdStr: the name of the field to set 
-// 	- value *gobject.Value: the new value of the field 
-//
-// Sets the field with the given GstIdStr @field to @value.  If the field
-// does not exist, it is created.  If the field exists, the previous
-// value is replaced and freed.
-func (structure *Structure) IDStrTakeValue(fieldname *IdStr, value *gobject.Value) {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
-	var carg2 *C.GValue       // in, full, converted
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(fieldname))
-	carg2 = (*C.GValue)(gobject.UnsafeValueToGlibUseAnyInstead(value))
-
-	C.gst_structure_id_str_take_value(carg0, carg1, carg2)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
+	runtime.KeepAlive(field)
 	runtime.KeepAlive(value)
 }
 
@@ -65916,31 +64857,33 @@ func (subset *Structure) IsSubset(superset *Structure) bool {
 	return goret
 }
 
-// MapInPlaceIDStr wraps gst_structure_map_in_place_id_str
+// MapInPlace wraps gst_structure_map_in_place
 // 
 // The function takes the following parameters:
 // 
-// 	- fn StructureMapIdStrFunc: a function to call for each field 
+// 	- fn StructureMapFunc: a function to call for each field 
 // 
 // The function returns the following values:
 // 
 // 	- goret bool 
 //
 // Calls the provided function once for each field in the #GstStructure. In
-// contrast to gst_structure_foreach_id_str(), the function may modify but not delete the
+// contrast to gst_structure_foreach(), the function may modify but not delete the
 // fields. The structure must be mutable.
-func (structure *Structure) MapInPlaceIDStr(fn StructureMapIdStrFunc) bool {
-	var carg0 *C.GstStructure            // in, none, converted
-	var carg1 C.GstStructureMapIdStrFunc // callback, scope: call, closure: carg2
-	var carg2 C.gpointer                 // implicit
-	var cret  C.gboolean                 // return
+//
+// Deprecated: (since 1.26.0) Use gst_structure_map_in_place_id_str().
+func (structure *Structure) MapInPlace(fn StructureMapFunc) bool {
+	var carg0 *C.GstStructure       // in, none, converted
+	var carg1 C.GstStructureMapFunc // callback, scope: call, closure: carg2
+	var carg2 C.gpointer            // implicit
+	var cret  C.gboolean            // return
 
 	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*[0]byte)(C._goglib_gst1_StructureMapIdStrFunc)
+	carg1 = (*[0]byte)(C._goglib_gst1_StructureMapFunc)
 	carg2 = C.gpointer(userdata.Register(fn))
 	defer userdata.Delete(unsafe.Pointer(carg2))
 
-	cret = C.gst_structure_map_in_place_id_str(carg0, carg1, carg2)
+	cret = C.gst_structure_map_in_place(carg0, carg1, carg2)
 	runtime.KeepAlive(structure)
 	runtime.KeepAlive(fn)
 
@@ -66095,52 +65038,6 @@ func (structure *Structure) SetName(name string) {
 	runtime.KeepAlive(name)
 }
 
-// SetNameIDStr wraps gst_structure_set_name_id_str
-// 
-// The function takes the following parameters:
-// 
-// 	- name *IdStr: the new name of the structure 
-//
-// Sets the name of the structure to the given @name.  The string
-// provided is copied before being used. It must not be empty, start with a
-// letter and can be followed by letters, numbers and any of "/-_.:".
-func (structure *Structure) SetNameIDStr(name *IdStr) {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.GstIdStr     // in, none, converted
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.GstIdStr)(UnsafeIdStrToGlibNone(name))
-
-	C.gst_structure_set_name_id_str(carg0, carg1)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(name)
-}
-
-// SetNameStaticStr wraps gst_structure_set_name_static_str
-// 
-// The function takes the following parameters:
-// 
-// 	- name string: the new name of the structure 
-//
-// Sets the name of the structure to the given @name.  The string
-// provided is copied before being used. It must not be empty, start with a
-// letter and can be followed by letters, numbers and any of "/-_.:".
-// 
-// @name needs to be valid for the remaining lifetime of the process, e.g. has
-// to be a static string.
-func (structure *Structure) SetNameStaticStr(name string) {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.gchar        // in, none, string
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(name)))
-	defer C.free(unsafe.Pointer(carg1))
-
-	C.gst_structure_set_name_static_str(carg0, carg1)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(name)
-}
-
 // SetParentRefcount wraps gst_structure_set_parent_refcount
 // 
 // The function takes the following parameters:
@@ -66176,64 +65073,6 @@ func (structure *Structure) SetParentRefcount(refcount *int32) bool {
 	}
 
 	return goret
-}
-
-// SetValueStaticStr wraps gst_structure_set_value_static_str
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname string: the name of the field to set 
-// 	- value *gobject.Value: the new value of the field 
-//
-// Sets the field with the given name @field to @value.  If the field
-// does not exist, it is created.  If the field exists, the previous
-// value is replaced and freed.
-// 
-// @fieldname needs to be valid for the remaining lifetime of the process, e.g.
-// has to be a static string.
-func (structure *Structure) SetValueStaticStr(fieldname string, value *gobject.Value) {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.gchar        // in, none, string
-	var carg2 *C.GValue       // in, none, converted
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(fieldname)))
-	defer C.free(unsafe.Pointer(carg1))
-	carg2 = (*C.GValue)(gobject.UnsafeValueToGlibUseAnyInstead(value))
-
-	C.gst_structure_set_value_static_str(carg0, carg1, carg2)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
-	runtime.KeepAlive(value)
-}
-
-// TakeValueStaticStr wraps gst_structure_take_value_static_str
-// 
-// The function takes the following parameters:
-// 
-// 	- fieldname string: the name of the field to set 
-// 	- value *gobject.Value: the new value of the field 
-//
-// Sets the field with the given name @field to @value.  If the field
-// does not exist, it is created.  If the field exists, the previous
-// value is replaced and freed. The function will take ownership of @value.
-// 
-// @fieldname needs to be valid for the remaining lifetime of the process, e.g.
-// has to be a static string.
-func (structure *Structure) TakeValueStaticStr(fieldname string, value *gobject.Value) {
-	var carg0 *C.GstStructure // in, none, converted
-	var carg1 *C.gchar        // in, none, string
-	var carg2 *C.GValue       // in, full, converted
-
-	carg0 = (*C.GstStructure)(UnsafeStructureToGlibNone(structure))
-	carg1 = (*C.gchar)(unsafe.Pointer(C.CString(fieldname)))
-	defer C.free(unsafe.Pointer(carg1))
-	carg2 = (*C.GValue)(gobject.UnsafeValueToGlibUseAnyInstead(value))
-
-	C.gst_structure_take_value_static_str(carg0, carg1, carg2)
-	runtime.KeepAlive(structure)
-	runtime.KeepAlive(fieldname)
-	runtime.KeepAlive(value)
 }
 
 // String wraps gst_structure_to_string
@@ -69045,59 +67884,6 @@ func (t *TracerClass) ParentClass() *ObjectClass {
 	// attach a cleanup to keep the instance alive as long as the parent is referenced
 	runtime.AddCleanup(parent, func(_ *TracerClass) {}, t)
 	return parent
-}
-
-// SetUseStructureParams wraps gst_tracer_class_set_use_structure_params
-// 
-// The function takes the following parameters:
-// 
-// 	- useStructureParams bool: %TRUE to use structure parameters, %FALSE otherwise 
-//
-// Sets whether the tracer should use structure parameters for configuration.
-// This function configures how parameters should be passed when instantiating
-// the tracer.
-// 
-// This is typically called in the tracer's class initialization function to
-// indicate its parameter handling preference.
-func (tracerClass *TracerClass) SetUseStructureParams(useStructureParams bool) {
-	var carg0 *C.GstTracerClass // in, none, converted
-	var carg1 C.gboolean        // in
-
-	carg0 = (*C.GstTracerClass)(UnsafeTracerClassToGlibNone(tracerClass))
-	if useStructureParams {
-		carg1 = C.TRUE
-	}
-
-	C.gst_tracer_class_set_use_structure_params(carg0, carg1)
-	runtime.KeepAlive(tracerClass)
-	runtime.KeepAlive(useStructureParams)
-}
-
-// UsesStructureParams wraps gst_tracer_class_uses_structure_params
-// 
-// The function returns the following values:
-// 
-// 	- goret bool 
-//
-// If set, the tracer subsystem will consider parameters passed to the
-// `GST_TRACERS` environment variable as a #GstStructure and use its
-// fields as properties to instanciate the tracer.
-func (tracerClass *TracerClass) UsesStructureParams() bool {
-	var carg0 *C.GstTracerClass // in, none, converted
-	var cret  C.gboolean        // return
-
-	carg0 = (*C.GstTracerClass)(UnsafeTracerClassToGlibNone(tracerClass))
-
-	cret = C.gst_tracer_class_uses_structure_params(carg0)
-	runtime.KeepAlive(tracerClass)
-
-	var goret bool
-
-	if cret != 0 {
-		goret = true
-	}
-
-	return goret
 }
 
 // TracerFactoryClass wraps GstTracerFactoryClass
