@@ -42598,7 +42598,7 @@ func UnsafeBufferFromGlibBorrow(p unsafe.Pointer) *Buffer {
 
 // UnsafeBufferFromGlibNone is used to convert raw C.GstBuffer pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeBufferFromGlibNone(p unsafe.Pointer) *Buffer {
-	miniObjectRef(unsafe.Pointer(p))
+	C.gst_buffer_ref((*C.GstBuffer)(p))
 	wrapped := UnsafeBufferFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
@@ -42607,7 +42607,7 @@ func UnsafeBufferFromGlibNone(p unsafe.Pointer) *Buffer {
 	runtime.SetFinalizer(
 		wrapped.buffer,
 		func (intern *buffer) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_buffer_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -42622,7 +42622,7 @@ func UnsafeBufferFromGlibFull(p unsafe.Pointer) *Buffer {
 	runtime.SetFinalizer(
 		wrapped.buffer,
 		func (intern *buffer) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_buffer_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -42632,14 +42632,14 @@ func UnsafeBufferFromGlibFull(p unsafe.Pointer) *Buffer {
 // 
 // When this is called without an associated call to [Buffer.UnsafeBufferUnref], then [Buffer] will leak memory.
 func UnsafeBufferRef(b *Buffer) {
-	miniObjectRef(unsafe.Pointer(b.native))
+	C.gst_buffer_ref((*C.GstBuffer)(b.native))
 }
 
 // UnsafeBufferUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Buffer] is expected to work anymore.
 func UnsafeBufferUnref(b *Buffer) {
-	miniObjectUnref(unsafe.Pointer(b.native))
+	C.gst_buffer_unref(b.native)
 	runtime.SetFinalizer(b.buffer, nil)
 }
 
@@ -44215,7 +44215,7 @@ func UnsafeBufferListFromGlibBorrow(p unsafe.Pointer) *BufferList {
 
 // UnsafeBufferListFromGlibNone is used to convert raw C.GstBufferList pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeBufferListFromGlibNone(p unsafe.Pointer) *BufferList {
-	miniObjectRef(unsafe.Pointer(p))
+	C.gst_buffer_list_ref((*C.GstBufferList)(p))
 	wrapped := UnsafeBufferListFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
@@ -44224,7 +44224,7 @@ func UnsafeBufferListFromGlibNone(p unsafe.Pointer) *BufferList {
 	runtime.SetFinalizer(
 		wrapped.bufferList,
 		func (intern *bufferList) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_buffer_list_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -44239,7 +44239,7 @@ func UnsafeBufferListFromGlibFull(p unsafe.Pointer) *BufferList {
 	runtime.SetFinalizer(
 		wrapped.bufferList,
 		func (intern *bufferList) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_buffer_list_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -44249,14 +44249,14 @@ func UnsafeBufferListFromGlibFull(p unsafe.Pointer) *BufferList {
 // 
 // When this is called without an associated call to [BufferList.UnsafeBufferListUnref], then [BufferList] will leak memory.
 func UnsafeBufferListRef(b *BufferList) {
-	miniObjectRef(unsafe.Pointer(b.native))
+	C.gst_buffer_list_ref((*C.GstBufferList)(b.native))
 }
 
 // UnsafeBufferListUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [BufferList] is expected to work anymore.
 func UnsafeBufferListUnref(b *BufferList) {
-	miniObjectUnref(unsafe.Pointer(b.native))
+	C.gst_buffer_list_unref(b.native)
 	runtime.SetFinalizer(b.bufferList, nil)
 }
 
@@ -44919,7 +44919,7 @@ func UnsafeCapsFromGlibBorrow(p unsafe.Pointer) *Caps {
 
 // UnsafeCapsFromGlibNone is used to convert raw C.GstCaps pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeCapsFromGlibNone(p unsafe.Pointer) *Caps {
-	miniObjectRef(unsafe.Pointer(p))
+	C.gst_caps_ref((*C.GstCaps)(p))
 	wrapped := UnsafeCapsFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
@@ -44928,7 +44928,7 @@ func UnsafeCapsFromGlibNone(p unsafe.Pointer) *Caps {
 	runtime.SetFinalizer(
 		wrapped.caps,
 		func (intern *caps) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_caps_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -44943,7 +44943,7 @@ func UnsafeCapsFromGlibFull(p unsafe.Pointer) *Caps {
 	runtime.SetFinalizer(
 		wrapped.caps,
 		func (intern *caps) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_caps_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -44953,14 +44953,14 @@ func UnsafeCapsFromGlibFull(p unsafe.Pointer) *Caps {
 // 
 // When this is called without an associated call to [Caps.UnsafeCapsUnref], then [Caps] will leak memory.
 func UnsafeCapsRef(c *Caps) {
-	miniObjectRef(unsafe.Pointer(c.native))
+	C.gst_caps_ref((*C.GstCaps)(c.native))
 }
 
 // UnsafeCapsUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Caps] is expected to work anymore.
 func UnsafeCapsUnref(c *Caps) {
-	miniObjectUnref(unsafe.Pointer(c.native))
+	C.gst_caps_unref(c.native)
 	runtime.SetFinalizer(c.caps, nil)
 }
 
@@ -52573,7 +52573,7 @@ func UnsafeMemoryFromGlibBorrow(p unsafe.Pointer) *Memory {
 
 // UnsafeMemoryFromGlibNone is used to convert raw C.GstMemory pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeMemoryFromGlibNone(p unsafe.Pointer) *Memory {
-	miniObjectRef(unsafe.Pointer(p))
+	C.gst_memory_ref((*C.GstMemory)(p))
 	wrapped := UnsafeMemoryFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
@@ -52582,7 +52582,7 @@ func UnsafeMemoryFromGlibNone(p unsafe.Pointer) *Memory {
 	runtime.SetFinalizer(
 		wrapped.memory,
 		func (intern *memory) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_memory_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -52597,7 +52597,7 @@ func UnsafeMemoryFromGlibFull(p unsafe.Pointer) *Memory {
 	runtime.SetFinalizer(
 		wrapped.memory,
 		func (intern *memory) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_memory_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -52607,14 +52607,14 @@ func UnsafeMemoryFromGlibFull(p unsafe.Pointer) *Memory {
 // 
 // When this is called without an associated call to [Memory.UnsafeMemoryUnref], then [Memory] will leak memory.
 func UnsafeMemoryRef(m *Memory) {
-	miniObjectRef(unsafe.Pointer(m.native))
+	C.gst_memory_ref((*C.GstMemory)(m.native))
 }
 
 // UnsafeMemoryUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Memory] is expected to work anymore.
 func UnsafeMemoryUnref(m *Memory) {
-	miniObjectUnref(unsafe.Pointer(m.native))
+	C.gst_memory_unref(m.native)
 	runtime.SetFinalizer(m.memory, nil)
 }
 
@@ -52904,7 +52904,7 @@ func UnsafeMessageFromGlibBorrow(p unsafe.Pointer) *Message {
 
 // UnsafeMessageFromGlibNone is used to convert raw C.GstMessage pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeMessageFromGlibNone(p unsafe.Pointer) *Message {
-	miniObjectRef(unsafe.Pointer(p))
+	C.gst_message_ref((*C.GstMessage)(p))
 	wrapped := UnsafeMessageFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
@@ -52913,7 +52913,7 @@ func UnsafeMessageFromGlibNone(p unsafe.Pointer) *Message {
 	runtime.SetFinalizer(
 		wrapped.message,
 		func (intern *message) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_message_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -52928,7 +52928,7 @@ func UnsafeMessageFromGlibFull(p unsafe.Pointer) *Message {
 	runtime.SetFinalizer(
 		wrapped.message,
 		func (intern *message) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_message_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -52938,14 +52938,14 @@ func UnsafeMessageFromGlibFull(p unsafe.Pointer) *Message {
 // 
 // When this is called without an associated call to [Message.UnsafeMessageUnref], then [Message] will leak memory.
 func UnsafeMessageRef(m *Message) {
-	miniObjectRef(unsafe.Pointer(m.native))
+	C.gst_message_ref((*C.GstMessage)(m.native))
 }
 
 // UnsafeMessageUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Message] is expected to work anymore.
 func UnsafeMessageUnref(m *Message) {
-	miniObjectUnref(unsafe.Pointer(m.native))
+	C.gst_message_unref(m.native)
 	runtime.SetFinalizer(m.message, nil)
 }
 
@@ -58933,7 +58933,7 @@ func UnsafeQueryFromGlibBorrow(p unsafe.Pointer) *Query {
 
 // UnsafeQueryFromGlibNone is used to convert raw C.GstQuery pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeQueryFromGlibNone(p unsafe.Pointer) *Query {
-	miniObjectRef(unsafe.Pointer(p))
+	C.gst_query_ref((*C.GstQuery)(p))
 	wrapped := UnsafeQueryFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
@@ -58942,7 +58942,7 @@ func UnsafeQueryFromGlibNone(p unsafe.Pointer) *Query {
 	runtime.SetFinalizer(
 		wrapped.query,
 		func (intern *query) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_query_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -58957,7 +58957,7 @@ func UnsafeQueryFromGlibFull(p unsafe.Pointer) *Query {
 	runtime.SetFinalizer(
 		wrapped.query,
 		func (intern *query) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_query_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -58967,14 +58967,14 @@ func UnsafeQueryFromGlibFull(p unsafe.Pointer) *Query {
 // 
 // When this is called without an associated call to [Query.UnsafeQueryUnref], then [Query] will leak memory.
 func UnsafeQueryRef(q *Query) {
-	miniObjectRef(unsafe.Pointer(q.native))
+	C.gst_query_ref((*C.GstQuery)(q.native))
 }
 
 // UnsafeQueryUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Query] is expected to work anymore.
 func UnsafeQueryUnref(q *Query) {
-	miniObjectUnref(unsafe.Pointer(q.native))
+	C.gst_query_unref(q.native)
 	runtime.SetFinalizer(q.query, nil)
 }
 
@@ -61723,7 +61723,7 @@ func UnsafeSampleFromGlibBorrow(p unsafe.Pointer) *Sample {
 
 // UnsafeSampleFromGlibNone is used to convert raw C.GstSample pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeSampleFromGlibNone(p unsafe.Pointer) *Sample {
-	miniObjectRef(unsafe.Pointer(p))
+	C.gst_sample_ref((*C.GstSample)(p))
 	wrapped := UnsafeSampleFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
@@ -61732,7 +61732,7 @@ func UnsafeSampleFromGlibNone(p unsafe.Pointer) *Sample {
 	runtime.SetFinalizer(
 		wrapped.sample,
 		func (intern *sample) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_sample_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -61747,7 +61747,7 @@ func UnsafeSampleFromGlibFull(p unsafe.Pointer) *Sample {
 	runtime.SetFinalizer(
 		wrapped.sample,
 		func (intern *sample) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_sample_unref(intern.native)
 		},
 	)
 	return wrapped
@@ -61757,14 +61757,14 @@ func UnsafeSampleFromGlibFull(p unsafe.Pointer) *Sample {
 // 
 // When this is called without an associated call to [Sample.UnsafeSampleUnref], then [Sample] will leak memory.
 func UnsafeSampleRef(s *Sample) {
-	miniObjectRef(unsafe.Pointer(s.native))
+	C.gst_sample_ref((*C.GstSample)(s.native))
 }
 
 // UnsafeSampleUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Sample] is expected to work anymore.
 func UnsafeSampleUnref(s *Sample) {
-	miniObjectUnref(unsafe.Pointer(s.native))
+	C.gst_sample_unref(s.native)
 	runtime.SetFinalizer(s.sample, nil)
 }
 
@@ -63490,19 +63490,13 @@ func UnsafeStructureFromGlibBorrow(p unsafe.Pointer) *Structure {
 
 // UnsafeStructureFromGlibNone is used to convert raw C.GstStructure pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeStructureFromGlibNone(p unsafe.Pointer) *Structure {
-	miniObjectRef(unsafe.Pointer(p))
 	wrapped := UnsafeStructureFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
 	}
 
-	runtime.SetFinalizer(
-		wrapped.structure,
-		func (intern *structure) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
-		},
-	)
-	return wrapped
+	return wrapped.Copy() // create an owned copy
+
 }
 
 // UnsafeStructureFromGlibFull is used to convert raw C.GstStructure pointers to go while taking ownership. This is used by the bindings internally.
@@ -63514,24 +63508,17 @@ func UnsafeStructureFromGlibFull(p unsafe.Pointer) *Structure {
 	runtime.SetFinalizer(
 		wrapped.structure,
 		func (intern *structure) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.gst_structure_free(intern.native)
 		},
 	)
 	return wrapped
 }
 
-// UnsafeStructureRef increases the refcount on the underlying resource.
-// 
-// When this is called without an associated call to [Structure.UnsafeStructureUnref], then [Structure] will leak memory.
-func UnsafeStructureRef(s *Structure) {
-	miniObjectRef(unsafe.Pointer(s.native))
-}
-
-// UnsafeStructureUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
+// UnsafeStructureFree unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Structure] is expected to work anymore.
-func UnsafeStructureUnref(s *Structure) {
-	miniObjectUnref(unsafe.Pointer(s.native))
+func UnsafeStructureFree(s *Structure) {
+	C.gst_structure_free(s.native)
 	runtime.SetFinalizer(s.structure, nil)
 }
 
@@ -67069,18 +67056,12 @@ func UnsafeTocFromGlibBorrow(p unsafe.Pointer) *Toc {
 
 // UnsafeTocFromGlibNone is used to convert raw C.GstToc pointers to go without transferring ownership. This is used by the bindings internally.
 func UnsafeTocFromGlibNone(p unsafe.Pointer) *Toc {
-	miniObjectRef(unsafe.Pointer(p))
 	wrapped := UnsafeTocFromGlibBorrow(p)
 	if wrapped == nil {
 		return nil
 	}
 
-	runtime.SetFinalizer(
-		wrapped.toc,
-		func (intern *toc) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
-		},
-	)
+	log.Println("WARNING: not attaching a finalizer to Toc because no cgo ref function or copy method is available. This may leak memory. Please file an issue")
 	return wrapped
 }
 
@@ -67093,24 +67074,17 @@ func UnsafeTocFromGlibFull(p unsafe.Pointer) *Toc {
 	runtime.SetFinalizer(
 		wrapped.toc,
 		func (intern *toc) {
-			miniObjectUnref(unsafe.Pointer(intern.native))
+			C.free(unsafe.Pointer(intern.native))
 		},
 	)
 	return wrapped
 }
 
-// UnsafeTocRef increases the refcount on the underlying resource.
-// 
-// When this is called without an associated call to [Toc.UnsafeTocUnref], then [Toc] will leak memory.
-func UnsafeTocRef(t *Toc) {
-	miniObjectRef(unsafe.Pointer(t.native))
-}
-
-// UnsafeTocUnref unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
+// UnsafeTocFree unrefs/frees the underlying resource. This can be used to remove the instance before the GC decides to do so.
 // 
 // After this is called, no other method on [Toc] is expected to work anymore.
-func UnsafeTocUnref(t *Toc) {
-	miniObjectUnref(unsafe.Pointer(t.native))
+func UnsafeTocFree(t *Toc) {
+	C.free(unsafe.Pointer(t.native))
 	runtime.SetFinalizer(t.toc, nil)
 }
 
