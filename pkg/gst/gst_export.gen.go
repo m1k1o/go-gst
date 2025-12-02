@@ -413,33 +413,6 @@ func _goglib_gst1_StructureFilterMapFunc(carg1 C.GQuark, carg2 *C.GValue, carg3 
 	return cret
 }
 
-//export _goglib_gst1_StructureFilterMapIdStrFunc
-func _goglib_gst1_StructureFilterMapIdStrFunc(carg1 *C.GstIdStr, carg2 *C.GValue, carg3 C.gpointer) (cret C.gboolean) {
-	var fn StructureFilterMapIdStrFunc
-	{
-		v := userdata.Load(unsafe.Pointer(carg3))
-		if v == nil {
-			panic(`callback not found`)
-		}
-		fn = v.(StructureFilterMapIdStrFunc)
-	}
-
-	var fieldname *IdStr         // in, none, converted
-	var value     *gobject.Value // in, none, converted
-	var goret     bool           // return
-
-	fieldname = UnsafeIdStrFromGlibNone(unsafe.Pointer(carg1))
-	value = gobject.UnsafeValueFromGlibUseAnyInstead(unsafe.Pointer(carg2))
-
-	goret = fn(fieldname, value)
-
-	if goret {
-		cret = C.TRUE
-	}
-
-	return cret
-}
-
 //export _goglib_gst1_StructureForeachFunc
 func _goglib_gst1_StructureForeachFunc(carg1 C.GQuark, carg2 *C.GValue, carg3 C.gpointer) (cret C.gboolean) {
 	var fn StructureForeachFunc
@@ -467,33 +440,6 @@ func _goglib_gst1_StructureForeachFunc(carg1 C.GQuark, carg2 *C.GValue, carg3 C.
 	return cret
 }
 
-//export _goglib_gst1_StructureForeachIdStrFunc
-func _goglib_gst1_StructureForeachIdStrFunc(carg1 *C.GstIdStr, carg2 *C.GValue, carg3 C.gpointer) (cret C.gboolean) {
-	var fn StructureForeachIdStrFunc
-	{
-		v := userdata.Load(unsafe.Pointer(carg3))
-		if v == nil {
-			panic(`callback not found`)
-		}
-		fn = v.(StructureForeachIdStrFunc)
-	}
-
-	var fieldname *IdStr         // in, none, converted
-	var value     *gobject.Value // in, none, converted
-	var goret     bool           // return
-
-	fieldname = UnsafeIdStrFromGlibNone(unsafe.Pointer(carg1))
-	value = gobject.UnsafeValueFromGlibUseAnyInstead(unsafe.Pointer(carg2))
-
-	goret = fn(fieldname, value)
-
-	if goret {
-		cret = C.TRUE
-	}
-
-	return cret
-}
-
 //export _goglib_gst1_StructureMapFunc
 func _goglib_gst1_StructureMapFunc(carg1 C.GQuark, carg2 *C.GValue, carg3 C.gpointer) (cret C.gboolean) {
 	var fn StructureMapFunc
@@ -513,33 +459,6 @@ func _goglib_gst1_StructureMapFunc(carg1 C.GQuark, carg2 *C.GValue, carg3 C.gpoi
 	value = gobject.UnsafeValueFromGlibUseAnyInstead(unsafe.Pointer(carg2))
 
 	goret = fn(fieldId, value)
-
-	if goret {
-		cret = C.TRUE
-	}
-
-	return cret
-}
-
-//export _goglib_gst1_StructureMapIdStrFunc
-func _goglib_gst1_StructureMapIdStrFunc(carg1 *C.GstIdStr, carg2 *C.GValue, carg3 C.gpointer) (cret C.gboolean) {
-	var fn StructureMapIdStrFunc
-	{
-		v := userdata.Load(unsafe.Pointer(carg3))
-		if v == nil {
-			panic(`callback not found`)
-		}
-		fn = v.(StructureMapIdStrFunc)
-	}
-
-	var fieldname *IdStr         // in, none, converted
-	var value     *gobject.Value // in, none, converted
-	var goret     bool           // return
-
-	fieldname = UnsafeIdStrFromGlibNone(unsafe.Pointer(carg1))
-	value = gobject.UnsafeValueFromGlibUseAnyInstead(unsafe.Pointer(carg2))
-
-	goret = fn(fieldname, value)
 
 	if goret {
 		cret = C.TRUE
