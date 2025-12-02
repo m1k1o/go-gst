@@ -96,22 +96,23 @@ func init() {
 }
 
 // AppLeakyType wraps GstAppLeakyType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GstAppLeakyType
+//
+// Buffer dropping scheme to avoid the element's internal queue to block when
+// full.
 type AppLeakyType C.int
 
 const (
 	// AppLeakyTypeNone wraps GST_APP_LEAKY_TYPE_NONE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GST_APP_LEAKY_TYPE_NONE
+	//
+	// Not Leaky
 	AppLeakyTypeNone AppLeakyType = 0
 	// AppLeakyTypeUpstream wraps GST_APP_LEAKY_TYPE_UPSTREAM
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GST_APP_LEAKY_TYPE_UPSTREAM
+	//
+	// Leaky on upstream (new buffers)
 	AppLeakyTypeUpstream AppLeakyType = 1
 	// AppLeakyTypeDownstream wraps GST_APP_LEAKY_TYPE_DOWNSTREAM
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GST_APP_LEAKY_TYPE_DOWNSTREAM
+	//
+	// Leaky on downstream (old buffers)
 	AppLeakyTypeDownstream AppLeakyType = 2
 )
 
@@ -139,22 +140,25 @@ func (e AppLeakyType) String() string {
 }
 
 // AppStreamType wraps GstAppStreamType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GstAppStreamType
+//
+// The stream type.
 type AppStreamType C.int
 
 const (
 	// AppStreamTypeStream wraps GST_APP_STREAM_TYPE_STREAM
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GST_APP_STREAM_TYPE_STREAM
+	//
+	// No seeking is supported in the stream, such as a
+	// live stream.
 	AppStreamTypeStream AppStreamType = 0
 	// AppStreamTypeSeekable wraps GST_APP_STREAM_TYPE_SEEKABLE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GST_APP_STREAM_TYPE_SEEKABLE
+	//
+	// The stream is seekable but seeking might not
+	// be very fast, such as data from a webserver.
 	AppStreamTypeSeekable AppStreamType = 1
 	// AppStreamTypeRandomAccess wraps GST_APP_STREAM_TYPE_RANDOM_ACCESS
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GST_APP_STREAM_TYPE_RANDOM_ACCESS
+	//
+	// The stream is seekable and seeking is fast,
+	// such as in a local file.
 	AppStreamTypeRandomAccess AppStreamType = 2
 )
 
@@ -192,8 +196,43 @@ type AppSinkInstance struct {
 var _ AppSink = (*AppSinkInstance)(nil)
 
 // AppSink wraps GstAppSink
+//
+// Appsink is a sink plugin that supports many different methods for making
+// the application get a handle on the GStreamer data in a pipeline. Unlike
+// most GStreamer elements, Appsink provides external API functions.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#GstAppSink
+// appsink can be used by linking to the gstappsink.h header file to access the
+// methods or by using the appsink action signals and properties.
+// 
+// The normal way of retrieving samples from appsink is by using the
+// gst_app_sink_pull_sample() and gst_app_sink_pull_preroll() methods.
+// These methods block until a sample becomes available in the sink or when the
+// sink is shut down or reaches EOS. There are also timed variants of these
+// methods, gst_app_sink_try_pull_sample() and gst_app_sink_try_pull_preroll(),
+// which accept a timeout parameter to limit the amount of time to wait.
+// 
+// Appsink will internally use a queue to collect buffers from the streaming
+// thread. If the application is not pulling samples fast enough, this queue
+// will consume a lot of memory over time. The "max-buffers", "max-time" and "max-bytes"
+// properties can be used to limit the queue size. The "leaky-type" property controls whether the
+// streaming thread blocks or if older buffers are dropped when the maximum
+// queue size is reached. Note that blocking the streaming thread can negatively
+// affect real-time performance and should be avoided.
+// 
+// If a blocking behaviour is not desirable, setting the "emit-signals" property
+// to %TRUE will make appsink emit the "new-sample" and "new-preroll" signals
+// when a sample can be pulled without blocking.
+// 
+// The "caps" property on appsink can be used to control the formats that
+// appsink can receive. This property can contain non-fixed caps, the format of
+// the pulled samples can be obtained by getting the sample caps.
+// 
+// If one of the pull-preroll or pull-sample methods return %NULL, the appsink
+// is stopped or in the EOS state. You can check for the EOS state with the
+// "eos" property or with the gst_app_sink_is_eos() method.
+// 
+// The eos signal can also be used to be informed when the EOS state is reached
+// to avoid polling.
 type AppSink interface {
 	gstbase.BaseSink
 	gst.URIHandler
@@ -201,182 +240,636 @@ type AppSink interface {
 
 	// GetBufferListSupport wraps gst_app_sink_get_buffer_list_support
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_buffer_list_support
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
+	// Check if @appsink supports buffer lists.
 	GetBufferListSupport() bool
 	// GetCaps wraps gst_app_sink_get_caps
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_caps
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Caps (nullable) 
+	//
+	// Get the configured caps on @appsink.
 	GetCaps() *gst.Caps
 	// GetDrop wraps gst_app_sink_get_drop
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_drop
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
 	//
-	// Deprecated: (since 1.28.0) see the provided link for the reason
+	// Check if @appsink will drop old buffers when the maximum amount of queued
+	// data is reached (meaning max buffers, time or bytes limit, whichever is hit first).
+	//
+	// Deprecated: (since 1.28.0) Use gst_app_src_get_leaky_type() instead.
 	GetDrop() bool
 	// GetEmitSignals wraps gst_app_sink_get_emit_signals
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_emit_signals
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
+	// Check if appsink will emit the "new-preroll" and "new-sample" signals.
 	GetEmitSignals() bool
 	// GetMaxBuffers wraps gst_app_sink_get_max_buffers
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_max_buffers
+	// The function returns the following values:
+	// 
+	// 	- goret uint 
+	//
+	// Get the maximum amount of buffers that can be queued in @appsink.
 	GetMaxBuffers() uint
 	// GetMaxBytes wraps gst_app_sink_get_max_bytes
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_max_bytes
+	// The function returns the following values:
+	// 
+	// 	- goret uint64 
+	//
+	// Get the maximum total size, in bytes, that can be queued in @appsink.
 	GetMaxBytes() uint64
 	// GetMaxTime wraps gst_app_sink_get_max_time
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_max_time
+	// The function returns the following values:
+	// 
+	// 	- goret gst.ClockTime 
+	//
+	// Get the maximum total duration that can be queued in @appsink.
 	GetMaxTime() gst.ClockTime
 	// GetWaitOnEOS wraps gst_app_sink_get_wait_on_eos
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_wait_on_eos
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
+	// Check if @appsink will wait for all buffers to be consumed when an EOS is
+	// received.
 	GetWaitOnEOS() bool
 	// IsEOS wraps gst_app_sink_is_eos
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_is_eos
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
+	// Check if @appsink is EOS, which is when no more samples can be pulled because
+	// an EOS event was received.
+	// 
+	// This function also returns %TRUE when the appsink is not in the PAUSED or
+	// PLAYING state.
 	IsEOS() bool
 	// PullObject wraps gst_app_sink_pull_object
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_pull_object
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.MiniObject (nullable) 
+	//
+	// This function blocks until a sample or an event becomes available or the appsink
+	// element is set to the READY/NULL state.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers and events will be put in a queue so that the application
+	// can pull them at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+	// 
+	// This function will only pull serialized events, excluding
+	// the EOS event for which this functions returns
+	// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+	// 
+	// This method is a variant of gst_app_sink_pull_sample() that can be used
+	// to handle incoming events events as well as samples.
+	// 
+	// Note that future releases may extend this API to return other object types
+	// so make sure that your code is checking for the actual type it is handling.
 	PullObject() *gst.MiniObject
 	// PullPreroll wraps gst_app_sink_pull_preroll
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_pull_preroll
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
+	// 
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample().
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received or the appsink
+	// element is set to the READY/NULL state.
 	PullPreroll() *gst.Sample
 	// PullSample wraps gst_app_sink_pull_sample
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_pull_sample
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers will be put in a queue so that the application
+	// can pull samples at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
 	PullSample() *gst.Sample
 	// SetBufferListSupport wraps gst_app_sink_set_buffer_list_support
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_buffer_list_support
+	// The function takes the following parameters:
+	// 
+	// 	- enableLists bool: enable or disable buffer list support 
+	//
+	// Instruct @appsink to enable or disable buffer list support.
+	// 
+	// For backwards-compatibility reasons applications need to opt in
+	// to indicate that they will be able to handle buffer lists.
 	SetBufferListSupport(bool)
 	// SetCaps wraps gst_app_sink_set_caps
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_caps
+	// The function takes the following parameters:
+	// 
+	// 	- caps *gst.Caps (nullable): caps to set 
+	//
+	// Set the capabilities on the appsink element.  This function takes
+	// a copy of the caps structure. After calling this method, the sink will only
+	// accept caps that match @caps. If @caps is non-fixed, or incomplete,
+	// you must check the caps on the samples to get the actual used caps.
 	SetCaps(*gst.Caps)
 	// SetDrop wraps gst_app_sink_set_drop
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_drop
+	// The function takes the following parameters:
+	// 
+	// 	- drop bool: the new state 
 	//
-	// Deprecated: (since 1.28.0) see the provided link for the reason
+	// Instruct @appsink to drop old buffers when the maximum amount of queued
+	// data is reached, that is, when any configured limit is hit (max-buffers, max-time or max-bytes).
+	//
+	// Deprecated: (since 1.28.0) Use gst_app_src_get_leaky_type() instead.
 	SetDrop(bool)
 	// SetEmitSignals wraps gst_app_sink_set_emit_signals
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_emit_signals
+	// The function takes the following parameters:
+	// 
+	// 	- emit bool: the new state 
+	//
+	// Make appsink emit the "new-preroll" and "new-sample" signals. This option is
+	// by default disabled because signal emission is expensive and unneeded when
+	// the application prefers to operate in pull mode.
 	SetEmitSignals(bool)
 	// SetMaxBuffers wraps gst_app_sink_set_max_buffers
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_max_buffers
+	// The function takes the following parameters:
+	// 
+	// 	- max uint: the maximum number of buffers to queue 
+	//
+	// Set the maximum amount of buffers that can be queued in @appsink. After this
+	// amount of buffers are queued in appsink, any more buffers will block upstream
+	// elements until a sample is pulled from @appsink, unless 'drop' is set, in which
+	// case new buffers will be discarded.
 	SetMaxBuffers(uint)
 	// SetMaxBytes wraps gst_app_sink_set_max_bytes
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_max_bytes
+	// The function takes the following parameters:
+	// 
+	// 	- max uint64: the maximum total size of buffers to queue, in bytes 
+	//
+	// Set the maximum total size that can be queued in @appsink. After this
+	// amount of buffers are queued in appsink, any more buffers will block upstream
+	// elements until a sample is pulled from @appsink, unless 'drop' is set, in which
+	// case new buffers will be discarded.
 	SetMaxBytes(uint64)
 	// SetMaxTime wraps gst_app_sink_set_max_time
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_max_time
+	// The function takes the following parameters:
+	// 
+	// 	- max gst.ClockTime: the maximum total duration to queue 
+	//
+	// Set the maximum total duration that can be queued in @appsink. After this
+	// amount of buffers are queued in appsink, any more buffers will block upstream
+	// elements until a sample is pulled from @appsink, unless 'drop' is set, in which
+	// case new buffers will be discarded.
 	SetMaxTime(gst.ClockTime)
 	// SetWaitOnEOS wraps gst_app_sink_set_wait_on_eos
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_wait_on_eos
+	// The function takes the following parameters:
+	// 
+	// 	- wait bool: the new state 
+	//
+	// Instruct @appsink to wait for all buffers to be consumed when an EOS is received.
 	SetWaitOnEOS(bool)
 	// TryPullObject wraps gst_app_sink_try_pull_object
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_try_pull_object
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.MiniObject (nullable) 
+	//
+	// This function blocks until a sample or an event or EOS becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers and events will be put in a queue so that the application
+	// can pull them at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+	// 
+	// This function will only pull serialized events, excluding
+	// the EOS event for which this functions returns
+	// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+	// 
+	// This method is a variant of gst_app_sink_try_pull_sample() that can be used
+	// to handle incoming events events as well as samples.
+	// 
+	// Note that future releases may extend this API to return other object types
+	// so make sure that your code is checking for the actual type it is handling.
 	TryPullObject(gst.ClockTime) *gst.MiniObject
 	// TryPullPreroll wraps gst_app_sink_try_pull_preroll
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_try_pull_preroll
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for the preroll sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
+	// 
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample().
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+	// condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received, the appsink
+	// element is set to the READY/NULL state, or the timeout expires.
 	TryPullPreroll(gst.ClockTime) *gst.Sample
 	// TryPullSample wraps gst_app_sink_try_pull_sample
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_try_pull_sample
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers will be put in a queue so that the application
+	// can pull samples at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+	// condition.
 	TryPullSample(gst.ClockTime) *gst.Sample
 	// ConnectEOS connects the provided callback to the "eos" signal
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	//
+	// Signal that the end-of-stream has been reached. This signal is emitted from
+	// the streaming thread.
 	ConnectEOS(func(AppSink)) gobject.SignalHandle
 	// ConnectNewPreroll connects the provided callback to the "new-preroll" signal
+	//
+	// Signal that a new preroll sample is available.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This signal is emitted from the streaming thread and only when the
+	// "emit-signals" property is %TRUE.
+	// 
+	// The new preroll sample can be retrieved with the "pull-preroll" action
+	// signal or gst_app_sink_pull_preroll() either from this signal callback
+	// or from any other thread.
+	// 
+	// Note that this signal is only emitted when the "emit-signals" property is
+	// set to %TRUE, which it is not by default for performance reasons.
 	ConnectNewPreroll(func(AppSink) gst.FlowReturn) gobject.SignalHandle
 	// ConnectNewSample connects the provided callback to the "new-sample" signal
+	//
+	// Signal that a new sample is available.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This signal is emitted from the streaming thread and only when the
+	// "emit-signals" property is %TRUE.
+	// 
+	// The new sample can be retrieved with the "pull-sample" action
+	// signal or gst_app_sink_pull_sample() either from this signal callback
+	// or from any other thread.
+	// 
+	// Note that this signal is only emitted when the "emit-signals" property is
+	// set to %TRUE, which it is not by default for performance reasons.
 	ConnectNewSample(func(AppSink) gst.FlowReturn) gobject.SignalHandle
 	// ConnectNewSerializedEvent connects the provided callback to the "new-serialized-event" signal
+	//
+	// Signal that a new downstream serialized event is available.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This signal is emitted from the streaming thread and only when the
+	// "emit-signals" property is %TRUE.
+	// 
+	// The new event can be retrieved with the "try-pull-object" action
+	// signal or gst_app_sink_pull_object() either from this signal callback
+	// or from any other thread.
+	// 
+	// EOS will not be notified using this signal, use #GstAppSink::eos instead.
+	// EOS cannot be pulled either, use gst_app_sink_is_eos() to check for it.
+	// 
+	// Note that this signal is only emitted when the "emit-signals" property is
+	// set to %TRUE, which it is not by default for performance reasons.
+	// 
+	// The callback should return %TRUE if the event has been handled, which will
+	// skip basesink handling of the event, %FALSE otherwise.
 	ConnectNewSerializedEvent(func(AppSink) bool) gobject.SignalHandle
 	// ConnectProposeAllocation connects the provided callback to the "propose-allocation" signal
+	//
+	// Signal that a new propose_allocation query is available.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This signal is emitted from the streaming thread and only when the
+	// "emit-signals" property is %TRUE.
 	ConnectProposeAllocation(func(AppSink, gst.Query) bool) gobject.SignalHandle
 	// EmitPullPreroll emits the "pull-preroll" signal
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample() or the "pull-sample" action signal.
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received or the appsink
+	// element is set to the READY/NULL state.
 	EmitPullPreroll() gst.Sample
 	// EmitPullSample emits the "pull-sample" signal
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered samples will be put in a queue so that the application
+	// can pull samples at its own rate.
+	// 
+	// Note that when the application does not pull samples fast enough, the
+	// queued samples could consume a lot of memory, especially when dealing with
+	// raw video frames. It's possible to control the behaviour of the queue with
+	// the "leaky-type" and "max-buffers" / "max-bytes" / "max-time" set of properties.
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
 	EmitPullSample() gst.Sample
 	// EmitTryPullObject emits the "try-pull-object" signal
+	//
+	// This function blocks until a sample or an event becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered samples and events will be put in a queue so that the application
+	// can pull them at its own rate.
+	// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+	// 
+	// Note that when the application does not pull samples fast enough, the
+	// queued samples could consume a lot of memory, especially when dealing with
+	// raw video frames. It's possible to control the behaviour of the queue with
+	// the "leaky-type" and "max-buffers" / "max-bytes" / "max-time" set of properties.
+	// 
+	// This function will only pull serialized events, excluding
+	// the EOS event for which this functions returns
+	// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+	// 
+	// This signal is a variant of #GstAppSink::try-pull-sample: that can be used
+	// to handle incoming events as well as samples.
+	// 
+	// Note that future releases may extend this API to return other object types
+	// so make sure that your code is checking for the actual type it is handling.
 	EmitTryPullObject(uint64) gst.MiniObject
 	// EmitTryPullPreroll emits the "try-pull-preroll" signal
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample() or the "pull-sample" action signal.
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+	// condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received, the appsink
+	// element is set to the READY/NULL state, or the timeout expires.
 	EmitTryPullPreroll(uint64) gst.Sample
 	// EmitTryPullSample emits the "try-pull-sample" signal
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered samples will be put in a queue so that the application
+	// can pull samples at its own rate.
+	// 
+	// Note that when the application does not pull samples fast enough, the
+	// queued samples could consume a lot of memory, especially when dealing with
+	// raw video frames. It's possible to control the behaviour of the queue with
+	// the "leaky-type" and "max-buffers" / "max-bytes" / "max-time" set of properties.
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check
+	// for the EOS condition.
 	EmitTryPullSample(uint64) gst.Sample
 
 	// chain up virtual methods:
 
 	// ParentEOS calls the default implementations of the `GstAppSink.eos` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#eos
+	//
 	ParentEOS()
 	// ParentNewPreroll calls the default implementations of the `GstAppSink.new_preroll` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#new_preroll
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
 	ParentNewPreroll() gst.FlowReturn
 	// ParentNewSample calls the default implementations of the `GstAppSink.new_sample` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#new_sample
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
 	ParentNewSample() gst.FlowReturn
 	// ParentPullPreroll calls the default implementations of the `GstAppSink.pull_preroll` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#pull_preroll
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
+	// 
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample().
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received or the appsink
+	// element is set to the READY/NULL state.
 	ParentPullPreroll() *gst.Sample
 	// ParentPullSample calls the default implementations of the `GstAppSink.pull_sample` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#pull_sample
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers will be put in a queue so that the application
+	// can pull samples at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
 	ParentPullSample() *gst.Sample
 	// ParentTryPullObject calls the default implementations of the `GstAppSink.try_pull_object` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_object
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.MiniObject (nullable) 
+	//
+	// This function blocks until a sample or an event or EOS becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers and events will be put in a queue so that the application
+	// can pull them at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+	// 
+	// This function will only pull serialized events, excluding
+	// the EOS event for which this functions returns
+	// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+	// 
+	// This method is a variant of gst_app_sink_try_pull_sample() that can be used
+	// to handle incoming events events as well as samples.
+	// 
+	// Note that future releases may extend this API to return other object types
+	// so make sure that your code is checking for the actual type it is handling.
 	ParentTryPullObject(timeout gst.ClockTime) *gst.MiniObject
 	// ParentTryPullPreroll calls the default implementations of the `GstAppSink.try_pull_preroll` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_preroll
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for the preroll sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
+	// 
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample().
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+	// condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received, the appsink
+	// element is set to the READY/NULL state, or the timeout expires.
 	ParentTryPullPreroll(timeout gst.ClockTime) *gst.Sample
 	// ParentTryPullSample calls the default implementations of the `GstAppSink.try_pull_sample` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_sample
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers will be put in a queue so that the application
+	// can pull samples at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+	// condition.
 	ParentTryPullSample(timeout gst.ClockTime) *gst.Sample
 }
 
@@ -441,7 +934,11 @@ func UnsafeAppSinkToGlibFull(c AppSink) unsafe.Pointer {
 
 // GetBufferListSupport wraps gst_app_sink_get_buffer_list_support
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_buffer_list_support
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Check if @appsink supports buffer lists.
 func (appsink *AppSinkInstance) GetBufferListSupport() bool {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  C.gboolean    // return
@@ -462,7 +959,11 @@ func (appsink *AppSinkInstance) GetBufferListSupport() bool {
 
 // GetCaps wraps gst_app_sink_get_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_caps
+// The function returns the following values:
+// 
+// 	- goret *gst.Caps (nullable) 
+//
+// Get the configured caps on @appsink.
 func (appsink *AppSinkInstance) GetCaps() *gst.Caps {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  *C.GstCaps    // return, full, converted, nullable
@@ -483,9 +984,14 @@ func (appsink *AppSinkInstance) GetCaps() *gst.Caps {
 
 // GetDrop wraps gst_app_sink_get_drop
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_drop
+// The function returns the following values:
+// 
+// 	- goret bool 
 //
-// Deprecated: (since 1.28.0) see the provided link for the reason
+// Check if @appsink will drop old buffers when the maximum amount of queued
+// data is reached (meaning max buffers, time or bytes limit, whichever is hit first).
+//
+// Deprecated: (since 1.28.0) Use gst_app_src_get_leaky_type() instead.
 func (appsink *AppSinkInstance) GetDrop() bool {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  C.gboolean    // return
@@ -506,7 +1012,11 @@ func (appsink *AppSinkInstance) GetDrop() bool {
 
 // GetEmitSignals wraps gst_app_sink_get_emit_signals
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_emit_signals
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Check if appsink will emit the "new-preroll" and "new-sample" signals.
 func (appsink *AppSinkInstance) GetEmitSignals() bool {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  C.gboolean    // return
@@ -527,7 +1037,11 @@ func (appsink *AppSinkInstance) GetEmitSignals() bool {
 
 // GetMaxBuffers wraps gst_app_sink_get_max_buffers
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_max_buffers
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the maximum amount of buffers that can be queued in @appsink.
 func (appsink *AppSinkInstance) GetMaxBuffers() uint {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  C.guint       // return, none, casted
@@ -546,7 +1060,11 @@ func (appsink *AppSinkInstance) GetMaxBuffers() uint {
 
 // GetMaxBytes wraps gst_app_sink_get_max_bytes
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_max_bytes
+// The function returns the following values:
+// 
+// 	- goret uint64 
+//
+// Get the maximum total size, in bytes, that can be queued in @appsink.
 func (appsink *AppSinkInstance) GetMaxBytes() uint64 {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  C.guint64     // return, none, casted
@@ -565,7 +1083,11 @@ func (appsink *AppSinkInstance) GetMaxBytes() uint64 {
 
 // GetMaxTime wraps gst_app_sink_get_max_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_max_time
+// The function returns the following values:
+// 
+// 	- goret gst.ClockTime 
+//
+// Get the maximum total duration that can be queued in @appsink.
 func (appsink *AppSinkInstance) GetMaxTime() gst.ClockTime {
 	var carg0 *C.GstAppSink  // in, none, converted
 	var cret  C.GstClockTime // return, none, casted, alias
@@ -584,7 +1106,12 @@ func (appsink *AppSinkInstance) GetMaxTime() gst.ClockTime {
 
 // GetWaitOnEOS wraps gst_app_sink_get_wait_on_eos
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_get_wait_on_eos
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Check if @appsink will wait for all buffers to be consumed when an EOS is
+// received.
 func (appsink *AppSinkInstance) GetWaitOnEOS() bool {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  C.gboolean    // return
@@ -605,7 +1132,15 @@ func (appsink *AppSinkInstance) GetWaitOnEOS() bool {
 
 // IsEOS wraps gst_app_sink_is_eos
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_is_eos
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Check if @appsink is EOS, which is when no more samples can be pulled because
+// an EOS event was received.
+// 
+// This function also returns %TRUE when the appsink is not in the PAUSED or
+// PLAYING state.
 func (appsink *AppSinkInstance) IsEOS() bool {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  C.gboolean    // return
@@ -626,7 +1161,29 @@ func (appsink *AppSinkInstance) IsEOS() bool {
 
 // PullObject wraps gst_app_sink_pull_object
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_pull_object
+// The function returns the following values:
+// 
+// 	- goret *gst.MiniObject (nullable) 
+//
+// This function blocks until a sample or an event becomes available or the appsink
+// element is set to the READY/NULL state.
+// 
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered buffers and events will be put in a queue so that the application
+// can pull them at its own rate. Note that when the application does not
+// pull samples fast enough, the queued buffers could consume a lot of memory,
+// especially when dealing with raw video frames.
+// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+// 
+// This function will only pull serialized events, excluding
+// the EOS event for which this functions returns
+// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+// 
+// This method is a variant of gst_app_sink_pull_sample() that can be used
+// to handle incoming events events as well as samples.
+// 
+// Note that future releases may extend this API to return other object types
+// so make sure that your code is checking for the actual type it is handling.
 func (appsink *AppSinkInstance) PullObject() *gst.MiniObject {
 	var carg0 *C.GstAppSink    // in, none, converted
 	var cret  *C.GstMiniObject // return, full, converted, nullable
@@ -647,7 +1204,28 @@ func (appsink *AppSinkInstance) PullObject() *gst.MiniObject {
 
 // PullPreroll wraps gst_app_sink_pull_preroll
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_pull_preroll
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// Get the last preroll sample in @appsink. This was the sample that caused the
+// appsink to preroll in the PAUSED state.
+// 
+// This function is typically used when dealing with a pipeline in the PAUSED
+// state. Calling this function after doing a seek will give the sample right
+// after the seek position.
+// 
+// Calling this function will clear the internal reference to the preroll
+// buffer.
+// 
+// Note that the preroll sample will also be returned as the first sample
+// when calling gst_app_sink_pull_sample().
+// 
+// If an EOS event was received before any buffers, this function returns
+// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
+// 
+// This function blocks until a preroll sample or EOS is received or the appsink
+// element is set to the READY/NULL state.
 func (appsink *AppSinkInstance) PullPreroll() *gst.Sample {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  *C.GstSample  // return, full, converted, nullable
@@ -668,7 +1246,21 @@ func (appsink *AppSinkInstance) PullPreroll() *gst.Sample {
 
 // PullSample wraps gst_app_sink_pull_sample
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_pull_sample
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// This function blocks until a sample or EOS becomes available or the appsink
+// element is set to the READY/NULL state.
+// 
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered buffers will be put in a queue so that the application
+// can pull samples at its own rate. Note that when the application does not
+// pull samples fast enough, the queued buffers could consume a lot of memory,
+// especially when dealing with raw video frames.
+// 
+// If an EOS event was received before any buffers, this function returns
+// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
 func (appsink *AppSinkInstance) PullSample() *gst.Sample {
 	var carg0 *C.GstAppSink // in, none, converted
 	var cret  *C.GstSample  // return, full, converted, nullable
@@ -689,7 +1281,14 @@ func (appsink *AppSinkInstance) PullSample() *gst.Sample {
 
 // SetBufferListSupport wraps gst_app_sink_set_buffer_list_support
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_buffer_list_support
+// The function takes the following parameters:
+// 
+// 	- enableLists bool: enable or disable buffer list support 
+//
+// Instruct @appsink to enable or disable buffer list support.
+// 
+// For backwards-compatibility reasons applications need to opt in
+// to indicate that they will be able to handle buffer lists.
 func (appsink *AppSinkInstance) SetBufferListSupport(enableLists bool) {
 	var carg0 *C.GstAppSink // in, none, converted
 	var carg1 C.gboolean    // in
@@ -706,7 +1305,14 @@ func (appsink *AppSinkInstance) SetBufferListSupport(enableLists bool) {
 
 // SetCaps wraps gst_app_sink_set_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_caps
+// The function takes the following parameters:
+// 
+// 	- caps *gst.Caps (nullable): caps to set 
+//
+// Set the capabilities on the appsink element.  This function takes
+// a copy of the caps structure. After calling this method, the sink will only
+// accept caps that match @caps. If @caps is non-fixed, or incomplete,
+// you must check the caps on the samples to get the actual used caps.
 func (appsink *AppSinkInstance) SetCaps(caps *gst.Caps) {
 	var carg0 *C.GstAppSink // in, none, converted
 	var carg1 *C.GstCaps    // in, none, converted, nullable
@@ -723,9 +1329,14 @@ func (appsink *AppSinkInstance) SetCaps(caps *gst.Caps) {
 
 // SetDrop wraps gst_app_sink_set_drop
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_drop
+// The function takes the following parameters:
+// 
+// 	- drop bool: the new state 
 //
-// Deprecated: (since 1.28.0) see the provided link for the reason
+// Instruct @appsink to drop old buffers when the maximum amount of queued
+// data is reached, that is, when any configured limit is hit (max-buffers, max-time or max-bytes).
+//
+// Deprecated: (since 1.28.0) Use gst_app_src_get_leaky_type() instead.
 func (appsink *AppSinkInstance) SetDrop(drop bool) {
 	var carg0 *C.GstAppSink // in, none, converted
 	var carg1 C.gboolean    // in
@@ -742,7 +1353,13 @@ func (appsink *AppSinkInstance) SetDrop(drop bool) {
 
 // SetEmitSignals wraps gst_app_sink_set_emit_signals
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_emit_signals
+// The function takes the following parameters:
+// 
+// 	- emit bool: the new state 
+//
+// Make appsink emit the "new-preroll" and "new-sample" signals. This option is
+// by default disabled because signal emission is expensive and unneeded when
+// the application prefers to operate in pull mode.
 func (appsink *AppSinkInstance) SetEmitSignals(emit bool) {
 	var carg0 *C.GstAppSink // in, none, converted
 	var carg1 C.gboolean    // in
@@ -759,7 +1376,14 @@ func (appsink *AppSinkInstance) SetEmitSignals(emit bool) {
 
 // SetMaxBuffers wraps gst_app_sink_set_max_buffers
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_max_buffers
+// The function takes the following parameters:
+// 
+// 	- max uint: the maximum number of buffers to queue 
+//
+// Set the maximum amount of buffers that can be queued in @appsink. After this
+// amount of buffers are queued in appsink, any more buffers will block upstream
+// elements until a sample is pulled from @appsink, unless 'drop' is set, in which
+// case new buffers will be discarded.
 func (appsink *AppSinkInstance) SetMaxBuffers(max uint) {
 	var carg0 *C.GstAppSink // in, none, converted
 	var carg1 C.guint       // in, none, casted
@@ -774,7 +1398,14 @@ func (appsink *AppSinkInstance) SetMaxBuffers(max uint) {
 
 // SetMaxBytes wraps gst_app_sink_set_max_bytes
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_max_bytes
+// The function takes the following parameters:
+// 
+// 	- max uint64: the maximum total size of buffers to queue, in bytes 
+//
+// Set the maximum total size that can be queued in @appsink. After this
+// amount of buffers are queued in appsink, any more buffers will block upstream
+// elements until a sample is pulled from @appsink, unless 'drop' is set, in which
+// case new buffers will be discarded.
 func (appsink *AppSinkInstance) SetMaxBytes(max uint64) {
 	var carg0 *C.GstAppSink // in, none, converted
 	var carg1 C.guint64     // in, none, casted
@@ -789,7 +1420,14 @@ func (appsink *AppSinkInstance) SetMaxBytes(max uint64) {
 
 // SetMaxTime wraps gst_app_sink_set_max_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_max_time
+// The function takes the following parameters:
+// 
+// 	- max gst.ClockTime: the maximum total duration to queue 
+//
+// Set the maximum total duration that can be queued in @appsink. After this
+// amount of buffers are queued in appsink, any more buffers will block upstream
+// elements until a sample is pulled from @appsink, unless 'drop' is set, in which
+// case new buffers will be discarded.
 func (appsink *AppSinkInstance) SetMaxTime(max gst.ClockTime) {
 	var carg0 *C.GstAppSink  // in, none, converted
 	var carg1 C.GstClockTime // in, none, casted, alias
@@ -804,7 +1442,11 @@ func (appsink *AppSinkInstance) SetMaxTime(max gst.ClockTime) {
 
 // SetWaitOnEOS wraps gst_app_sink_set_wait_on_eos
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_set_wait_on_eos
+// The function takes the following parameters:
+// 
+// 	- wait bool: the new state 
+//
+// Instruct @appsink to wait for all buffers to be consumed when an EOS is received.
 func (appsink *AppSinkInstance) SetWaitOnEOS(wait bool) {
 	var carg0 *C.GstAppSink // in, none, converted
 	var carg1 C.gboolean    // in
@@ -821,7 +1463,33 @@ func (appsink *AppSinkInstance) SetWaitOnEOS(wait bool) {
 
 // TryPullObject wraps gst_app_sink_try_pull_object
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_try_pull_object
+// The function takes the following parameters:
+// 
+// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+// 
+// The function returns the following values:
+// 
+// 	- goret *gst.MiniObject (nullable) 
+//
+// This function blocks until a sample or an event or EOS becomes available or the appsink
+// element is set to the READY/NULL state or the timeout expires.
+// 
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered buffers and events will be put in a queue so that the application
+// can pull them at its own rate. Note that when the application does not
+// pull samples fast enough, the queued buffers could consume a lot of memory,
+// especially when dealing with raw video frames.
+// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+// 
+// This function will only pull serialized events, excluding
+// the EOS event for which this functions returns
+// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+// 
+// This method is a variant of gst_app_sink_try_pull_sample() that can be used
+// to handle incoming events events as well as samples.
+// 
+// Note that future releases may extend this API to return other object types
+// so make sure that your code is checking for the actual type it is handling.
 func (appsink *AppSinkInstance) TryPullObject(timeout gst.ClockTime) *gst.MiniObject {
 	var carg0 *C.GstAppSink    // in, none, converted
 	var carg1 C.GstClockTime   // in, none, casted, alias
@@ -845,7 +1513,33 @@ func (appsink *AppSinkInstance) TryPullObject(timeout gst.ClockTime) *gst.MiniOb
 
 // TryPullPreroll wraps gst_app_sink_try_pull_preroll
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_try_pull_preroll
+// The function takes the following parameters:
+// 
+// 	- timeout gst.ClockTime: the maximum amount of time to wait for the preroll sample 
+// 
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// Get the last preroll sample in @appsink. This was the sample that caused the
+// appsink to preroll in the PAUSED state.
+// 
+// This function is typically used when dealing with a pipeline in the PAUSED
+// state. Calling this function after doing a seek will give the sample right
+// after the seek position.
+// 
+// Calling this function will clear the internal reference to the preroll
+// buffer.
+// 
+// Note that the preroll sample will also be returned as the first sample
+// when calling gst_app_sink_pull_sample().
+// 
+// If an EOS event was received before any buffers or the timeout expires,
+// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+// condition.
+// 
+// This function blocks until a preroll sample or EOS is received, the appsink
+// element is set to the READY/NULL state, or the timeout expires.
 func (appsink *AppSinkInstance) TryPullPreroll(timeout gst.ClockTime) *gst.Sample {
 	var carg0 *C.GstAppSink  // in, none, converted
 	var carg1 C.GstClockTime // in, none, casted, alias
@@ -869,7 +1563,26 @@ func (appsink *AppSinkInstance) TryPullPreroll(timeout gst.ClockTime) *gst.Sampl
 
 // TryPullSample wraps gst_app_sink_try_pull_sample
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#gst_app_sink_try_pull_sample
+// The function takes the following parameters:
+// 
+// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+// 
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// This function blocks until a sample or EOS becomes available or the appsink
+// element is set to the READY/NULL state or the timeout expires.
+// 
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered buffers will be put in a queue so that the application
+// can pull samples at its own rate. Note that when the application does not
+// pull samples fast enough, the queued buffers could consume a lot of memory,
+// especially when dealing with raw video frames.
+// 
+// If an EOS event was received before any buffers or the timeout expires,
+// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+// condition.
 func (appsink *AppSinkInstance) TryPullSample(timeout gst.ClockTime) *gst.Sample {
 	var carg0 *C.GstAppSink  // in, none, converted
 	var carg1 C.GstClockTime // in, none, casted, alias
@@ -892,71 +1605,194 @@ func (appsink *AppSinkInstance) TryPullSample(timeout gst.ClockTime) *gst.Sample
 }
 
 // ConnectEOS connects the provided callback to the "eos" signal
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+//
+// Signal that the end-of-stream has been reached. This signal is emitted from
+// the streaming thread.
 func (o *AppSinkInstance) ConnectEOS(fn func(AppSink)) gobject.SignalHandle {
 	return o.Connect("eos", fn)
 }
 
 // ConnectNewPreroll connects the provided callback to the "new-preroll" signal
+//
+// Signal that a new preroll sample is available.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This signal is emitted from the streaming thread and only when the
+// "emit-signals" property is %TRUE.
+// 
+// The new preroll sample can be retrieved with the "pull-preroll" action
+// signal or gst_app_sink_pull_preroll() either from this signal callback
+// or from any other thread.
+// 
+// Note that this signal is only emitted when the "emit-signals" property is
+// set to %TRUE, which it is not by default for performance reasons.
 func (o *AppSinkInstance) ConnectNewPreroll(fn func(AppSink) gst.FlowReturn) gobject.SignalHandle {
 	return o.Connect("new-preroll", fn)
 }
 
 // ConnectNewSample connects the provided callback to the "new-sample" signal
+//
+// Signal that a new sample is available.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This signal is emitted from the streaming thread and only when the
+// "emit-signals" property is %TRUE.
+// 
+// The new sample can be retrieved with the "pull-sample" action
+// signal or gst_app_sink_pull_sample() either from this signal callback
+// or from any other thread.
+// 
+// Note that this signal is only emitted when the "emit-signals" property is
+// set to %TRUE, which it is not by default for performance reasons.
 func (o *AppSinkInstance) ConnectNewSample(fn func(AppSink) gst.FlowReturn) gobject.SignalHandle {
 	return o.Connect("new-sample", fn)
 }
 
 // ConnectNewSerializedEvent connects the provided callback to the "new-serialized-event" signal
+//
+// Signal that a new downstream serialized event is available.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This signal is emitted from the streaming thread and only when the
+// "emit-signals" property is %TRUE.
+// 
+// The new event can be retrieved with the "try-pull-object" action
+// signal or gst_app_sink_pull_object() either from this signal callback
+// or from any other thread.
+// 
+// EOS will not be notified using this signal, use #GstAppSink::eos instead.
+// EOS cannot be pulled either, use gst_app_sink_is_eos() to check for it.
+// 
+// Note that this signal is only emitted when the "emit-signals" property is
+// set to %TRUE, which it is not by default for performance reasons.
+// 
+// The callback should return %TRUE if the event has been handled, which will
+// skip basesink handling of the event, %FALSE otherwise.
 func (o *AppSinkInstance) ConnectNewSerializedEvent(fn func(AppSink) bool) gobject.SignalHandle {
 	return o.Connect("new-serialized-event", fn)
 }
 
 // ConnectProposeAllocation connects the provided callback to the "propose-allocation" signal
+//
+// Signal that a new propose_allocation query is available.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This signal is emitted from the streaming thread and only when the
+// "emit-signals" property is %TRUE.
 func (o *AppSinkInstance) ConnectProposeAllocation(fn func(AppSink, gst.Query) bool) gobject.SignalHandle {
 	return o.Connect("propose-allocation", fn)
 }
 
 // EmitPullPreroll emits the "pull-preroll" signal
+//
+// Get the last preroll sample in @appsink. This was the sample that caused the
+// appsink to preroll in the PAUSED state.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This function is typically used when dealing with a pipeline in the PAUSED
+// state. Calling this function after doing a seek will give the sample right
+// after the seek position.
+// 
+// Calling this function will clear the internal reference to the preroll
+// buffer.
+// 
+// Note that the preroll sample will also be returned as the first sample
+// when calling gst_app_sink_pull_sample() or the "pull-sample" action signal.
+// 
+// If an EOS event was received before any buffers, this function returns
+// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
+// 
+// This function blocks until a preroll sample or EOS is received or the appsink
+// element is set to the READY/NULL state.
 func (o *AppSinkInstance) EmitPullPreroll() gst.Sample {
 	return o.Emit("pull-preroll").(gst.Sample)
 }
 
 // EmitPullSample emits the "pull-sample" signal
+//
+// This function blocks until a sample or EOS becomes available or the appsink
+// element is set to the READY/NULL state.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered samples will be put in a queue so that the application
+// can pull samples at its own rate.
+// 
+// Note that when the application does not pull samples fast enough, the
+// queued samples could consume a lot of memory, especially when dealing with
+// raw video frames. It's possible to control the behaviour of the queue with
+// the "leaky-type" and "max-buffers" / "max-bytes" / "max-time" set of properties.
+// 
+// If an EOS event was received before any buffers, this function returns
+// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
 func (o *AppSinkInstance) EmitPullSample() gst.Sample {
 	return o.Emit("pull-sample").(gst.Sample)
 }
 
 // EmitTryPullObject emits the "try-pull-object" signal
+//
+// This function blocks until a sample or an event becomes available or the appsink
+// element is set to the READY/NULL state or the timeout expires.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered samples and events will be put in a queue so that the application
+// can pull them at its own rate.
+// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+// 
+// Note that when the application does not pull samples fast enough, the
+// queued samples could consume a lot of memory, especially when dealing with
+// raw video frames. It's possible to control the behaviour of the queue with
+// the "leaky-type" and "max-buffers" / "max-bytes" / "max-time" set of properties.
+// 
+// This function will only pull serialized events, excluding
+// the EOS event for which this functions returns
+// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+// 
+// This signal is a variant of #GstAppSink::try-pull-sample: that can be used
+// to handle incoming events as well as samples.
+// 
+// Note that future releases may extend this API to return other object types
+// so make sure that your code is checking for the actual type it is handling.
 func (o *AppSinkInstance) EmitTryPullObject(arg0 uint64) gst.MiniObject {
 	return o.Emit("try-pull-object", arg0).(gst.MiniObject)
 }
 
 // EmitTryPullPreroll emits the "try-pull-preroll" signal
+//
+// Get the last preroll sample in @appsink. This was the sample that caused the
+// appsink to preroll in the PAUSED state.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This function is typically used when dealing with a pipeline in the PAUSED
+// state. Calling this function after doing a seek will give the sample right
+// after the seek position.
+// 
+// Calling this function will clear the internal reference to the preroll
+// buffer.
+// 
+// Note that the preroll sample will also be returned as the first sample
+// when calling gst_app_sink_pull_sample() or the "pull-sample" action signal.
+// 
+// If an EOS event was received before any buffers or the timeout expires,
+// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+// condition.
+// 
+// This function blocks until a preroll sample or EOS is received, the appsink
+// element is set to the READY/NULL state, or the timeout expires.
 func (o *AppSinkInstance) EmitTryPullPreroll(arg0 uint64) gst.Sample {
 	return o.Emit("try-pull-preroll", arg0).(gst.Sample)
 }
 
 // EmitTryPullSample emits the "try-pull-sample" signal
+//
+// This function blocks until a sample or EOS becomes available or the appsink
+// element is set to the READY/NULL state or the timeout expires.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered samples will be put in a queue so that the application
+// can pull samples at its own rate.
+// 
+// Note that when the application does not pull samples fast enough, the
+// queued samples could consume a lot of memory, especially when dealing with
+// raw video frames. It's possible to control the behaviour of the queue with
+// the "leaky-type" and "max-buffers" / "max-bytes" / "max-time" set of properties.
+// 
+// If an EOS event was received before any buffers or the timeout expires,
+// this function returns %NULL. Use gst_app_sink_is_eos () to check
+// for the EOS condition.
 func (o *AppSinkInstance) EmitTryPullSample(arg0 uint64) gst.Sample {
 	return o.Emit("try-pull-sample", arg0).(gst.Sample)
 }
@@ -968,36 +1804,147 @@ type AppSinkOverrides[Instance AppSink] struct {
 	gstbase.BaseSinkOverrides[Instance]
 
 	// // EOS allows you to override the implementation of the virtual method eos.
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#eos
+	//
 	EOS func(Instance)
 	// // NewPreroll allows you to override the implementation of the virtual method new_preroll.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#new_preroll
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
 	NewPreroll func(Instance) gst.FlowReturn
 	// // NewSample allows you to override the implementation of the virtual method new_sample.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#new_sample
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
 	NewSample func(Instance) gst.FlowReturn
 	// // PullPreroll allows you to override the implementation of the virtual method pull_preroll.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#pull_preroll
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
+	// 
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample().
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received or the appsink
+	// element is set to the READY/NULL state.
 	PullPreroll func(Instance) *gst.Sample
 	// // PullSample allows you to override the implementation of the virtual method pull_sample.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#pull_sample
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers will be put in a queue so that the application
+	// can pull samples at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// 
+	// If an EOS event was received before any buffers, this function returns
+	// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
 	PullSample func(Instance) *gst.Sample
 	// // TryPullObject allows you to override the implementation of the virtual method try_pull_object.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_object
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.MiniObject (nullable) 
+	//
+	// This function blocks until a sample or an event or EOS becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers and events will be put in a queue so that the application
+	// can pull them at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+	// 
+	// This function will only pull serialized events, excluding
+	// the EOS event for which this functions returns
+	// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+	// 
+	// This method is a variant of gst_app_sink_try_pull_sample() that can be used
+	// to handle incoming events events as well as samples.
+	// 
+	// Note that future releases may extend this API to return other object types
+	// so make sure that your code is checking for the actual type it is handling.
 	TryPullObject func(Instance, gst.ClockTime) *gst.MiniObject
 	// // TryPullPreroll allows you to override the implementation of the virtual method try_pull_preroll.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_preroll
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for the preroll sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// Get the last preroll sample in @appsink. This was the sample that caused the
+	// appsink to preroll in the PAUSED state.
+	// 
+	// This function is typically used when dealing with a pipeline in the PAUSED
+	// state. Calling this function after doing a seek will give the sample right
+	// after the seek position.
+	// 
+	// Calling this function will clear the internal reference to the preroll
+	// buffer.
+	// 
+	// Note that the preroll sample will also be returned as the first sample
+	// when calling gst_app_sink_pull_sample().
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+	// condition.
+	// 
+	// This function blocks until a preroll sample or EOS is received, the appsink
+	// element is set to the READY/NULL state, or the timeout expires.
 	TryPullPreroll func(Instance, gst.ClockTime) *gst.Sample
 	// // TryPullSample allows you to override the implementation of the virtual method try_pull_sample.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_sample
+	// The function takes the following parameters:
+	// 
+	// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Sample (nullable) 
+	//
+	// This function blocks until a sample or EOS becomes available or the appsink
+	// element is set to the READY/NULL state or the timeout expires.
+	// 
+	// This function will only return samples when the appsink is in the PLAYING
+	// state. All rendered buffers will be put in a queue so that the application
+	// can pull samples at its own rate. Note that when the application does not
+	// pull samples fast enough, the queued buffers could consume a lot of memory,
+	// especially when dealing with raw video frames.
+	// 
+	// If an EOS event was received before any buffers or the timeout expires,
+	// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+	// condition.
 	TryPullSample func(Instance, gst.ClockTime) *gst.Sample
 }
 
@@ -1182,8 +2129,7 @@ func UnsafeApplyAppSinkOverrides[Instance AppSink](gclass unsafe.Pointer, overri
 
 // ParentEOS calls the default implementations of the `GstAppSink.eos` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#eos
+//
 func (appsink *AppSinkInstance) ParentEOS() {
 	var carg0 *C.GstAppSink
 
@@ -1198,7 +2144,10 @@ func (appsink *AppSinkInstance) ParentEOS() {
 // ParentNewPreroll calls the default implementations of the `GstAppSink.new_preroll` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#new_preroll
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
 func (appsink *AppSinkInstance) ParentNewPreroll() gst.FlowReturn {
 	var carg0 *C.GstAppSink
 	var cret  C.GstFlowReturn // return, none, casted
@@ -1220,7 +2169,10 @@ func (appsink *AppSinkInstance) ParentNewPreroll() gst.FlowReturn {
 // ParentNewSample calls the default implementations of the `GstAppSink.new_sample` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#new_sample
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
 func (appsink *AppSinkInstance) ParentNewSample() gst.FlowReturn {
 	var carg0 *C.GstAppSink
 	var cret  C.GstFlowReturn // return, none, casted
@@ -1242,7 +2194,28 @@ func (appsink *AppSinkInstance) ParentNewSample() gst.FlowReturn {
 // ParentPullPreroll calls the default implementations of the `GstAppSink.pull_preroll` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#pull_preroll
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// Get the last preroll sample in @appsink. This was the sample that caused the
+// appsink to preroll in the PAUSED state.
+// 
+// This function is typically used when dealing with a pipeline in the PAUSED
+// state. Calling this function after doing a seek will give the sample right
+// after the seek position.
+// 
+// Calling this function will clear the internal reference to the preroll
+// buffer.
+// 
+// Note that the preroll sample will also be returned as the first sample
+// when calling gst_app_sink_pull_sample().
+// 
+// If an EOS event was received before any buffers, this function returns
+// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
+// 
+// This function blocks until a preroll sample or EOS is received or the appsink
+// element is set to the READY/NULL state.
 func (appsink *AppSinkInstance) ParentPullPreroll() *gst.Sample {
 	var carg0 *C.GstAppSink
 	var cret  *C.GstSample // return, full, converted, nullable
@@ -1266,7 +2239,21 @@ func (appsink *AppSinkInstance) ParentPullPreroll() *gst.Sample {
 // ParentPullSample calls the default implementations of the `GstAppSink.pull_sample` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#pull_sample
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// This function blocks until a sample or EOS becomes available or the appsink
+// element is set to the READY/NULL state.
+// 
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered buffers will be put in a queue so that the application
+// can pull samples at its own rate. Note that when the application does not
+// pull samples fast enough, the queued buffers could consume a lot of memory,
+// especially when dealing with raw video frames.
+// 
+// If an EOS event was received before any buffers, this function returns
+// %NULL. Use gst_app_sink_is_eos () to check for the EOS condition.
 func (appsink *AppSinkInstance) ParentPullSample() *gst.Sample {
 	var carg0 *C.GstAppSink
 	var cret  *C.GstSample // return, full, converted, nullable
@@ -1290,7 +2277,33 @@ func (appsink *AppSinkInstance) ParentPullSample() *gst.Sample {
 // ParentTryPullObject calls the default implementations of the `GstAppSink.try_pull_object` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_object
+// The function takes the following parameters:
+// 
+// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+// 
+// The function returns the following values:
+// 
+// 	- goret *gst.MiniObject (nullable) 
+//
+// This function blocks until a sample or an event or EOS becomes available or the appsink
+// element is set to the READY/NULL state or the timeout expires.
+// 
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered buffers and events will be put in a queue so that the application
+// can pull them at its own rate. Note that when the application does not
+// pull samples fast enough, the queued buffers could consume a lot of memory,
+// especially when dealing with raw video frames.
+// Events can be pulled when the appsink is in the READY, PAUSED or PLAYING state.
+// 
+// This function will only pull serialized events, excluding
+// the EOS event for which this functions returns
+// %NULL. Use gst_app_sink_is_eos() to check for the EOS condition.
+// 
+// This method is a variant of gst_app_sink_try_pull_sample() that can be used
+// to handle incoming events events as well as samples.
+// 
+// Note that future releases may extend this API to return other object types
+// so make sure that your code is checking for the actual type it is handling.
 func (appsink *AppSinkInstance) ParentTryPullObject(timeout gst.ClockTime) *gst.MiniObject {
 	var carg0 *C.GstAppSink
 	var carg1 C.GstClockTime   // in, none, converted
@@ -1317,7 +2330,33 @@ func (appsink *AppSinkInstance) ParentTryPullObject(timeout gst.ClockTime) *gst.
 // ParentTryPullPreroll calls the default implementations of the `GstAppSink.try_pull_preroll` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_preroll
+// The function takes the following parameters:
+// 
+// 	- timeout gst.ClockTime: the maximum amount of time to wait for the preroll sample 
+// 
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// Get the last preroll sample in @appsink. This was the sample that caused the
+// appsink to preroll in the PAUSED state.
+// 
+// This function is typically used when dealing with a pipeline in the PAUSED
+// state. Calling this function after doing a seek will give the sample right
+// after the seek position.
+// 
+// Calling this function will clear the internal reference to the preroll
+// buffer.
+// 
+// Note that the preroll sample will also be returned as the first sample
+// when calling gst_app_sink_pull_sample().
+// 
+// If an EOS event was received before any buffers or the timeout expires,
+// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+// condition.
+// 
+// This function blocks until a preroll sample or EOS is received, the appsink
+// element is set to the READY/NULL state, or the timeout expires.
 func (appsink *AppSinkInstance) ParentTryPullPreroll(timeout gst.ClockTime) *gst.Sample {
 	var carg0 *C.GstAppSink
 	var carg1 C.GstClockTime // in, none, converted
@@ -1344,7 +2383,26 @@ func (appsink *AppSinkInstance) ParentTryPullPreroll(timeout gst.ClockTime) *gst
 // ParentTryPullSample calls the default implementations of the `GstAppSink.try_pull_sample` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#try_pull_sample
+// The function takes the following parameters:
+// 
+// 	- timeout gst.ClockTime: the maximum amount of time to wait for a sample 
+// 
+// The function returns the following values:
+// 
+// 	- goret *gst.Sample (nullable) 
+//
+// This function blocks until a sample or EOS becomes available or the appsink
+// element is set to the READY/NULL state or the timeout expires.
+// 
+// This function will only return samples when the appsink is in the PLAYING
+// state. All rendered buffers will be put in a queue so that the application
+// can pull samples at its own rate. Note that when the application does not
+// pull samples fast enough, the queued buffers could consume a lot of memory,
+// especially when dealing with raw video frames.
+// 
+// If an EOS event was received before any buffers or the timeout expires,
+// this function returns %NULL. Use gst_app_sink_is_eos () to check for the EOS
+// condition.
 func (appsink *AppSinkInstance) ParentTryPullSample(timeout gst.ClockTime) *gst.Sample {
 	var carg0 *C.GstAppSink
 	var carg1 C.GstClockTime // in, none, converted
@@ -1405,8 +2463,72 @@ type AppSrcInstance struct {
 var _ AppSrc = (*AppSrcInstance)(nil)
 
 // AppSrc wraps GstAppSrc
+//
+// The appsrc element can be used by applications to insert data into a
+// GStreamer pipeline. Unlike most GStreamer elements, appsrc provides
+// external API functions.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GstAppSrc
+// appsrc can be used by linking with the libgstapp library to access the
+// methods directly or by using the appsrc action signals.
+// 
+// Before operating appsrc, the caps property must be set to fixed caps
+// describing the format of the data that will be pushed with appsrc. An
+// exception to this is when pushing buffers with unknown caps, in which case no
+// caps should be set. This is typically true of file-like sources that push raw
+// byte buffers. If you don't want to explicitly set the caps, you can use
+// gst_app_src_push_sample. This method gets the caps associated with the
+// sample and sets them on the appsrc replacing any previously set caps (if
+// different from sample's caps).
+// 
+// The main way of handing data to the appsrc element is by calling the
+// gst_app_src_push_buffer() method or by emitting the push-buffer action signal.
+// This will put the buffer onto a queue from which appsrc will read from in its
+// streaming thread. It is important to note that data transport will not happen
+// from the thread that performed the push-buffer call.
+// 
+// The "max-bytes", "max-buffers" and "max-time" properties control how much
+// data can be queued in appsrc before appsrc considers the queue full. A
+// filled internal queue will always signal the "enough-data" signal, which
+// signals the application that it should stop pushing data into appsrc. The
+// "block" property will cause appsrc to block the push-buffer method until
+// free data becomes available again.
+// 
+// When the internal queue is running out of data, the "need-data" signal is
+// emitted, which signals the application that it should start pushing more data
+// into appsrc.
+// 
+// In addition to the "need-data" and "enough-data" signals, appsrc can emit the
+// "seek-data" signal when the "stream-mode" property is set to "seekable" or
+// "random-access". The signal argument will contain the new desired position in
+// the stream expressed in the unit set with the "format" property. After
+// receiving the seek-data signal, the application should push-buffers from the
+// new position.
+// 
+// These signals allow the application to operate the appsrc in two different
+// ways:
+// 
+// The push mode, in which the application repeatedly calls the push-buffer/push-sample
+// method with a new buffer/sample. Optionally, the queue size in the appsrc
+// can be controlled with the enough-data and need-data signals by respectively
+// stopping/starting the push-buffer/push-sample calls. This is a typical
+// mode of operation for the stream-type "stream" and "seekable". Use this
+// mode when implementing various network protocols or hardware devices.
+// 
+// The pull mode, in which the need-data signal triggers the next push-buffer call.
+// This mode is typically used in the "random-access" stream-type. Use this
+// mode for file access or other randomly accessible sources. In this mode, a
+// buffer of exactly the amount of bytes given by the need-data signal should be
+// pushed into appsrc.
+// 
+// In all modes, the size property on appsrc should contain the total stream
+// size in bytes. Setting this property is mandatory in the random-access mode.
+// For the stream and seekable modes, setting this property is optional but
+// recommended.
+// 
+// When the application has finished pushing data into appsrc, it should call
+// gst_app_src_end_of_stream() or emit the end-of-stream action signal. After
+// this call, no more buffers can be pushed into appsrc until a flushing seek
+// occurs or the state of the appsrc has gone through READY.
 type AppSrc interface {
 	gstbase.BaseSrc
 	gst.URIHandler
@@ -1414,139 +2536,344 @@ type AppSrc interface {
 
 	// EndOfStream wraps gst_app_src_end_of_stream
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_end_of_stream
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Indicates to the appsrc element that the last buffer queued in the
+	// element is the last buffer of the stream.
 	EndOfStream() gst.FlowReturn
 	// GetCaps wraps gst_app_src_get_caps
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_caps
+	// The function returns the following values:
+	// 
+	// 	- goret *gst.Caps (nullable) 
+	//
+	// Get the configured caps on @appsrc.
 	GetCaps() *gst.Caps
 	// GetCurrentLevelBuffers wraps gst_app_src_get_current_level_buffers
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_current_level_buffers
+	// The function returns the following values:
+	// 
+	// 	- goret uint64 
+	//
+	// Get the number of currently queued buffers inside @appsrc.
 	GetCurrentLevelBuffers() uint64
 	// GetCurrentLevelBytes wraps gst_app_src_get_current_level_bytes
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_current_level_bytes
+	// The function returns the following values:
+	// 
+	// 	- goret uint64 
+	//
+	// Get the number of currently queued bytes inside @appsrc.
 	GetCurrentLevelBytes() uint64
 	// GetCurrentLevelTime wraps gst_app_src_get_current_level_time
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_current_level_time
+	// The function returns the following values:
+	// 
+	// 	- goret gst.ClockTime 
+	//
+	// Get the amount of currently queued time inside @appsrc.
 	GetCurrentLevelTime() gst.ClockTime
 	// GetDuration wraps gst_app_src_get_duration
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_duration
+	// The function returns the following values:
+	// 
+	// 	- goret gst.ClockTime 
+	//
+	// Get the duration of the stream in nanoseconds. A value of GST_CLOCK_TIME_NONE means that the duration is
+	// not known.
 	GetDuration() gst.ClockTime
 	// GetEmitSignals wraps gst_app_src_get_emit_signals
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_emit_signals
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
+	// Check if appsrc will emit the "new-preroll" and "new-buffer" signals.
 	GetEmitSignals() bool
 	// GetLatency wraps gst_app_src_get_latency
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_latency
+	// The function returns the following values:
+	// 
+	// 	- min uint64: the min latency 
+	// 	- max uint64: the max latency 
+	//
+	// Retrieve the min and max latencies in @min and @max respectively.
 	GetLatency() (uint64, uint64)
 	// GetLeakyType wraps gst_app_src_get_leaky_type
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_leaky_type
+	// The function returns the following values:
+	// 
+	// 	- goret AppLeakyType 
+	//
+	// Returns the currently set #GstAppLeakyType. See gst_app_src_set_leaky_type()
+	// for more details.
 	GetLeakyType() AppLeakyType
 	// GetMaxBuffers wraps gst_app_src_get_max_buffers
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_max_buffers
+	// The function returns the following values:
+	// 
+	// 	- goret uint64 
+	//
+	// Get the maximum amount of buffers that can be queued in @appsrc.
 	GetMaxBuffers() uint64
 	// GetMaxBytes wraps gst_app_src_get_max_bytes
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_max_bytes
+	// The function returns the following values:
+	// 
+	// 	- goret uint64 
+	//
+	// Get the maximum amount of bytes that can be queued in @appsrc.
 	GetMaxBytes() uint64
 	// GetMaxTime wraps gst_app_src_get_max_time
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_max_time
+	// The function returns the following values:
+	// 
+	// 	- goret gst.ClockTime 
+	//
+	// Get the maximum amount of time that can be queued in @appsrc.
 	GetMaxTime() gst.ClockTime
 	// GetSize wraps gst_app_src_get_size
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_size
+	// The function returns the following values:
+	// 
+	// 	- goret int64 
+	//
+	// Get the size of the stream in bytes. A value of -1 means that the size is
+	// not known.
 	GetSize() int64
 	// GetStreamType wraps gst_app_src_get_stream_type
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_stream_type
+	// The function returns the following values:
+	// 
+	// 	- goret AppStreamType 
+	//
+	// Get the stream type. Control the stream type of @appsrc
+	// with gst_app_src_set_stream_type().
 	GetStreamType() AppStreamType
 	// PushBuffer wraps gst_app_src_push_buffer
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_push_buffer
+	// The function takes the following parameters:
+	// 
+	// 	- buffer *gst.Buffer: a #GstBuffer to push 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Adds a buffer to the queue of buffers that the appsrc element will
+	// push to its source pad.  This function takes ownership of the buffer.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	PushBuffer(*gst.Buffer) gst.FlowReturn
 	// PushBufferList wraps gst_app_src_push_buffer_list
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_push_buffer_list
+	// The function takes the following parameters:
+	// 
+	// 	- bufferList *gst.BufferList: a #GstBufferList to push 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Adds a buffer list to the queue of buffers and buffer lists that the
+	// appsrc element will push to its source pad.  This function takes ownership
+	// of @buffer_list.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	PushBufferList(*gst.BufferList) gst.FlowReturn
 	// PushSample wraps gst_app_src_push_sample
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_push_sample
+	// The function takes the following parameters:
+	// 
+	// 	- sample *gst.Sample: a #GstSample from which buffer and caps may be
+	// extracted 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Extract a buffer from the provided sample and adds it to the queue of
+	// buffers that the appsrc element will push to its source pad. Any
+	// previous caps that were set on appsrc will be replaced by the caps
+	// associated with the sample if not equal.
+	// 
+	// This function does not take ownership of the
+	// sample so the sample needs to be unreffed after calling this function.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	PushSample(*gst.Sample) gst.FlowReturn
 	// AppSrcSetCaps wraps gst_app_src_set_caps
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_caps
+	// The function takes the following parameters:
+	// 
+	// 	- caps *gst.Caps (nullable): caps to set 
+	//
+	// Set the capabilities on the appsrc element.  This function takes
+	// a copy of the caps structure. After calling this method, the source will
+	// only produce caps that match @caps. @caps must be fixed and the caps on the
+	// buffers must match the caps or left NULL.
 	AppSrcSetCaps(*gst.Caps)
 	// SetDuration wraps gst_app_src_set_duration
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_duration
+	// The function takes the following parameters:
+	// 
+	// 	- duration gst.ClockTime: the duration to set 
+	//
+	// Set the duration of the stream in nanoseconds. A value of GST_CLOCK_TIME_NONE means that the duration is
+	// not known.
 	SetDuration(gst.ClockTime)
 	// SetEmitSignals wraps gst_app_src_set_emit_signals
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_emit_signals
+	// The function takes the following parameters:
+	// 
+	// 	- emit bool: the new state 
+	//
+	// Make appsrc emit the "new-preroll" and "new-buffer" signals. This option is
+	// by default disabled because signal emission is expensive and unneeded when
+	// the application prefers to operate in pull mode.
 	SetEmitSignals(bool)
 	// SetLatency wraps gst_app_src_set_latency
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_latency
+	// The function takes the following parameters:
+	// 
+	// 	- min uint64: the min latency 
+	// 	- max uint64: the max latency 
+	//
+	// Configure the @min and @max latency in @src. If @min is set to -1, the
+	// default latency calculations for pseudo-live sources will be used.
 	SetLatency(uint64, uint64)
 	// SetLeakyType wraps gst_app_src_set_leaky_type
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_leaky_type
+	// The function takes the following parameters:
+	// 
+	// 	- leaky AppLeakyType: the #GstAppLeakyType 
+	//
+	// When set to any other value than GST_APP_LEAKY_TYPE_NONE then the appsrc
+	// will drop any buffers that are pushed into it once its internal queue is
+	// full. The selected type defines whether to drop the oldest or new
+	// buffers.
 	SetLeakyType(AppLeakyType)
 	// SetMaxBuffers wraps gst_app_src_set_max_buffers
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_max_buffers
+	// The function takes the following parameters:
+	// 
+	// 	- max uint64: the maximum number of buffers to queue 
+	//
+	// Set the maximum amount of buffers that can be queued in @appsrc.
+	// After the maximum amount of buffers are queued, @appsrc will emit the
+	// "enough-data" signal.
 	SetMaxBuffers(uint64)
 	// SetMaxBytes wraps gst_app_src_set_max_bytes
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_max_bytes
+	// The function takes the following parameters:
+	// 
+	// 	- max uint64: the maximum number of bytes to queue 
+	//
+	// Set the maximum amount of bytes that can be queued in @appsrc.
+	// After the maximum amount of bytes are queued, @appsrc will emit the
+	// "enough-data" signal.
 	SetMaxBytes(uint64)
 	// SetMaxTime wraps gst_app_src_set_max_time
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_max_time
+	// The function takes the following parameters:
+	// 
+	// 	- max gst.ClockTime: the maximum amonut of time to queue 
+	//
+	// Set the maximum amount of time that can be queued in @appsrc.
+	// After the maximum amount of time are queued, @appsrc will emit the
+	// "enough-data" signal.
 	SetMaxTime(gst.ClockTime)
 	// SetSize wraps gst_app_src_set_size
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_size
+	// The function takes the following parameters:
+	// 
+	// 	- size int64: the size to set 
+	//
+	// Set the size of the stream in bytes. A value of -1 means that the size is
+	// not known.
 	SetSize(int64)
 	// SetStreamType wraps gst_app_src_set_stream_type
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_stream_type
+	// The function takes the following parameters:
+	// 
+	// 	- typ AppStreamType: the new state 
+	//
+	// Set the stream type on @appsrc. For seekable streams, the "seek" signal must
+	// be connected to.
+	// 
+	// A stream_type stream
 	SetStreamType(AppStreamType)
 	// EmitEndOfStream emits the "end-of-stream" signal
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+	//
+	// Notify @appsrc that no more buffer are available.
 	EmitEndOfStream() gst.FlowReturn
 	// ConnectEnoughData connects the provided callback to the "enough-data" signal
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+	//
+	// Signal that the source has enough data. It is recommended that the
+	// application stops calling push-buffer until the need-data signal is
+	// emitted again to avoid excessive buffer queueing.
 	ConnectEnoughData(func(AppSrc)) gobject.SignalHandle
 	// ConnectNeedData connects the provided callback to the "need-data" signal
+	//
+	// Signal that the source needs more data. In the callback or from another
+	// thread you should call push-buffer or end-of-stream.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+	// @length is just a hint and when it is set to -1, any number of bytes can be
+	// pushed into @appsrc.
+	// 
+	// You can call push-buffer multiple times until the enough-data signal is
+	// fired.
 	ConnectNeedData(func(AppSrc, uint)) gobject.SignalHandle
 	// EmitPushBuffer emits the "push-buffer" signal
+	//
+	// Adds a buffer to the queue of buffers that the appsrc element will
+	// push to its source pad.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+	// This function does not take ownership of the buffer, but it takes a
+	// reference so the buffer can be unreffed at any time after calling this
+	// function.
+	// 
+	// When the block property is TRUE, this function can block until free space
+	// becomes available in the queue.
 	EmitPushBuffer(gst.Buffer) gst.FlowReturn
 	// EmitPushBufferList emits the "push-buffer-list" signal
+	//
+	// Adds a buffer list to the queue of buffers and buffer lists that the
+	// appsrc element will push to its source pad.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+	// This function does not take ownership of the buffer list, but it takes a
+	// reference so the buffer list can be unreffed at any time after calling
+	// this function.
+	// 
+	// When the block property is TRUE, this function can block until free space
+	// becomes available in the queue.
 	EmitPushBufferList(gst.BufferList) gst.FlowReturn
 	// EmitPushSample emits the "push-sample" signal
+	//
+	// Extract a buffer from the provided sample and adds the extracted buffer
+	// to the queue of buffers that the appsrc element will
+	// push to its source pad. This function set the appsrc caps based on the caps
+	// in the sample and reset the caps if they change.
+	// Only the caps and the buffer of the provided sample are used and not
+	// for example the segment in the sample.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+	// This function does not take ownership of the sample, but it takes a
+	// reference so the sample can be unreffed at any time after calling this
+	// function.
+	// 
+	// When the block property is TRUE, this function can block until free space
+	// becomes available in the queue.
 	EmitPushSample(gst.Sample) gst.FlowReturn
 	// ConnectSeekData connects the provided callback to the "seek-data" signal
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+	//
+	// Seek to the given offset. The next push-buffer should produce buffers from
+	// the new @offset.
+	// This callback is only called for seekable stream types.
 	ConnectSeekData(func(AppSrc, uint64) bool) gobject.SignalHandle
 
 	// chain up virtual methods:
@@ -1554,37 +2881,94 @@ type AppSrc interface {
 	// ParentEndOfStream calls the default implementations of the `GstAppSrc.end_of_stream` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#end_of_stream
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Indicates to the appsrc element that the last buffer queued in the
+	// element is the last buffer of the stream.
 	ParentEndOfStream() gst.FlowReturn
 	// ParentEnoughData calls the default implementations of the `GstAppSrc.enough_data` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#enough_data
+	//
 	ParentEnoughData()
 	// ParentNeedData calls the default implementations of the `GstAppSrc.need_data` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#need_data
+	// The function takes the following parameters:
+	// 
+	// 	- length uint 
+	//
 	ParentNeedData(length uint)
 	// ParentPushBuffer calls the default implementations of the `GstAppSrc.push_buffer` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_buffer
+	// The function takes the following parameters:
+	// 
+	// 	- buffer *gst.Buffer: a #GstBuffer to push 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Adds a buffer to the queue of buffers that the appsrc element will
+	// push to its source pad.  This function takes ownership of the buffer.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	ParentPushBuffer(buffer *gst.Buffer) gst.FlowReturn
 	// ParentPushBufferList calls the default implementations of the `GstAppSrc.push_buffer_list` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_buffer_list
+	// The function takes the following parameters:
+	// 
+	// 	- bufferList *gst.BufferList: a #GstBufferList to push 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Adds a buffer list to the queue of buffers and buffer lists that the
+	// appsrc element will push to its source pad.  This function takes ownership
+	// of @buffer_list.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	ParentPushBufferList(bufferList *gst.BufferList) gst.FlowReturn
 	// ParentPushSample calls the default implementations of the `GstAppSrc.push_sample` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_sample
+	// The function takes the following parameters:
+	// 
+	// 	- sample *gst.Sample: a #GstSample from which buffer and caps may be
+	// extracted 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Extract a buffer from the provided sample and adds it to the queue of
+	// buffers that the appsrc element will push to its source pad. Any
+	// previous caps that were set on appsrc will be replaced by the caps
+	// associated with the sample if not equal.
+	// 
+	// This function does not take ownership of the
+	// sample so the sample needs to be unreffed after calling this function.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	ParentPushSample(sample *gst.Sample) gst.FlowReturn
 	// ParentSeekData calls the default implementations of the `GstAppSrc.seek_data` virtual method.
 	// This function's behavior is not defined when the parent does not implement the virtual method.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#seek_data
+	// The function takes the following parameters:
+	// 
+	// 	- offset uint64 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
 	ParentSeekData(offset uint64) bool
 }
 
@@ -1649,7 +3033,12 @@ func UnsafeAppSrcToGlibFull(c AppSrc) unsafe.Pointer {
 
 // EndOfStream wraps gst_app_src_end_of_stream
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_end_of_stream
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Indicates to the appsrc element that the last buffer queued in the
+// element is the last buffer of the stream.
 func (appsrc *AppSrcInstance) EndOfStream() gst.FlowReturn {
 	var carg0 *C.GstAppSrc    // in, none, converted
 	var cret  C.GstFlowReturn // return, none, casted
@@ -1668,7 +3057,11 @@ func (appsrc *AppSrcInstance) EndOfStream() gst.FlowReturn {
 
 // GetCaps wraps gst_app_src_get_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_caps
+// The function returns the following values:
+// 
+// 	- goret *gst.Caps (nullable) 
+//
+// Get the configured caps on @appsrc.
 func (appsrc *AppSrcInstance) GetCaps() *gst.Caps {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var cret  *C.GstCaps   // return, full, converted, nullable
@@ -1689,7 +3082,11 @@ func (appsrc *AppSrcInstance) GetCaps() *gst.Caps {
 
 // GetCurrentLevelBuffers wraps gst_app_src_get_current_level_buffers
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_current_level_buffers
+// The function returns the following values:
+// 
+// 	- goret uint64 
+//
+// Get the number of currently queued buffers inside @appsrc.
 func (appsrc *AppSrcInstance) GetCurrentLevelBuffers() uint64 {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var cret  C.guint64    // return, none, casted
@@ -1708,7 +3105,11 @@ func (appsrc *AppSrcInstance) GetCurrentLevelBuffers() uint64 {
 
 // GetCurrentLevelBytes wraps gst_app_src_get_current_level_bytes
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_current_level_bytes
+// The function returns the following values:
+// 
+// 	- goret uint64 
+//
+// Get the number of currently queued bytes inside @appsrc.
 func (appsrc *AppSrcInstance) GetCurrentLevelBytes() uint64 {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var cret  C.guint64    // return, none, casted
@@ -1727,7 +3128,11 @@ func (appsrc *AppSrcInstance) GetCurrentLevelBytes() uint64 {
 
 // GetCurrentLevelTime wraps gst_app_src_get_current_level_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_current_level_time
+// The function returns the following values:
+// 
+// 	- goret gst.ClockTime 
+//
+// Get the amount of currently queued time inside @appsrc.
 func (appsrc *AppSrcInstance) GetCurrentLevelTime() gst.ClockTime {
 	var carg0 *C.GstAppSrc   // in, none, converted
 	var cret  C.GstClockTime // return, none, casted, alias
@@ -1746,7 +3151,12 @@ func (appsrc *AppSrcInstance) GetCurrentLevelTime() gst.ClockTime {
 
 // GetDuration wraps gst_app_src_get_duration
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_duration
+// The function returns the following values:
+// 
+// 	- goret gst.ClockTime 
+//
+// Get the duration of the stream in nanoseconds. A value of GST_CLOCK_TIME_NONE means that the duration is
+// not known.
 func (appsrc *AppSrcInstance) GetDuration() gst.ClockTime {
 	var carg0 *C.GstAppSrc   // in, none, converted
 	var cret  C.GstClockTime // return, none, casted, alias
@@ -1765,7 +3175,11 @@ func (appsrc *AppSrcInstance) GetDuration() gst.ClockTime {
 
 // GetEmitSignals wraps gst_app_src_get_emit_signals
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_emit_signals
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Check if appsrc will emit the "new-preroll" and "new-buffer" signals.
 func (appsrc *AppSrcInstance) GetEmitSignals() bool {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var cret  C.gboolean   // return
@@ -1786,7 +3200,12 @@ func (appsrc *AppSrcInstance) GetEmitSignals() bool {
 
 // GetLatency wraps gst_app_src_get_latency
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_latency
+// The function returns the following values:
+// 
+// 	- min uint64: the min latency 
+// 	- max uint64: the max latency 
+//
+// Retrieve the min and max latencies in @min and @max respectively.
 func (appsrc *AppSrcInstance) GetLatency() (uint64, uint64) {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var carg1 C.guint64    // out, full, casted
@@ -1808,7 +3227,12 @@ func (appsrc *AppSrcInstance) GetLatency() (uint64, uint64) {
 
 // GetLeakyType wraps gst_app_src_get_leaky_type
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_leaky_type
+// The function returns the following values:
+// 
+// 	- goret AppLeakyType 
+//
+// Returns the currently set #GstAppLeakyType. See gst_app_src_set_leaky_type()
+// for more details.
 func (appsrc *AppSrcInstance) GetLeakyType() AppLeakyType {
 	var carg0 *C.GstAppSrc      // in, none, converted
 	var cret  C.GstAppLeakyType // return, none, casted
@@ -1827,7 +3251,11 @@ func (appsrc *AppSrcInstance) GetLeakyType() AppLeakyType {
 
 // GetMaxBuffers wraps gst_app_src_get_max_buffers
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_max_buffers
+// The function returns the following values:
+// 
+// 	- goret uint64 
+//
+// Get the maximum amount of buffers that can be queued in @appsrc.
 func (appsrc *AppSrcInstance) GetMaxBuffers() uint64 {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var cret  C.guint64    // return, none, casted
@@ -1846,7 +3274,11 @@ func (appsrc *AppSrcInstance) GetMaxBuffers() uint64 {
 
 // GetMaxBytes wraps gst_app_src_get_max_bytes
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_max_bytes
+// The function returns the following values:
+// 
+// 	- goret uint64 
+//
+// Get the maximum amount of bytes that can be queued in @appsrc.
 func (appsrc *AppSrcInstance) GetMaxBytes() uint64 {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var cret  C.guint64    // return, none, casted
@@ -1865,7 +3297,11 @@ func (appsrc *AppSrcInstance) GetMaxBytes() uint64 {
 
 // GetMaxTime wraps gst_app_src_get_max_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_max_time
+// The function returns the following values:
+// 
+// 	- goret gst.ClockTime 
+//
+// Get the maximum amount of time that can be queued in @appsrc.
 func (appsrc *AppSrcInstance) GetMaxTime() gst.ClockTime {
 	var carg0 *C.GstAppSrc   // in, none, converted
 	var cret  C.GstClockTime // return, none, casted, alias
@@ -1884,7 +3320,12 @@ func (appsrc *AppSrcInstance) GetMaxTime() gst.ClockTime {
 
 // GetSize wraps gst_app_src_get_size
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_size
+// The function returns the following values:
+// 
+// 	- goret int64 
+//
+// Get the size of the stream in bytes. A value of -1 means that the size is
+// not known.
 func (appsrc *AppSrcInstance) GetSize() int64 {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var cret  C.gint64     // return, none, casted
@@ -1903,7 +3344,12 @@ func (appsrc *AppSrcInstance) GetSize() int64 {
 
 // GetStreamType wraps gst_app_src_get_stream_type
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_get_stream_type
+// The function returns the following values:
+// 
+// 	- goret AppStreamType 
+//
+// Get the stream type. Control the stream type of @appsrc
+// with gst_app_src_set_stream_type().
 func (appsrc *AppSrcInstance) GetStreamType() AppStreamType {
 	var carg0 *C.GstAppSrc       // in, none, converted
 	var cret  C.GstAppStreamType // return, none, casted
@@ -1922,7 +3368,19 @@ func (appsrc *AppSrcInstance) GetStreamType() AppStreamType {
 
 // PushBuffer wraps gst_app_src_push_buffer
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_push_buffer
+// The function takes the following parameters:
+// 
+// 	- buffer *gst.Buffer: a #GstBuffer to push 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Adds a buffer to the queue of buffers that the appsrc element will
+// push to its source pad.  This function takes ownership of the buffer.
+// 
+// When the block property is TRUE, this function can block until free
+// space becomes available in the queue.
 func (appsrc *AppSrcInstance) PushBuffer(buffer *gst.Buffer) gst.FlowReturn {
 	var carg0 *C.GstAppSrc    // in, none, converted
 	var carg1 *C.GstBuffer    // in, full, converted
@@ -1944,7 +3402,20 @@ func (appsrc *AppSrcInstance) PushBuffer(buffer *gst.Buffer) gst.FlowReturn {
 
 // PushBufferList wraps gst_app_src_push_buffer_list
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_push_buffer_list
+// The function takes the following parameters:
+// 
+// 	- bufferList *gst.BufferList: a #GstBufferList to push 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Adds a buffer list to the queue of buffers and buffer lists that the
+// appsrc element will push to its source pad.  This function takes ownership
+// of @buffer_list.
+// 
+// When the block property is TRUE, this function can block until free
+// space becomes available in the queue.
 func (appsrc *AppSrcInstance) PushBufferList(bufferList *gst.BufferList) gst.FlowReturn {
 	var carg0 *C.GstAppSrc     // in, none, converted
 	var carg1 *C.GstBufferList // in, full, converted
@@ -1966,7 +3437,25 @@ func (appsrc *AppSrcInstance) PushBufferList(bufferList *gst.BufferList) gst.Flo
 
 // PushSample wraps gst_app_src_push_sample
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_push_sample
+// The function takes the following parameters:
+// 
+// 	- sample *gst.Sample: a #GstSample from which buffer and caps may be
+// extracted 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Extract a buffer from the provided sample and adds it to the queue of
+// buffers that the appsrc element will push to its source pad. Any
+// previous caps that were set on appsrc will be replaced by the caps
+// associated with the sample if not equal.
+// 
+// This function does not take ownership of the
+// sample so the sample needs to be unreffed after calling this function.
+// 
+// When the block property is TRUE, this function can block until free
+// space becomes available in the queue.
 func (appsrc *AppSrcInstance) PushSample(sample *gst.Sample) gst.FlowReturn {
 	var carg0 *C.GstAppSrc    // in, none, converted
 	var carg1 *C.GstSample    // in, none, converted
@@ -1988,7 +3477,14 @@ func (appsrc *AppSrcInstance) PushSample(sample *gst.Sample) gst.FlowReturn {
 
 // AppSrcSetCaps wraps gst_app_src_set_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_caps
+// The function takes the following parameters:
+// 
+// 	- caps *gst.Caps (nullable): caps to set 
+//
+// Set the capabilities on the appsrc element.  This function takes
+// a copy of the caps structure. After calling this method, the source will
+// only produce caps that match @caps. @caps must be fixed and the caps on the
+// buffers must match the caps or left NULL.
 func (appsrc *AppSrcInstance) AppSrcSetCaps(caps *gst.Caps) {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var carg1 *C.GstCaps   // in, none, converted, nullable
@@ -2005,7 +3501,12 @@ func (appsrc *AppSrcInstance) AppSrcSetCaps(caps *gst.Caps) {
 
 // SetDuration wraps gst_app_src_set_duration
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_duration
+// The function takes the following parameters:
+// 
+// 	- duration gst.ClockTime: the duration to set 
+//
+// Set the duration of the stream in nanoseconds. A value of GST_CLOCK_TIME_NONE means that the duration is
+// not known.
 func (appsrc *AppSrcInstance) SetDuration(duration gst.ClockTime) {
 	var carg0 *C.GstAppSrc   // in, none, converted
 	var carg1 C.GstClockTime // in, none, casted, alias
@@ -2020,7 +3521,13 @@ func (appsrc *AppSrcInstance) SetDuration(duration gst.ClockTime) {
 
 // SetEmitSignals wraps gst_app_src_set_emit_signals
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_emit_signals
+// The function takes the following parameters:
+// 
+// 	- emit bool: the new state 
+//
+// Make appsrc emit the "new-preroll" and "new-buffer" signals. This option is
+// by default disabled because signal emission is expensive and unneeded when
+// the application prefers to operate in pull mode.
 func (appsrc *AppSrcInstance) SetEmitSignals(emit bool) {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var carg1 C.gboolean   // in
@@ -2037,7 +3544,13 @@ func (appsrc *AppSrcInstance) SetEmitSignals(emit bool) {
 
 // SetLatency wraps gst_app_src_set_latency
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_latency
+// The function takes the following parameters:
+// 
+// 	- min uint64: the min latency 
+// 	- max uint64: the max latency 
+//
+// Configure the @min and @max latency in @src. If @min is set to -1, the
+// default latency calculations for pseudo-live sources will be used.
 func (appsrc *AppSrcInstance) SetLatency(min uint64, max uint64) {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var carg1 C.guint64    // in, none, casted
@@ -2055,7 +3568,14 @@ func (appsrc *AppSrcInstance) SetLatency(min uint64, max uint64) {
 
 // SetLeakyType wraps gst_app_src_set_leaky_type
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_leaky_type
+// The function takes the following parameters:
+// 
+// 	- leaky AppLeakyType: the #GstAppLeakyType 
+//
+// When set to any other value than GST_APP_LEAKY_TYPE_NONE then the appsrc
+// will drop any buffers that are pushed into it once its internal queue is
+// full. The selected type defines whether to drop the oldest or new
+// buffers.
 func (appsrc *AppSrcInstance) SetLeakyType(leaky AppLeakyType) {
 	var carg0 *C.GstAppSrc      // in, none, converted
 	var carg1 C.GstAppLeakyType // in, none, casted
@@ -2070,7 +3590,13 @@ func (appsrc *AppSrcInstance) SetLeakyType(leaky AppLeakyType) {
 
 // SetMaxBuffers wraps gst_app_src_set_max_buffers
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_max_buffers
+// The function takes the following parameters:
+// 
+// 	- max uint64: the maximum number of buffers to queue 
+//
+// Set the maximum amount of buffers that can be queued in @appsrc.
+// After the maximum amount of buffers are queued, @appsrc will emit the
+// "enough-data" signal.
 func (appsrc *AppSrcInstance) SetMaxBuffers(max uint64) {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var carg1 C.guint64    // in, none, casted
@@ -2085,7 +3611,13 @@ func (appsrc *AppSrcInstance) SetMaxBuffers(max uint64) {
 
 // SetMaxBytes wraps gst_app_src_set_max_bytes
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_max_bytes
+// The function takes the following parameters:
+// 
+// 	- max uint64: the maximum number of bytes to queue 
+//
+// Set the maximum amount of bytes that can be queued in @appsrc.
+// After the maximum amount of bytes are queued, @appsrc will emit the
+// "enough-data" signal.
 func (appsrc *AppSrcInstance) SetMaxBytes(max uint64) {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var carg1 C.guint64    // in, none, casted
@@ -2100,7 +3632,13 @@ func (appsrc *AppSrcInstance) SetMaxBytes(max uint64) {
 
 // SetMaxTime wraps gst_app_src_set_max_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_max_time
+// The function takes the following parameters:
+// 
+// 	- max gst.ClockTime: the maximum amonut of time to queue 
+//
+// Set the maximum amount of time that can be queued in @appsrc.
+// After the maximum amount of time are queued, @appsrc will emit the
+// "enough-data" signal.
 func (appsrc *AppSrcInstance) SetMaxTime(max gst.ClockTime) {
 	var carg0 *C.GstAppSrc   // in, none, converted
 	var carg1 C.GstClockTime // in, none, casted, alias
@@ -2115,7 +3653,12 @@ func (appsrc *AppSrcInstance) SetMaxTime(max gst.ClockTime) {
 
 // SetSize wraps gst_app_src_set_size
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_size
+// The function takes the following parameters:
+// 
+// 	- size int64: the size to set 
+//
+// Set the size of the stream in bytes. A value of -1 means that the size is
+// not known.
 func (appsrc *AppSrcInstance) SetSize(size int64) {
 	var carg0 *C.GstAppSrc // in, none, converted
 	var carg1 C.gint64     // in, none, casted
@@ -2130,7 +3673,14 @@ func (appsrc *AppSrcInstance) SetSize(size int64) {
 
 // SetStreamType wraps gst_app_src_set_stream_type
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#gst_app_src_set_stream_type
+// The function takes the following parameters:
+// 
+// 	- typ AppStreamType: the new state 
+//
+// Set the stream type on @appsrc. For seekable streams, the "seek" signal must
+// be connected to.
+// 
+// A stream_type stream
 func (appsrc *AppSrcInstance) SetStreamType(typ AppStreamType) {
 	var carg0 *C.GstAppSrc       // in, none, converted
 	var carg1 C.GstAppStreamType // in, none, casted
@@ -2144,50 +3694,89 @@ func (appsrc *AppSrcInstance) SetStreamType(typ AppStreamType) {
 }
 
 // EmitEndOfStream emits the "end-of-stream" signal
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+//
+// Notify @appsrc that no more buffer are available.
 func (o *AppSrcInstance) EmitEndOfStream() gst.FlowReturn {
 	return o.Emit("end-of-stream").(gst.FlowReturn)
 }
 
 // ConnectEnoughData connects the provided callback to the "enough-data" signal
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+//
+// Signal that the source has enough data. It is recommended that the
+// application stops calling push-buffer until the need-data signal is
+// emitted again to avoid excessive buffer queueing.
 func (o *AppSrcInstance) ConnectEnoughData(fn func(AppSrc)) gobject.SignalHandle {
 	return o.Connect("enough-data", fn)
 }
 
 // ConnectNeedData connects the provided callback to the "need-data" signal
+//
+// Signal that the source needs more data. In the callback or from another
+// thread you should call push-buffer or end-of-stream.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+// @length is just a hint and when it is set to -1, any number of bytes can be
+// pushed into @appsrc.
+// 
+// You can call push-buffer multiple times until the enough-data signal is
+// fired.
 func (o *AppSrcInstance) ConnectNeedData(fn func(AppSrc, uint)) gobject.SignalHandle {
 	return o.Connect("need-data", fn)
 }
 
 // EmitPushBuffer emits the "push-buffer" signal
+//
+// Adds a buffer to the queue of buffers that the appsrc element will
+// push to its source pad.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+// This function does not take ownership of the buffer, but it takes a
+// reference so the buffer can be unreffed at any time after calling this
+// function.
+// 
+// When the block property is TRUE, this function can block until free space
+// becomes available in the queue.
 func (o *AppSrcInstance) EmitPushBuffer(arg0 gst.Buffer) gst.FlowReturn {
 	return o.Emit("push-buffer", arg0).(gst.FlowReturn)
 }
 
 // EmitPushBufferList emits the "push-buffer-list" signal
+//
+// Adds a buffer list to the queue of buffers and buffer lists that the
+// appsrc element will push to its source pad.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+// This function does not take ownership of the buffer list, but it takes a
+// reference so the buffer list can be unreffed at any time after calling
+// this function.
+// 
+// When the block property is TRUE, this function can block until free space
+// becomes available in the queue.
 func (o *AppSrcInstance) EmitPushBufferList(arg0 gst.BufferList) gst.FlowReturn {
 	return o.Emit("push-buffer-list", arg0).(gst.FlowReturn)
 }
 
 // EmitPushSample emits the "push-sample" signal
+//
+// Extract a buffer from the provided sample and adds the extracted buffer
+// to the queue of buffers that the appsrc element will
+// push to its source pad. This function set the appsrc caps based on the caps
+// in the sample and reset the caps if they change.
+// Only the caps and the buffer of the provided sample are used and not
+// for example the segment in the sample.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+// This function does not take ownership of the sample, but it takes a
+// reference so the sample can be unreffed at any time after calling this
+// function.
+// 
+// When the block property is TRUE, this function can block until free space
+// becomes available in the queue.
 func (o *AppSrcInstance) EmitPushSample(arg0 gst.Sample) gst.FlowReturn {
 	return o.Emit("push-sample", arg0).(gst.FlowReturn)
 }
 
 // ConnectSeekData connects the provided callback to the "seek-data" signal
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html
+//
+// Seek to the given offset. The next push-buffer should produce buffers from
+// the new @offset.
+// This callback is only called for seekable stream types.
 func (o *AppSrcInstance) ConnectSeekData(fn func(AppSrc, uint64) bool) gobject.SignalHandle {
 	return o.Connect("seek-data", fn)
 }
@@ -2200,31 +3789,88 @@ type AppSrcOverrides[Instance AppSrc] struct {
 
 	// // EndOfStream allows you to override the implementation of the virtual method end_of_stream.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#end_of_stream
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Indicates to the appsrc element that the last buffer queued in the
+	// element is the last buffer of the stream.
 	EndOfStream func(Instance) gst.FlowReturn
 	// // EnoughData allows you to override the implementation of the virtual method enough_data.
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#enough_data
+	//
 	EnoughData func(Instance)
 	// // NeedData allows you to override the implementation of the virtual method need_data.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#need_data
+	// The function takes the following parameters:
+	// 
+	// 	- length uint 
+	//
 	NeedData func(Instance, uint)
 	// // PushBuffer allows you to override the implementation of the virtual method push_buffer.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_buffer
+	// The function takes the following parameters:
+	// 
+	// 	- buffer *gst.Buffer: a #GstBuffer to push 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Adds a buffer to the queue of buffers that the appsrc element will
+	// push to its source pad.  This function takes ownership of the buffer.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	PushBuffer func(Instance, *gst.Buffer) gst.FlowReturn
 	// // PushBufferList allows you to override the implementation of the virtual method push_buffer_list.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_buffer_list
+	// The function takes the following parameters:
+	// 
+	// 	- bufferList *gst.BufferList: a #GstBufferList to push 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Adds a buffer list to the queue of buffers and buffer lists that the
+	// appsrc element will push to its source pad.  This function takes ownership
+	// of @buffer_list.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	PushBufferList func(Instance, *gst.BufferList) gst.FlowReturn
 	// // PushSample allows you to override the implementation of the virtual method push_sample.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_sample
+	// The function takes the following parameters:
+	// 
+	// 	- sample *gst.Sample: a #GstSample from which buffer and caps may be
+	// extracted 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret gst.FlowReturn 
+	//
+	// Extract a buffer from the provided sample and adds it to the queue of
+	// buffers that the appsrc element will push to its source pad. Any
+	// previous caps that were set on appsrc will be replaced by the caps
+	// associated with the sample if not equal.
+	// 
+	// This function does not take ownership of the
+	// sample so the sample needs to be unreffed after calling this function.
+	// 
+	// When the block property is TRUE, this function can block until free
+	// space becomes available in the queue.
 	PushSample func(Instance, *gst.Sample) gst.FlowReturn
 	// // SeekData allows you to override the implementation of the virtual method seek_data.
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#seek_data
+	// The function takes the following parameters:
+	// 
+	// 	- offset uint64 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
 	SeekData func(Instance, uint64) bool
 }
 
@@ -2381,7 +4027,12 @@ func UnsafeApplyAppSrcOverrides[Instance AppSrc](gclass unsafe.Pointer, override
 // ParentEndOfStream calls the default implementations of the `GstAppSrc.end_of_stream` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#end_of_stream
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Indicates to the appsrc element that the last buffer queued in the
+// element is the last buffer of the stream.
 func (appsrc *AppSrcInstance) ParentEndOfStream() gst.FlowReturn {
 	var carg0 *C.GstAppSrc
 	var cret  C.GstFlowReturn // return, none, casted
@@ -2402,8 +4053,7 @@ func (appsrc *AppSrcInstance) ParentEndOfStream() gst.FlowReturn {
 
 // ParentEnoughData calls the default implementations of the `GstAppSrc.enough_data` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#enough_data
+//
 func (appsrc *AppSrcInstance) ParentEnoughData() {
 	var carg0 *C.GstAppSrc
 
@@ -2418,7 +4068,10 @@ func (appsrc *AppSrcInstance) ParentEnoughData() {
 // ParentNeedData calls the default implementations of the `GstAppSrc.need_data` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#need_data
+// The function takes the following parameters:
+// 
+// 	- length uint 
+//
 func (appsrc *AppSrcInstance) ParentNeedData(length uint) {
 	var carg0 *C.GstAppSrc
 	var carg1 C.guint // in, none, converted
@@ -2436,7 +4089,19 @@ func (appsrc *AppSrcInstance) ParentNeedData(length uint) {
 // ParentPushBuffer calls the default implementations of the `GstAppSrc.push_buffer` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_buffer
+// The function takes the following parameters:
+// 
+// 	- buffer *gst.Buffer: a #GstBuffer to push 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Adds a buffer to the queue of buffers that the appsrc element will
+// push to its source pad.  This function takes ownership of the buffer.
+// 
+// When the block property is TRUE, this function can block until free
+// space becomes available in the queue.
 func (appsrc *AppSrcInstance) ParentPushBuffer(buffer *gst.Buffer) gst.FlowReturn {
 	var carg0 *C.GstAppSrc
 	var carg1 *C.GstBuffer    // in, none, converted
@@ -2461,7 +4126,20 @@ func (appsrc *AppSrcInstance) ParentPushBuffer(buffer *gst.Buffer) gst.FlowRetur
 // ParentPushBufferList calls the default implementations of the `GstAppSrc.push_buffer_list` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_buffer_list
+// The function takes the following parameters:
+// 
+// 	- bufferList *gst.BufferList: a #GstBufferList to push 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Adds a buffer list to the queue of buffers and buffer lists that the
+// appsrc element will push to its source pad.  This function takes ownership
+// of @buffer_list.
+// 
+// When the block property is TRUE, this function can block until free
+// space becomes available in the queue.
 func (appsrc *AppSrcInstance) ParentPushBufferList(bufferList *gst.BufferList) gst.FlowReturn {
 	var carg0 *C.GstAppSrc
 	var carg1 *C.GstBufferList // in, none, converted
@@ -2486,7 +4164,25 @@ func (appsrc *AppSrcInstance) ParentPushBufferList(bufferList *gst.BufferList) g
 // ParentPushSample calls the default implementations of the `GstAppSrc.push_sample` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#push_sample
+// The function takes the following parameters:
+// 
+// 	- sample *gst.Sample: a #GstSample from which buffer and caps may be
+// extracted 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.FlowReturn 
+//
+// Extract a buffer from the provided sample and adds it to the queue of
+// buffers that the appsrc element will push to its source pad. Any
+// previous caps that were set on appsrc will be replaced by the caps
+// associated with the sample if not equal.
+// 
+// This function does not take ownership of the
+// sample so the sample needs to be unreffed after calling this function.
+// 
+// When the block property is TRUE, this function can block until free
+// space becomes available in the queue.
 func (appsrc *AppSrcInstance) ParentPushSample(sample *gst.Sample) gst.FlowReturn {
 	var carg0 *C.GstAppSrc
 	var carg1 *C.GstSample    // in, none, converted
@@ -2511,7 +4207,14 @@ func (appsrc *AppSrcInstance) ParentPushSample(sample *gst.Sample) gst.FlowRetur
 // ParentSeekData calls the default implementations of the `GstAppSrc.seek_data` virtual method.
 // This function's behavior is not defined when the parent does not implement the virtual method.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#seek_data
+// The function takes the following parameters:
+// 
+// 	- offset uint64 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
 func (appsrc *AppSrcInstance) ParentSeekData(offset uint64) bool {
 	var carg0 *C.GstAppSrc
 	var carg1 C.guint64  // in, none, converted
@@ -2562,8 +4265,7 @@ func RegisterAppSrcSubClass[InstanceT AppSrc](
 }
 
 // AppSinkClass wraps GstAppSinkClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsink.html#GstAppSinkClass
+//
 // 
 // AppSinkClass is the type struct for [AppSink]
 type AppSinkClass struct {
@@ -2617,8 +4319,7 @@ func (a *AppSinkClass) ParentClass() *gstbase.BaseSinkClass {
 }
 
 // AppSrcClass wraps GstAppSrcClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/app/gstappsrc.html#GstAppSrcClass
+//
 // 
 // AppSrcClass is the type struct for [AppSrc]
 type AppSrcClass struct {

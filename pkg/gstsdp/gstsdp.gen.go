@@ -34,26 +34,27 @@ func init() {
 }
 
 // MIKEY_VERSION wraps GST_MIKEY_VERSION
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_VERSION
+//
+// The supported MIKEY version 1.
 const MIKEY_VERSION = 1
 // MIKEYCacheType wraps GstMIKEYCacheType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYCacheType
+//
+// The different cache types
 type MIKEYCacheType C.int
 
 const (
 	// MikeyCacheNone wraps GST_MIKEY_CACHE_NONE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_CACHE_NONE
+	//
+	// The envelope key MUST NOT be cached
 	MikeyCacheNone MIKEYCacheType = 0
 	// MikeyCacheAlways wraps GST_MIKEY_CACHE_ALWAYS
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_CACHE_ALWAYS
+	//
+	// The envelope key MUST be cached
 	MikeyCacheAlways MIKEYCacheType = 1
 	// MikeyCacheForCsb wraps GST_MIKEY_CACHE_FOR_CSB
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_CACHE_FOR_CSB
+	//
+	// The envelope key MUST be cached, but only
+	//                           to be used for the specific CSB.
 	MikeyCacheForCsb MIKEYCacheType = 2
 )
 
@@ -68,26 +69,26 @@ func (e MIKEYCacheType) String() string {
 }
 
 // MIKEYEncAlg wraps GstMIKEYEncAlg
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYEncAlg
+//
+// The encryption algorithm used to encrypt the Encr data field
 type MIKEYEncAlg C.int
 
 const (
 	// MikeyEncNull wraps GST_MIKEY_ENC_NULL
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_ENC_NULL
+	//
+	// no encryption
 	MikeyEncNull MIKEYEncAlg = 0
 	// MikeyEncAesCm128 wraps GST_MIKEY_ENC_AES_CM_128
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_ENC_AES_CM_128
+	//
+	// AES-CM using a 128-bit key
 	MikeyEncAesCm128 MIKEYEncAlg = 1
 	// MikeyEncAesKw128 wraps GST_MIKEY_ENC_AES_KW_128
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_ENC_AES_KW_128
+	//
+	// AES Key Wrap using a 128-bit key
 	MikeyEncAesKw128 MIKEYEncAlg = 2
 	// MikeyEncAesGcm128 wraps GST_MIKEY_ENC_AES_GCM_128
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_ENC_AES_GCM_128
+	//
+	// AES-GCM using a 128-bit key (Since: 1.16)
 	MikeyEncAesGcm128 MIKEYEncAlg = 6
 )
 
@@ -103,22 +104,22 @@ func (e MIKEYEncAlg) String() string {
 }
 
 // MIKEYKVType wraps GstMIKEYKVType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYKVType
+//
+// The key validity type
 type MIKEYKVType C.int
 
 const (
 	// MikeyKvNull wraps GST_MIKEY_KV_NULL
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_KV_NULL
+	//
+	// No specific usage rule
 	MikeyKvNull MIKEYKVType = 0
 	// MikeyKvSpi wraps GST_MIKEY_KV_SPI
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_KV_SPI
+	//
+	// The key is associated with the SPI/MKI
 	MikeyKvSpi MIKEYKVType = 1
 	// MikeyKvInterval wraps GST_MIKEY_KV_INTERVAL
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_KV_INTERVAL
+	//
+	// The key has a start and expiration time
 	MikeyKvInterval MIKEYKVType = 2
 )
 
@@ -133,18 +134,18 @@ func (e MIKEYKVType) String() string {
 }
 
 // MIKEYKeyDataType wraps GstMIKEYKeyDataType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYKeyDataType
+//
+// The type of key.
 type MIKEYKeyDataType C.int
 
 const (
 	// MikeyKdTgk wraps GST_MIKEY_KD_TGK
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_KD_TGK
+	//
+	// a TEK Generation Key
 	MikeyKdTgk MIKEYKeyDataType = 0
 	// MikeyKdTek wraps GST_MIKEY_KD_TEK
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_KD_TEK
+	//
+	// Traffic-Encrypting Key
 	MikeyKdTek MIKEYKeyDataType = 2
 )
 
@@ -158,18 +159,18 @@ func (e MIKEYKeyDataType) String() string {
 }
 
 // MIKEYMacAlg wraps GstMIKEYMacAlg
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYMacAlg
+//
+// Specifies the authentication algorithm used
 type MIKEYMacAlg C.int
 
 const (
 	// MikeyMacNull wraps GST_MIKEY_MAC_NULL
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_MAC_NULL
+	//
+	// no authentication
 	MikeyMacNull MIKEYMacAlg = 0
 	// MikeyMacHmacSha1160 wraps GST_MIKEY_MAC_HMAC_SHA_1_160
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_MAC_HMAC_SHA_1_160
+	//
+	// HMAC-SHA-1-160
 	MikeyMacHmacSha1160 MIKEYMacAlg = 1
 )
 
@@ -183,14 +184,15 @@ func (e MIKEYMacAlg) String() string {
 }
 
 // MIKEYMapType wraps GstMIKEYMapType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYMapType
+//
+// Specifies the method of uniquely mapping Crypto Sessions to the security
+// protocol sessions.
 type MIKEYMapType C.int
 
 const (
 	// MikeyMapTypeSrtp wraps GST_MIKEY_MAP_TYPE_SRTP
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_MAP_TYPE_SRTP
+	//
+	// SRTP
 	MikeyMapTypeSrtp MIKEYMapType = 0
 )
 
@@ -203,14 +205,14 @@ func (e MIKEYMapType) String() string {
 }
 
 // MIKEYPRFFunc wraps GstMIKEYPRFFunc
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPRFFunc
+//
+// The PRF function that has been/will be used for key derivation
 type MIKEYPRFFunc C.int
 
 const (
 	// MikeyPrfMikey1 wraps GST_MIKEY_PRF_MIKEY_1
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PRF_MIKEY_1
+	//
+	// MIKEY-1 PRF function
 	MikeyPrfMikey1 MIKEYPRFFunc = 0
 )
 
@@ -223,70 +225,70 @@ func (e MIKEYPRFFunc) String() string {
 }
 
 // MIKEYPayloadType wraps GstMIKEYPayloadType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadType
+//
+// Different MIKEY Payload types.
 type MIKEYPayloadType C.int
 
 const (
 	// MikeyPtLast wraps GST_MIKEY_PT_LAST
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_LAST
+	//
+	// Last payload
 	MikeyPtLast MIKEYPayloadType = 0
 	// MikeyPtKemac wraps GST_MIKEY_PT_KEMAC
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_KEMAC
+	//
+	// Key data transport payload
 	MikeyPtKemac MIKEYPayloadType = 1
 	// MikeyPtPke wraps GST_MIKEY_PT_PKE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_PKE
+	//
+	// Envelope data payload
 	MikeyPtPke MIKEYPayloadType = 2
 	// MikeyPtDh wraps GST_MIKEY_PT_DH
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_DH
+	//
+	// DH data payload
 	MikeyPtDh MIKEYPayloadType = 3
 	// MikeyPtSign wraps GST_MIKEY_PT_SIGN
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_SIGN
+	//
+	// Signature payload
 	MikeyPtSign MIKEYPayloadType = 4
 	// MikeyPtT wraps GST_MIKEY_PT_T
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_T
+	//
+	// Timestamp payload
 	MikeyPtT MIKEYPayloadType = 5
 	// MikeyPtID wraps GST_MIKEY_PT_ID
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_ID
+	//
+	// ID payload
 	MikeyPtID MIKEYPayloadType = 6
 	// MikeyPtCert wraps GST_MIKEY_PT_CERT
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_CERT
+	//
+	// Certificate Payload
 	MikeyPtCert MIKEYPayloadType = 7
 	// MikeyPtChash wraps GST_MIKEY_PT_CHASH
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_CHASH
+	//
+	// Cert hash payload
 	MikeyPtChash MIKEYPayloadType = 8
 	// MikeyPtV wraps GST_MIKEY_PT_V
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_V
+	//
+	// Verification message payload
 	MikeyPtV MIKEYPayloadType = 9
 	// MikeyPtSp wraps GST_MIKEY_PT_SP
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_SP
+	//
+	// Security Policy payload
 	MikeyPtSp MIKEYPayloadType = 10
 	// MikeyPtRand wraps GST_MIKEY_PT_RAND
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_RAND
+	//
+	// RAND payload
 	MikeyPtRand MIKEYPayloadType = 11
 	// MikeyPtErr wraps GST_MIKEY_PT_ERR
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_ERR
+	//
+	// Error payload
 	MikeyPtErr MIKEYPayloadType = 12
 	// MikeyPtKeyData wraps GST_MIKEY_PT_KEY_DATA
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_KEY_DATA
+	//
+	// Key data sub-payload
 	MikeyPtKeyData MIKEYPayloadType = 20
 	// MikeyPtGenExt wraps GST_MIKEY_PT_GEN_EXT
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_PT_GEN_EXT
+	//
+	// General Extension Payload
 	MikeyPtGenExt MIKEYPayloadType = 21
 )
 
@@ -313,14 +315,14 @@ func (e MIKEYPayloadType) String() string {
 }
 
 // MIKEYSecProto wraps GstMIKEYSecProto
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYSecProto
+//
+// Specifies the security protocol
 type MIKEYSecProto C.int
 
 const (
 	// MikeySecProtoSrtp wraps GST_MIKEY_SEC_PROTO_SRTP
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SEC_PROTO_SRTP
+	//
+	// SRTP
 	MikeySecProtoSrtp MIKEYSecProto = 0
 )
 
@@ -333,66 +335,66 @@ func (e MIKEYSecProto) String() string {
 }
 
 // MIKEYSecSRTP wraps GstMIKEYSecSRTP
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYSecSRTP
+//
+// This policy specifies the parameters for SRTP and SRTCP
 type MIKEYSecSRTP C.int
 
 const (
 	// MikeySpSrtpEncAlg wraps GST_MIKEY_SP_SRTP_ENC_ALG
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_ENC_ALG
+	//
+	// Encryption algorithm
 	MikeySpSrtpEncAlg MIKEYSecSRTP = 0
 	// MikeySpSrtpEncKeyLen wraps GST_MIKEY_SP_SRTP_ENC_KEY_LEN
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_ENC_KEY_LEN
+	//
+	// Session Encr. key length
 	MikeySpSrtpEncKeyLen MIKEYSecSRTP = 1
 	// MikeySpSrtpAuthAlg wraps GST_MIKEY_SP_SRTP_AUTH_ALG
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_AUTH_ALG
+	//
+	// Authentication algorithm
 	MikeySpSrtpAuthAlg MIKEYSecSRTP = 2
 	// MikeySpSrtpAuthKeyLen wraps GST_MIKEY_SP_SRTP_AUTH_KEY_LEN
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_AUTH_KEY_LEN
+	//
+	// Session Auth. key length
 	MikeySpSrtpAuthKeyLen MIKEYSecSRTP = 3
 	// MikeySpSrtpSaltKeyLen wraps GST_MIKEY_SP_SRTP_SALT_KEY_LEN
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_SALT_KEY_LEN
+	//
+	// Session Salt key length
 	MikeySpSrtpSaltKeyLen MIKEYSecSRTP = 4
 	// MikeySpSrtpPrf wraps GST_MIKEY_SP_SRTP_PRF
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_PRF
+	//
+	// SRTP Pseudo Random Function
 	MikeySpSrtpPrf MIKEYSecSRTP = 5
 	// MikeySpSrtpKeyDerivRate wraps GST_MIKEY_SP_SRTP_KEY_DERIV_RATE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_KEY_DERIV_RATE
+	//
+	// Key derivation rate
 	MikeySpSrtpKeyDerivRate MIKEYSecSRTP = 6
 	// MikeySpSrtpSrtpEnc wraps GST_MIKEY_SP_SRTP_SRTP_ENC
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_SRTP_ENC
+	//
+	// SRTP encryption off/on, 0 if off, 1 if on
 	MikeySpSrtpSrtpEnc MIKEYSecSRTP = 7
 	// MikeySpSrtpSrtcpEnc wraps GST_MIKEY_SP_SRTP_SRTCP_ENC
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_SRTCP_ENC
+	//
+	// SRTCP encryption off/on, 0 if off, 1 if on
 	MikeySpSrtpSrtcpEnc MIKEYSecSRTP = 8
 	// MikeySpSrtpFecOrder wraps GST_MIKEY_SP_SRTP_FEC_ORDER
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_FEC_ORDER
+	//
+	// sender's FEC order
 	MikeySpSrtpFecOrder MIKEYSecSRTP = 9
 	// MikeySpSrtpSrtpAuth wraps GST_MIKEY_SP_SRTP_SRTP_AUTH
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_SRTP_AUTH
+	//
+	// SRTP authentication off/on, 0 if off, 1 if on
 	MikeySpSrtpSrtpAuth MIKEYSecSRTP = 10
 	// MikeySpSrtpAuthTagLen wraps GST_MIKEY_SP_SRTP_AUTH_TAG_LEN
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_AUTH_TAG_LEN
+	//
+	// Authentication tag length
 	MikeySpSrtpAuthTagLen MIKEYSecSRTP = 11
 	// MikeySpSrtpSrtpPrefixLen wraps GST_MIKEY_SP_SRTP_SRTP_PREFIX_LEN
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_SRTP_PREFIX_LEN
+	//
+	// SRTP prefix length
 	MikeySpSrtpSrtpPrefixLen MIKEYSecSRTP = 12
 	// MikeySpSrtpAeadAuthTagLen wraps GST_MIKEY_SP_SRTP_AEAD_AUTH_TAG_LEN
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_SP_SRTP_AEAD_AUTH_TAG_LEN
+	//
+	// AEAD authentication tag length (Since: 1.16)
 	MikeySpSrtpAeadAuthTagLen MIKEYSecSRTP = 20
 )
 
@@ -418,22 +420,22 @@ func (e MIKEYSecSRTP) String() string {
 }
 
 // MIKEYTSType wraps GstMIKEYTSType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYTSType
+//
+// Specifies the timestamp type.
 type MIKEYTSType C.int
 
 const (
 	// MikeyTsTypeNtpUtc wraps GST_MIKEY_TS_TYPE_NTP_UTC
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TS_TYPE_NTP_UTC
+	//
+	// an NTP time in UTC timezone
 	MikeyTsTypeNtpUtc MIKEYTSType = 0
 	// MikeyTsTypeNtp wraps GST_MIKEY_TS_TYPE_NTP
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TS_TYPE_NTP
+	//
+	// an NTP time
 	MikeyTsTypeNtp MIKEYTSType = 1
 	// MikeyTsTypeCounter wraps GST_MIKEY_TS_TYPE_COUNTER
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TS_TYPE_COUNTER
+	//
+	// a counter
 	MikeyTsTypeCounter MIKEYTSType = 2
 )
 
@@ -448,42 +450,42 @@ func (e MIKEYTSType) String() string {
 }
 
 // MIKEYType wraps GstMIKEYType
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYType
+//
+// Different MIKEY data types.
 type MIKEYType C.int
 
 const (
 	// MikeyTypeInvalid wraps GST_MIKEY_TYPE_INVALID
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_INVALID
+	//
+	// Invalid type
 	MikeyTypeInvalid MIKEYType = -1
 	// MikeyTypePskInit wraps GST_MIKEY_TYPE_PSK_INIT
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_PSK_INIT
+	//
+	// Initiator's pre-shared key message
 	MikeyTypePskInit MIKEYType = 0
 	// MikeyTypePskVerify wraps GST_MIKEY_TYPE_PSK_VERIFY
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_PSK_VERIFY
+	//
+	// Verification message of a Pre-shared key message
 	MikeyTypePskVerify MIKEYType = 1
 	// MikeyTypePkInit wraps GST_MIKEY_TYPE_PK_INIT
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_PK_INIT
+	//
+	// Initiator's public-key transport message
 	MikeyTypePkInit MIKEYType = 2
 	// MikeyTypePkVerify wraps GST_MIKEY_TYPE_PK_VERIFY
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_PK_VERIFY
+	//
+	// Verification message of a public-key message
 	MikeyTypePkVerify MIKEYType = 3
 	// MikeyTypeDhInit wraps GST_MIKEY_TYPE_DH_INIT
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_DH_INIT
+	//
+	// Initiator's DH exchange message
 	MikeyTypeDhInit MIKEYType = 4
 	// MikeyTypeDhResp wraps GST_MIKEY_TYPE_DH_RESP
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_DH_RESP
+	//
+	// Responder's DH exchange message
 	MikeyTypeDhResp MIKEYType = 5
 	// MikeyTypeError wraps GST_MIKEY_TYPE_ERROR
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GST_MIKEY_TYPE_ERROR
+	//
+	// Error message
 	MikeyTypeError MIKEYType = 6
 )
 
@@ -503,18 +505,18 @@ func (e MIKEYType) String() string {
 }
 
 // SDPResult wraps GstSDPResult
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdp.html#GstSDPResult
+//
+// Return values for the SDP functions.
 type SDPResult C.int
 
 const (
 	// SdpOK wraps GST_SDP_OK
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdp.html#GST_SDP_OK
+	//
+	// A successful return value
 	SdpOK SDPResult = 0
 	// SdpEinval wraps GST_SDP_EINVAL
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdp.html#GST_SDP_EINVAL
+	//
+	// a function was given invalid parameters
 	SdpEinval SDPResult = -1
 )
 
@@ -529,7 +531,17 @@ func (e SDPResult) String() string {
 
 // SdpAddressIsMulticast wraps gst_sdp_address_is_multicast
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp
+// The function takes the following parameters:
+// 
+// 	- nettype string: a network type 
+// 	- addrtype string: an address type 
+// 	- addr string: an address 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Check if the given @addr is a multicast address.
 func SdpAddressIsMulticast(nettype string, addrtype string, addr string) bool {
 	var carg1 *C.gchar   // in, none, string
 	var carg2 *C.gchar   // in, none, string
@@ -559,7 +571,16 @@ func SdpAddressIsMulticast(nettype string, addrtype string, addr string) bool {
 
 // SdpMakeKeymgmt wraps gst_sdp_make_keymgmt
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp
+// The function takes the following parameters:
+// 
+// 	- uri string: a #gchar URI 
+// 	- base64 string: a #gchar base64-encoded key data 
+// 
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Makes key management data
 func SdpMakeKeymgmt(uri string, base64 string) string {
 	var carg1 *C.gchar // in, none, string
 	var carg2 *C.gchar // in, none, string
@@ -583,8 +604,7 @@ func SdpMakeKeymgmt(uri string, base64 string) string {
 }
 
 // MIKEYDecryptInfo wraps GstMIKEYDecryptInfo
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYDecryptInfo
+//
 type MIKEYDecryptInfo struct {
 	*mIKEYDecryptInfo
 }
@@ -665,8 +685,7 @@ func UnsafeMIKEYDecryptInfoToGlibFull(m *MIKEYDecryptInfo) unsafe.Pointer {
 }
 
 // MIKEYEncryptInfo wraps GstMIKEYEncryptInfo
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYEncryptInfo
+//
 type MIKEYEncryptInfo struct {
 	*mIKEYEncryptInfo
 }
@@ -747,8 +766,8 @@ func UnsafeMIKEYEncryptInfoToGlibFull(m *MIKEYEncryptInfo) unsafe.Pointer {
 }
 
 // MIKEYMapSRTP wraps GstMIKEYMapSRTP
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYMapSRTP
+//
+// The Security policy Map item for SRTP
 type MIKEYMapSRTP struct {
 	*mIKEYMapSRTP
 }
@@ -829,8 +848,8 @@ func UnsafeMIKEYMapSRTPToGlibFull(m *MIKEYMapSRTP) unsafe.Pointer {
 }
 
 // MIKEYMessage wraps GstMIKEYMessage
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYMessage
+//
+// Structure holding the information of the MIKEY message
 type MIKEYMessage struct {
 	*mIKEYMessage
 }
@@ -927,7 +946,11 @@ func UnsafeMIKEYMessageToGlibFull(m *MIKEYMessage) unsafe.Pointer {
 
 // NewMIKEYMessage wraps gst_mikey_message_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_new
+// The function returns the following values:
+// 
+// 	- goret *MIKEYMessage 
+//
+// Make a new MIKEY message.
 func NewMIKEYMessage() *MIKEYMessage {
 	var cret *C.GstMIKEYMessage // return, full, converted
 
@@ -942,7 +965,17 @@ func NewMIKEYMessage() *MIKEYMessage {
 
 // NewMIKEYMessageFromBytes wraps gst_mikey_message_new_from_bytes
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_new_from_bytes
+// The function takes the following parameters:
+// 
+// 	- bytes *glib.Bytes: a #GBytes 
+// 	- info *MIKEYDecryptInfo: a #GstMIKEYDecryptInfo 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYMessage 
+// 	- _goerr error (nullable): an error 
+//
+// Make a new #GstMIKEYMessage from @bytes.
 func NewMIKEYMessageFromBytes(bytes *glib.Bytes, info *MIKEYDecryptInfo) (*MIKEYMessage, error) {
 	var carg1 *C.GBytes              // in, none, converted
 	var carg2 *C.GstMIKEYDecryptInfo // in, none, converted
@@ -969,7 +1002,18 @@ func NewMIKEYMessageFromBytes(bytes *glib.Bytes, info *MIKEYDecryptInfo) (*MIKEY
 
 // NewMIKEYMessageFromCaps wraps gst_mikey_message_new_from_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_new_from_caps
+// The function takes the following parameters:
+// 
+// 	- caps *gst.Caps: a #GstCaps, including SRTP parameters (srtp/srtcp cipher, authorization, key data) 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYMessage (nullable) 
+//
+// Makes mikey message including:
+//  - Security Policy Payload
+//  - Key Data Transport Payload
+//  - Key Data Sub-Payload
 func NewMIKEYMessageFromCaps(caps *gst.Caps) *MIKEYMessage {
 	var carg1 *C.GstCaps         // in, none, converted
 	var cret  *C.GstMIKEYMessage // return, full, converted, nullable
@@ -990,7 +1034,17 @@ func NewMIKEYMessageFromCaps(caps *gst.Caps) *MIKEYMessage {
 
 // AddCsSrtp wraps gst_mikey_message_add_cs_srtp
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_add_cs_srtp
+// The function takes the following parameters:
+// 
+// 	- policy uint8: The security policy applied for the stream with @ssrc 
+// 	- ssrc uint32: the SSRC that must be used for the stream 
+// 	- roc uint32: current rollover counter 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a Crypto policy for SRTP to @msg.
 func (msg *MIKEYMessage) AddCsSrtp(policy uint8, ssrc uint32, roc uint32) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint8           // in, none, casted
@@ -1020,7 +1074,15 @@ func (msg *MIKEYMessage) AddCsSrtp(policy uint8, ssrc uint32, roc uint32) bool {
 
 // AddPayload wraps gst_mikey_message_add_payload
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_add_payload
+// The function takes the following parameters:
+// 
+// 	- payload *MIKEYPayload: a #GstMIKEYPayload 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a new payload to @msg.
 func (msg *MIKEYMessage) AddPayload(payload *MIKEYPayload) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 *C.GstMIKEYPayload // in, full, converted
@@ -1044,7 +1106,16 @@ func (msg *MIKEYMessage) AddPayload(payload *MIKEYPayload) bool {
 
 // AddPke wraps gst_mikey_message_add_pke
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_add_pke
+// The function takes the following parameters:
+// 
+// 	- c MIKEYCacheType: envelope key cache indicator 
+// 	- data []uint8: the encrypted envelope key 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a new PKE payload to @msg with the given parameters.
 func (msg *MIKEYMessage) AddPke(c MIKEYCacheType, data []uint8) bool {
 	var carg0 *C.GstMIKEYMessage  // in, none, converted
 	var carg1 C.GstMIKEYCacheType // in, none, casted
@@ -1075,7 +1146,15 @@ func (msg *MIKEYMessage) AddPke(c MIKEYCacheType, data []uint8) bool {
 
 // AddRand wraps gst_mikey_message_add_rand
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_add_rand
+// The function takes the following parameters:
+// 
+// 	- rand []uint8: random data 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a new RAND payload to @msg with the given parameters.
 func (msg *MIKEYMessage) AddRand(rand []uint8) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint8           // implicit
@@ -1103,7 +1182,15 @@ func (msg *MIKEYMessage) AddRand(rand []uint8) bool {
 
 // AddRandLen wraps gst_mikey_message_add_rand_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_add_rand_len
+// The function takes the following parameters:
+// 
+// 	- len uint8: length 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a new RAND payload to @msg with @len random bytes.
 func (msg *MIKEYMessage) AddRandLen(len uint8) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint8           // in, none, casted
@@ -1127,7 +1214,12 @@ func (msg *MIKEYMessage) AddRandLen(len uint8) bool {
 
 // AddTNowNtpUtc wraps gst_mikey_message_add_t_now_ntp_utc
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_add_t_now_ntp_utc
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a new T payload to @msg that contains the current time
+// in NTP-UTC format.
 func (msg *MIKEYMessage) AddTNowNtpUtc() bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var cret  C.gboolean         // return
@@ -1148,7 +1240,10 @@ func (msg *MIKEYMessage) AddTNowNtpUtc() bool {
 
 // Base64Encode wraps gst_mikey_message_base64_encode
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_base64_encode
+// The function returns the following values:
+// 
+// 	- goret string 
+//
 func (msg *MIKEYMessage) Base64Encode() string {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var cret  *C.gchar           // return, full, string
@@ -1168,7 +1263,16 @@ func (msg *MIKEYMessage) Base64Encode() string {
 
 // FindPayload wraps gst_mikey_message_find_payload
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_find_payload
+// The function takes the following parameters:
+// 
+// 	- typ MIKEYPayloadType: a #GstMIKEYPayloadType 
+// 	- nth uint: payload to find 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYPayload (nullable) 
+//
+// Find the @nth occurrence of the payload with @type in @msg.
 func (msg *MIKEYMessage) FindPayload(typ MIKEYPayloadType, nth uint) *MIKEYPayload {
 	var carg0 *C.GstMIKEYMessage    // in, none, converted
 	var carg1 C.GstMIKEYPayloadType // in, none, casted
@@ -1195,7 +1299,15 @@ func (msg *MIKEYMessage) FindPayload(typ MIKEYPayloadType, nth uint) *MIKEYPaylo
 
 // GetCsSrtp wraps gst_mikey_message_get_cs_srtp
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_get_cs_srtp
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYMapSRTP (nullable) 
+//
+// Get the policy information of @msg at @idx.
 func (msg *MIKEYMessage) GetCsSrtp(idx uint) *MIKEYMapSRTP {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -1219,7 +1331,11 @@ func (msg *MIKEYMessage) GetCsSrtp(idx uint) *MIKEYMapSRTP {
 
 // GetNCs wraps gst_mikey_message_get_n_cs
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_get_n_cs
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of crypto sessions in @msg.
 func (msg *MIKEYMessage) GetNCs() uint {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var cret  C.guint            // return, none, casted
@@ -1238,7 +1354,11 @@ func (msg *MIKEYMessage) GetNCs() uint {
 
 // GetNPayloads wraps gst_mikey_message_get_n_payloads
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_get_n_payloads
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of payloads in @msg.
 func (msg *MIKEYMessage) GetNPayloads() uint {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var cret  C.guint            // return, none, casted
@@ -1257,7 +1377,15 @@ func (msg *MIKEYMessage) GetNPayloads() uint {
 
 // GetPayload wraps gst_mikey_message_get_payload
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_get_payload
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYPayload (nullable) 
+//
+// Get the #GstMIKEYPayload at @idx in @msg
 func (msg *MIKEYMessage) GetPayload(idx uint) *MIKEYPayload {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -1281,7 +1409,18 @@ func (msg *MIKEYMessage) GetPayload(idx uint) *MIKEYPayload {
 
 // InsertCsSrtp wraps gst_mikey_message_insert_cs_srtp
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_insert_cs_srtp
+// The function takes the following parameters:
+// 
+// 	- idx int32: the index to insert at 
+// 	- _map *MIKEYMapSRTP: the map info 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Insert a Crypto Session map for SRTP in @msg at @idx
+// 
+// When @idx is -1, the policy will be appended.
 func (msg *MIKEYMessage) InsertCsSrtp(idx int32, _map *MIKEYMapSRTP) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.gint             // in, none, casted
@@ -1308,7 +1447,17 @@ func (msg *MIKEYMessage) InsertCsSrtp(idx int32, _map *MIKEYMapSRTP) bool {
 
 // InsertPayload wraps gst_mikey_message_insert_payload
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_insert_payload
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 	- payload *MIKEYPayload: a #GstMIKEYPayload 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Insert the @payload at index @idx in @msg. If @idx is -1, the payload
+// will be appended to @msg.
 func (msg *MIKEYMessage) InsertPayload(idx uint, payload *MIKEYPayload) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -1335,7 +1484,15 @@ func (msg *MIKEYMessage) InsertPayload(idx uint, payload *MIKEYPayload) bool {
 
 // RemoveCsSrtp wraps gst_mikey_message_remove_cs_srtp
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_remove_cs_srtp
+// The function takes the following parameters:
+// 
+// 	- idx int32: the index to remove 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Remove the SRTP policy at @idx.
 func (msg *MIKEYMessage) RemoveCsSrtp(idx int32) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.gint             // in, none, casted
@@ -1359,7 +1516,15 @@ func (msg *MIKEYMessage) RemoveCsSrtp(idx int32) bool {
 
 // RemovePayload wraps gst_mikey_message_remove_payload
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_remove_payload
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Remove the payload in @msg at @idx
 func (msg *MIKEYMessage) RemovePayload(idx uint) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -1383,7 +1548,16 @@ func (msg *MIKEYMessage) RemovePayload(idx uint) bool {
 
 // ReplaceCsSrtp wraps gst_mikey_message_replace_cs_srtp
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_replace_cs_srtp
+// The function takes the following parameters:
+// 
+// 	- idx int32: the index to insert at 
+// 	- _map *MIKEYMapSRTP: the map info 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Replace a Crypto Session map for SRTP in @msg at @idx with @map.
 func (msg *MIKEYMessage) ReplaceCsSrtp(idx int32, _map *MIKEYMapSRTP) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.gint             // in, none, casted
@@ -1410,7 +1584,16 @@ func (msg *MIKEYMessage) ReplaceCsSrtp(idx int32, _map *MIKEYMapSRTP) bool {
 
 // ReplacePayload wraps gst_mikey_message_replace_payload
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_replace_payload
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 	- payload *MIKEYPayload: a #GstMIKEYPayload 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Replace the payload at @idx in @msg with @payload.
 func (msg *MIKEYMessage) ReplacePayload(idx uint, payload *MIKEYPayload) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -1437,7 +1620,20 @@ func (msg *MIKEYMessage) ReplacePayload(idx uint, payload *MIKEYPayload) bool {
 
 // SetInfo wraps gst_mikey_message_set_info
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_set_info
+// The function takes the following parameters:
+// 
+// 	- version uint8: a version 
+// 	- typ MIKEYType: a #GstMIKEYType 
+// 	- v bool: verify flag 
+// 	- prfFunc MIKEYPRFFunc: the #GstMIKEYPRFFunc function to use 
+// 	- csbId uint32: the Crypto Session Bundle id 
+// 	- mapType MIKEYMapType: the #GstMIKEYMapType 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the information in @msg.
 func (msg *MIKEYMessage) SetInfo(version uint8, typ MIKEYType, v bool, prfFunc MIKEYPRFFunc, csbId uint32, mapType MIKEYMapType) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 C.guint8           // in, none, casted
@@ -1478,7 +1674,16 @@ func (msg *MIKEYMessage) SetInfo(version uint8, typ MIKEYType, v bool, prfFunc M
 
 // ToBytes wraps gst_mikey_message_to_bytes
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_to_bytes
+// The function takes the following parameters:
+// 
+// 	- info *MIKEYEncryptInfo: a #GstMIKEYEncryptInfo 
+// 
+// The function returns the following values:
+// 
+// 	- goret *glib.Bytes 
+// 	- _goerr error (nullable): an error 
+//
+// Convert @msg to a #GBytes.
 func (msg *MIKEYMessage) ToBytes(info *MIKEYEncryptInfo) (*glib.Bytes, error) {
 	var carg0 *C.GstMIKEYMessage     // in, none, converted
 	var carg1 *C.GstMIKEYEncryptInfo // in, none, converted
@@ -1505,7 +1710,14 @@ func (msg *MIKEYMessage) ToBytes(info *MIKEYEncryptInfo) (*glib.Bytes, error) {
 
 // ToCaps wraps gst_mikey_message_to_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_message_to_caps
+// The function takes the following parameters:
+// 
+// 	- caps *gst.Caps: a #GstCaps to be filled with SRTP parameters (srtp/srtcp cipher, authorization, key data) 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
 func (msg *MIKEYMessage) ToCaps(caps *gst.Caps) bool {
 	var carg0 *C.GstMIKEYMessage // in, none, converted
 	var carg1 *C.GstCaps         // in, none, converted
@@ -1528,8 +1740,8 @@ func (msg *MIKEYMessage) ToCaps(caps *gst.Caps) bool {
 }
 
 // MIKEYPayload wraps GstMIKEYPayload
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayload
+//
+// Hold the common fields for all payloads
 type MIKEYPayload struct {
 	*mIKEYPayload
 }
@@ -1626,7 +1838,15 @@ func UnsafeMIKEYPayloadToGlibFull(m *MIKEYPayload) unsafe.Pointer {
 
 // NewMIKEYPayload wraps gst_mikey_payload_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_new
+// The function takes the following parameters:
+// 
+// 	- typ MIKEYPayloadType: a #GstMIKEYPayloadType 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYPayload (nullable) 
+//
+// Make a new #GstMIKEYPayload with @type.
 func NewMIKEYPayload(typ MIKEYPayloadType) *MIKEYPayload {
 	var carg1 C.GstMIKEYPayloadType // in, none, casted
 	var cret  *C.GstMIKEYPayload    // return, full, converted, nullable
@@ -1647,7 +1867,15 @@ func NewMIKEYPayload(typ MIKEYPayloadType) *MIKEYPayload {
 
 // KemacAddSub wraps gst_mikey_payload_kemac_add_sub
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_kemac_add_sub
+// The function takes the following parameters:
+// 
+// 	- newpay *MIKEYPayload: a #GstMIKEYPayload to add 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a new sub payload to @payload.
 func (payload *MIKEYPayload) KemacAddSub(newpay *MIKEYPayload) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 *C.GstMIKEYPayload // in, full, converted
@@ -1671,7 +1899,12 @@ func (payload *MIKEYPayload) KemacAddSub(newpay *MIKEYPayload) bool {
 
 // KemacGetNSub wraps gst_mikey_payload_kemac_get_n_sub
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_kemac_get_n_sub
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of sub payloads of @payload. @payload should be of type
+// %GST_MIKEY_PT_KEMAC.
 func (payload *MIKEYPayload) KemacGetNSub() uint {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var cret  C.guint            // return, none, casted
@@ -1690,7 +1923,16 @@ func (payload *MIKEYPayload) KemacGetNSub() uint {
 
 // KemacGetSub wraps gst_mikey_payload_kemac_get_sub
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_kemac_get_sub
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYPayload (nullable) 
+//
+// Get the sub payload of @payload at @idx. @payload should be of type
+// %GST_MIKEY_PT_KEMAC.
 func (payload *MIKEYPayload) KemacGetSub(idx uint) *MIKEYPayload {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -1714,7 +1956,15 @@ func (payload *MIKEYPayload) KemacGetSub(idx uint) *MIKEYPayload {
 
 // KemacRemoveSub wraps gst_mikey_payload_kemac_remove_sub
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_kemac_remove_sub
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index to remove 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Remove the sub payload at @idx in @payload.
 func (payload *MIKEYPayload) KemacRemoveSub(idx uint) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -1738,7 +1988,17 @@ func (payload *MIKEYPayload) KemacRemoveSub(idx uint) bool {
 
 // KemacSet wraps gst_mikey_payload_kemac_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_kemac_set
+// The function takes the following parameters:
+// 
+// 	- encAlg MIKEYEncAlg: the #GstMIKEYEncAlg 
+// 	- macAlg MIKEYMacAlg: a #GstMIKEYMacAlg 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the KEMAC parameters. @payload should point to a %GST_MIKEY_PT_KEMAC
+// payload.
 func (payload *MIKEYPayload) KemacSet(encAlg MIKEYEncAlg, macAlg MIKEYMacAlg) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.GstMIKEYEncAlg   // in, none, casted
@@ -1765,7 +2025,16 @@ func (payload *MIKEYPayload) KemacSet(encAlg MIKEYEncAlg, macAlg MIKEYMacAlg) bo
 
 // KeyDataSetInterval wraps gst_mikey_payload_key_data_set_interval
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_key_data_set_interval
+// The function takes the following parameters:
+// 
+// 	- vfData []uint8: the Valid From data 
+// 	- vtData []uint8: the Valid To data 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the key validity period in the %GST_MIKEY_PT_KEY_DATA @payload.
 func (payload *MIKEYPayload) KeyDataSetInterval(vfData []uint8, vtData []uint8) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint8           // implicit
@@ -1800,7 +2069,17 @@ func (payload *MIKEYPayload) KeyDataSetInterval(vfData []uint8, vtData []uint8) 
 
 // KeyDataSetKey wraps gst_mikey_payload_key_data_set_key
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_key_data_set_key
+// The function takes the following parameters:
+// 
+// 	- keyType MIKEYKeyDataType: a #GstMIKEYKeyDataType 
+// 	- keyData []uint8: the key of type @key_type 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set @key_len bytes of @key_data of type @key_type as the key for the
+// %GST_MIKEY_PT_KEY_DATA @payload.
 func (payload *MIKEYPayload) KeyDataSetKey(keyType MIKEYKeyDataType, keyData []uint8) bool {
 	var carg0 *C.GstMIKEYPayload    // in, none, converted
 	var carg1 C.GstMIKEYKeyDataType // in, none, casted
@@ -1831,7 +2110,16 @@ func (payload *MIKEYPayload) KeyDataSetKey(keyType MIKEYKeyDataType, keyData []u
 
 // KeyDataSetSalt wraps gst_mikey_payload_key_data_set_salt
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_key_data_set_salt
+// The function takes the following parameters:
+// 
+// 	- saltData []uint8 (nullable): the salt 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the salt key data. If @salt_len is 0 and @salt_data is %NULL, the
+// salt data will be removed.
 func (payload *MIKEYPayload) KeyDataSetSalt(saltData []uint8) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint16          // implicit
@@ -1859,7 +2147,15 @@ func (payload *MIKEYPayload) KeyDataSetSalt(saltData []uint8) bool {
 
 // KeyDataSetSpi wraps gst_mikey_payload_key_data_set_spi
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_key_data_set_spi
+// The function takes the following parameters:
+// 
+// 	- spiData []uint8: the SPI/MKI data 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the SPI/MKI validity in the %GST_MIKEY_PT_KEY_DATA @payload.
 func (payload *MIKEYPayload) KeyDataSetSpi(spiData []uint8) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint8           // implicit
@@ -1887,7 +2183,17 @@ func (payload *MIKEYPayload) KeyDataSetSpi(spiData []uint8) bool {
 
 // PkeSet wraps gst_mikey_payload_pke_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_pke_set
+// The function takes the following parameters:
+// 
+// 	- c MIKEYCacheType: envelope key cache indicator 
+// 	- data []uint8: the encrypted envelope key 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the PKE values in @payload. @payload must be of type
+// %GST_MIKEY_PT_PKE.
 func (payload *MIKEYPayload) PkeSet(c MIKEYCacheType, data []uint8) bool {
 	var carg0 *C.GstMIKEYPayload  // in, none, converted
 	var carg1 C.GstMIKEYCacheType // in, none, casted
@@ -1918,7 +2224,15 @@ func (payload *MIKEYPayload) PkeSet(c MIKEYCacheType, data []uint8) bool {
 
 // RandSet wraps gst_mikey_payload_rand_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_rand_set
+// The function takes the following parameters:
+// 
+// 	- rand []uint8: random values 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the random values in a %GST_MIKEY_PT_RAND @payload.
 func (payload *MIKEYPayload) RandSet(rand []uint8) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint8           // implicit
@@ -1946,7 +2260,17 @@ func (payload *MIKEYPayload) RandSet(rand []uint8) bool {
 
 // SpAddParam wraps gst_mikey_payload_sp_add_param
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_sp_add_param
+// The function takes the following parameters:
+// 
+// 	- typ uint8: a type 
+// 	- val []uint8: @len bytes of data 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Add a new parameter to the %GST_MIKEY_PT_SP @payload with @type, @len
+// and @val.
 func (payload *MIKEYPayload) SpAddParam(typ uint8, val []uint8) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint8           // in, none, casted
@@ -1977,7 +2301,12 @@ func (payload *MIKEYPayload) SpAddParam(typ uint8, val []uint8) bool {
 
 // SpGetNParams wraps gst_mikey_payload_sp_get_n_params
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_sp_get_n_params
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of security policy parameters in a %GST_MIKEY_PT_SP
+// @payload.
 func (payload *MIKEYPayload) SpGetNParams() uint {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var cret  C.guint            // return, none, casted
@@ -1996,7 +2325,16 @@ func (payload *MIKEYPayload) SpGetNParams() uint {
 
 // SpGetParam wraps gst_mikey_payload_sp_get_param
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_sp_get_param
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *MIKEYPayloadSPParam (nullable) 
+//
+// Get the Security Policy parameter in a %GST_MIKEY_PT_SP @payload
+// at @idx.
 func (payload *MIKEYPayload) SpGetParam(idx uint) *MIKEYPayloadSPParam {
 	var carg0 *C.GstMIKEYPayload        // in, none, converted
 	var carg1 C.guint                   // in, none, casted
@@ -2020,7 +2358,16 @@ func (payload *MIKEYPayload) SpGetParam(idx uint) *MIKEYPayloadSPParam {
 
 // SpRemoveParam wraps gst_mikey_payload_sp_remove_param
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_sp_remove_param
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Remove the Security Policy parameters from a %GST_MIKEY_PT_SP
+// @payload at @idx.
 func (payload *MIKEYPayload) SpRemoveParam(idx uint) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -2044,7 +2391,16 @@ func (payload *MIKEYPayload) SpRemoveParam(idx uint) bool {
 
 // SpSet wraps gst_mikey_payload_sp_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#gst_mikey_payload_sp_set
+// The function takes the following parameters:
+// 
+// 	- policy uint: the policy number 
+// 	- proto MIKEYSecProto: a #GstMIKEYSecProto 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the Security Policy parameters for @payload.
 func (payload *MIKEYPayload) SpSet(policy uint, proto MIKEYSecProto) bool {
 	var carg0 *C.GstMIKEYPayload // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -2070,8 +2426,8 @@ func (payload *MIKEYPayload) SpSet(policy uint, proto MIKEYSecProto) bool {
 }
 
 // MIKEYPayloadKEMAC wraps GstMIKEYPayloadKEMAC
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadKEMAC
+//
+// A structure holding the KEMAC payload
 type MIKEYPayloadKEMAC struct {
 	*mIKEYPayloadKEMAC
 }
@@ -2152,8 +2508,9 @@ func UnsafeMIKEYPayloadKEMACToGlibFull(m *MIKEYPayloadKEMAC) unsafe.Pointer {
 }
 
 // MIKEYPayloadKeyData wraps GstMIKEYPayloadKeyData
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadKeyData
+//
+// The Key data payload contains key material. It should be added as sub
+// payload to the KEMAC.
 type MIKEYPayloadKeyData struct {
 	*mIKEYPayloadKeyData
 }
@@ -2234,8 +2591,11 @@ func UnsafeMIKEYPayloadKeyDataToGlibFull(m *MIKEYPayloadKeyData) unsafe.Pointer 
 }
 
 // MIKEYPayloadPKE wraps GstMIKEYPayloadPKE
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadPKE
+//
+// The Envelope data payload contains the encrypted envelope key that is
+// used in the public-key transport to protect the data in the Key data
+// transport payload.  The encryption algorithm used is implicit from
+// the certificate/public key used.
 type MIKEYPayloadPKE struct {
 	*mIKEYPayloadPKE
 }
@@ -2316,8 +2676,8 @@ func UnsafeMIKEYPayloadPKEToGlibFull(m *MIKEYPayloadPKE) unsafe.Pointer {
 }
 
 // MIKEYPayloadRAND wraps GstMIKEYPayloadRAND
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadRAND
+//
+// The RAND payload consists of a (pseudo-)random bit-string
 type MIKEYPayloadRAND struct {
 	*mIKEYPayloadRAND
 }
@@ -2398,8 +2758,9 @@ func UnsafeMIKEYPayloadRANDToGlibFull(m *MIKEYPayloadRAND) unsafe.Pointer {
 }
 
 // MIKEYPayloadSP wraps GstMIKEYPayloadSP
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadSP
+//
+// The Security Policy payload defines a set of policies that apply to a
+// specific security protocol
 type MIKEYPayloadSP struct {
 	*mIKEYPayloadSP
 }
@@ -2480,8 +2841,8 @@ func UnsafeMIKEYPayloadSPToGlibFull(m *MIKEYPayloadSP) unsafe.Pointer {
 }
 
 // MIKEYPayloadSPParam wraps GstMIKEYPayloadSPParam
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadSPParam
+//
+// A Type/Length/Value field for security parameters
 type MIKEYPayloadSPParam struct {
 	*mIKEYPayloadSPParam
 }
@@ -2562,8 +2923,8 @@ func UnsafeMIKEYPayloadSPParamToGlibFull(m *MIKEYPayloadSPParam) unsafe.Pointer 
 }
 
 // MIKEYPayloadT wraps GstMIKEYPayloadT
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstmikey.html#GstMIKEYPayloadT
+//
+// The timestamp payload carries the timestamp information
 type MIKEYPayloadT struct {
 	*mIKEYPayloadT
 }
@@ -2644,8 +3005,8 @@ func UnsafeMIKEYPayloadTToGlibFull(m *MIKEYPayloadT) unsafe.Pointer {
 }
 
 // SDPAttribute wraps GstSDPAttribute
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPAttribute
+//
+// The contents of the SDP "a=" field which contains a key/value pair.
 type SDPAttribute struct {
 	*sDPAttribute
 }
@@ -2727,7 +3088,11 @@ func UnsafeSDPAttributeToGlibFull(s *SDPAttribute) unsafe.Pointer {
 
 // Clear wraps gst_sdp_attribute_clear
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_attribute_clear
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Clear the attribute.
 func (attr *SDPAttribute) Clear() SDPResult {
 	var carg0 *C.GstSDPAttribute // in, none, converted
 	var cret  C.GstSDPResult     // return, none, casted
@@ -2746,7 +3111,16 @@ func (attr *SDPAttribute) Clear() SDPResult {
 
 // Set wraps gst_sdp_attribute_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_attribute_set
+// The function takes the following parameters:
+// 
+// 	- key string: the key 
+// 	- value string (nullable): the value 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the attribute with @key and @value.
 func (attr *SDPAttribute) Set(key string, value string) SDPResult {
 	var carg0 *C.GstSDPAttribute // in, none, converted
 	var carg1 *C.gchar           // in, none, string
@@ -2774,8 +3148,9 @@ func (attr *SDPAttribute) Set(key string, value string) SDPResult {
 }
 
 // SDPBandwidth wraps GstSDPBandwidth
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPBandwidth
+//
+// The contents of the SDP "b=" field which specifies the proposed bandwidth to
+// be used by the session or media.
 type SDPBandwidth struct {
 	*sDPBandwidth
 }
@@ -2857,7 +3232,11 @@ func UnsafeSDPBandwidthToGlibFull(s *SDPBandwidth) unsafe.Pointer {
 
 // Clear wraps gst_sdp_bandwidth_clear
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_bandwidth_clear
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Reset the bandwidth information in @bw.
 func (bw *SDPBandwidth) Clear() SDPResult {
 	var carg0 *C.GstSDPBandwidth // in, none, converted
 	var cret  C.GstSDPResult     // return, none, casted
@@ -2876,7 +3255,16 @@ func (bw *SDPBandwidth) Clear() SDPResult {
 
 // Set wraps gst_sdp_bandwidth_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_bandwidth_set
+// The function takes the following parameters:
+// 
+// 	- bwtype string: the bandwidth modifier type 
+// 	- bandwidth uint: the bandwidth in kilobits per second 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set bandwidth information in @bw.
 func (bw *SDPBandwidth) Set(bwtype string, bandwidth uint) SDPResult {
 	var carg0 *C.GstSDPBandwidth // in, none, converted
 	var carg1 *C.gchar           // in, none, string
@@ -2901,8 +3289,8 @@ func (bw *SDPBandwidth) Set(bwtype string, bandwidth uint) SDPResult {
 }
 
 // SDPConnection wraps GstSDPConnection
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPConnection
+//
+// The contents of the SDP "c=" field which contains connection data.
 type SDPConnection struct {
 	*sDPConnection
 }
@@ -2984,7 +3372,11 @@ func UnsafeSDPConnectionToGlibFull(s *SDPConnection) unsafe.Pointer {
 
 // Clear wraps gst_sdp_connection_clear
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_connection_clear
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Clear the connection.
 func (conn *SDPConnection) Clear() SDPResult {
 	var carg0 *C.GstSDPConnection // in, none, converted
 	var cret  C.GstSDPResult      // return, none, casted
@@ -3003,7 +3395,20 @@ func (conn *SDPConnection) Clear() SDPResult {
 
 // Set wraps gst_sdp_connection_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_connection_set
+// The function takes the following parameters:
+// 
+// 	- nettype string: the type of network. "IN" is defined to have the meaning
+// "Internet". 
+// 	- addrtype string: the type of address. 
+// 	- address string: the address 
+// 	- ttl uint: the time to live of the address 
+// 	- addrNumber uint: the number of layers 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the connection with the given parameters.
 func (conn *SDPConnection) Set(nettype string, addrtype string, address string, ttl uint, addrNumber uint) SDPResult {
 	var carg0 *C.GstSDPConnection // in, none, converted
 	var carg1 *C.gchar            // in, none, string
@@ -3039,8 +3444,9 @@ func (conn *SDPConnection) Set(nettype string, addrtype string, address string, 
 }
 
 // SDPKey wraps GstSDPKey
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPKey
+//
+// The contents of the SDP "k=" field which is used to convey encryption
+// keys.
 type SDPKey struct {
 	*sDPKey
 }
@@ -3121,8 +3527,8 @@ func UnsafeSDPKeyToGlibFull(s *SDPKey) unsafe.Pointer {
 }
 
 // SDPMedia wraps GstSDPMedia
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPMedia
+//
+// The contents of the SDP "m=" field with all related fields.
 type SDPMedia struct {
 	*sDPMedia
 }
@@ -3204,7 +3610,17 @@ func UnsafeSDPMediaToGlibFull(s *SDPMedia) unsafe.Pointer {
 
 // SDPMediaInit wraps gst_sdp_media_init
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_init
+// The function returns the following values:
+// 
+// 	- media SDPMedia: a #GstSDPMedia 
+// 	- goret SDPResult 
+//
+// Initialize @media so that its contents are as if it was freshly allocated
+// with gst_sdp_media_new(). This function is mostly used to initialize a media
+// allocated on the stack. gst_sdp_media_uninit() undoes this operation.
+// 
+// When this function is invoked on newly allocated data (with malloc or on the
+// stack), its contents should be set to 0 before calling this function.
 func SDPMediaInit() (SDPMedia, SDPResult) {
 	var carg1 C.GstSDPMedia  // out, transfer: none, C Pointers: 0, Name: SDPMedia, caller-allocates
 	var cret  C.GstSDPResult // return, none, casted
@@ -3224,7 +3640,12 @@ func SDPMediaInit() (SDPMedia, SDPResult) {
 
 // NewSDPMedia wraps gst_sdp_media_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_new
+// The function returns the following values:
+// 
+// 	- media *SDPMedia: pointer to new #GstSDPMedia 
+// 	- goret SDPResult 
+//
+// Allocate a new GstSDPMedia and store the result in @media.
 func NewSDPMedia() (*SDPMedia, SDPResult) {
 	var carg1 *C.GstSDPMedia // out, full, converted
 	var cret  C.GstSDPResult // return, none, casted
@@ -3242,7 +3663,28 @@ func NewSDPMedia() (*SDPMedia, SDPResult) {
 
 // SDPMediaSetMediaFromCaps wraps gst_sdp_media_set_media_from_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_set_media_from_caps
+// The function takes the following parameters:
+// 
+// 	- caps *gst.Caps: a #GstCaps 
+// 
+// The function returns the following values:
+// 
+// 	- media SDPMedia: a #GstSDPMedia 
+// 	- goret SDPResult 
+//
+// Mapping of caps to SDP fields:
+// 
+// a=rtpmap:(payload) (encoding_name) or (clock_rate)[or (encoding_params)]
+// 
+// a=framesize:(payload) (width)-(height)
+// 
+// a=fmtp:(payload) (param)[=(value)];...
+// 
+// a=rtcp-fb:(payload) (param1) [param2]...
+// 
+// a=extmap:(id)[/direction] (extensionname) (extensionattributes)
+// 
+// Only the first #GstStructure of the @caps is used.
 func SDPMediaSetMediaFromCaps(caps *gst.Caps) (SDPMedia, SDPResult) {
 	var carg1 *C.GstCaps     // in, none, converted
 	var carg2 C.GstSDPMedia  // out, transfer: none, C Pointers: 0, Name: SDPMedia, caller-allocates
@@ -3266,7 +3708,16 @@ func SDPMediaSetMediaFromCaps(caps *gst.Caps) (SDPMedia, SDPResult) {
 
 // AddAttribute wraps gst_sdp_media_add_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_add_attribute
+// The function takes the following parameters:
+// 
+// 	- key string: a key 
+// 	- value string (nullable): a value 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add the attribute with @key and @value to @media.
 func (media *SDPMedia) AddAttribute(key string, value string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -3295,7 +3746,16 @@ func (media *SDPMedia) AddAttribute(key string, value string) SDPResult {
 
 // AddBandwidth wraps gst_sdp_media_add_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_add_bandwidth
+// The function takes the following parameters:
+// 
+// 	- bwtype string: the bandwidth modifier type 
+// 	- bandwidth uint: the bandwidth in kilobits per second 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add the bandwidth information with @bwtype and @bandwidth to @media.
 func (media *SDPMedia) AddBandwidth(bwtype string, bandwidth uint) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -3321,7 +3781,20 @@ func (media *SDPMedia) AddBandwidth(bwtype string, bandwidth uint) SDPResult {
 
 // AddConnection wraps gst_sdp_media_add_connection
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_add_connection
+// The function takes the following parameters:
+// 
+// 	- nettype string: the type of network. "IN" is defined to have the meaning
+// "Internet". 
+// 	- addrtype string: the type of address. 
+// 	- address string: the address 
+// 	- ttl uint: the time to live of the address 
+// 	- addrNumber uint: the number of layers 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add the given connection parameters to @media.
 func (media *SDPMedia) AddConnection(nettype string, addrtype string, address string, ttl uint, addrNumber uint) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -3358,7 +3831,15 @@ func (media *SDPMedia) AddConnection(nettype string, addrtype string, address st
 
 // AddFormat wraps gst_sdp_media_add_format
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_add_format
+// The function takes the following parameters:
+// 
+// 	- format string: the format 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add the format information to @media.
 func (media *SDPMedia) AddFormat(format string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -3381,7 +3862,11 @@ func (media *SDPMedia) AddFormat(format string) SDPResult {
 
 // AsText wraps gst_sdp_media_as_text
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_as_text
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Convert the contents of @media to a text string.
 func (media *SDPMedia) AsText() string {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  *C.gchar       // return, full, string
@@ -3401,7 +3886,11 @@ func (media *SDPMedia) AsText() string {
 
 // AttributesLen wraps gst_sdp_media_attributes_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_attributes_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of attribute fields in @media.
 func (media *SDPMedia) AttributesLen() uint {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  C.guint        // return, none, casted
@@ -3420,7 +3909,15 @@ func (media *SDPMedia) AttributesLen() uint {
 
 // AttributesToCaps wraps gst_sdp_media_attributes_to_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_attributes_to_caps
+// The function takes the following parameters:
+// 
+// 	- caps *gst.Caps: a #GstCaps 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Mapping of attributes of #GstSDPMedia to #GstCaps
 func (media *SDPMedia) AttributesToCaps(caps *gst.Caps) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.GstCaps     // in, none, converted
@@ -3442,7 +3939,11 @@ func (media *SDPMedia) AttributesToCaps(caps *gst.Caps) SDPResult {
 
 // BandwidthsLen wraps gst_sdp_media_bandwidths_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_bandwidths_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of bandwidth fields in @media.
 func (media *SDPMedia) BandwidthsLen() uint {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  C.guint        // return, none, casted
@@ -3461,7 +3962,11 @@ func (media *SDPMedia) BandwidthsLen() uint {
 
 // ConnectionsLen wraps gst_sdp_media_connections_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_connections_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of connection fields in @media.
 func (media *SDPMedia) ConnectionsLen() uint {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  C.guint        // return, none, casted
@@ -3480,7 +3985,13 @@ func (media *SDPMedia) ConnectionsLen() uint {
 
 // Copy wraps gst_sdp_media_copy
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_copy
+// The function returns the following values:
+// 
+// 	- copy *SDPMedia: pointer to new #GstSDPMedia 
+// 	- goret SDPResult 
+//
+// Allocate a new copy of @media and store the result in @copy. The value in
+// @copy should be release with gst_sdp_media_free function.
 func (media *SDPMedia) Copy() (*SDPMedia, SDPResult) {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.GstSDPMedia // out, full, converted
@@ -3502,7 +4013,11 @@ func (media *SDPMedia) Copy() (*SDPMedia, SDPResult) {
 
 // FormatsLen wraps gst_sdp_media_formats_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_formats_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of formats in @media.
 func (media *SDPMedia) FormatsLen() uint {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  C.guint        // return, none, casted
@@ -3521,7 +4036,15 @@ func (media *SDPMedia) FormatsLen() uint {
 
 // GetAttribute wraps gst_sdp_media_get_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_attribute
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPAttribute 
+//
+// Get the attribute at position @idx in @media.
 func (media *SDPMedia) GetAttribute(idx uint) *SDPAttribute {
 	var carg0 *C.GstSDPMedia     // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -3544,7 +4067,15 @@ func (media *SDPMedia) GetAttribute(idx uint) *SDPAttribute {
 
 // GetAttributeVal wraps gst_sdp_media_get_attribute_val
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_attribute_val
+// The function takes the following parameters:
+// 
+// 	- key string: a key 
+// 
+// The function returns the following values:
+// 
+// 	- goret string (nullable) 
+//
+// Get the first attribute value for @key in @media.
 func (media *SDPMedia) GetAttributeVal(key string) string {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -3569,7 +4100,16 @@ func (media *SDPMedia) GetAttributeVal(key string) string {
 
 // GetAttributeValN wraps gst_sdp_media_get_attribute_val_n
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_attribute_val_n
+// The function takes the following parameters:
+// 
+// 	- key string: a key 
+// 	- nth uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret string (nullable) 
+//
+// Get the @nth attribute value for @key in @media.
 func (media *SDPMedia) GetAttributeValN(key string, nth uint) string {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -3597,7 +4137,15 @@ func (media *SDPMedia) GetAttributeValN(key string, nth uint) string {
 
 // GetBandwidth wraps gst_sdp_media_get_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPBandwidth 
+//
+// Get the bandwidth at position @idx in @media.
 func (media *SDPMedia) GetBandwidth(idx uint) *SDPBandwidth {
 	var carg0 *C.GstSDPMedia     // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -3620,7 +4168,23 @@ func (media *SDPMedia) GetBandwidth(idx uint) *SDPBandwidth {
 
 // GetCapsFromMedia wraps gst_sdp_media_get_caps_from_media
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_caps_from_media
+// The function takes the following parameters:
+// 
+// 	- pt int32: a payload type 
+// 
+// The function returns the following values:
+// 
+// 	- goret *gst.Caps (nullable) 
+//
+// Mapping of caps from SDP fields:
+// 
+// a=rtpmap:(payload) (encoding_name)/(clock_rate)[/(encoding_params)]
+// 
+// a=framesize:(payload) (width)-(height)
+// 
+// a=fmtp:(payload) (param)[=(value)];...
+// 
+// Note that the extmap, ssrc and rid attributes are set only by gst_sdp_media_attributes_to_caps().
 func (media *SDPMedia) GetCapsFromMedia(pt int32) *gst.Caps {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.gint         // in, none, casted
@@ -3644,7 +4208,15 @@ func (media *SDPMedia) GetCapsFromMedia(pt int32) *gst.Caps {
 
 // GetConnection wraps gst_sdp_media_get_connection
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_connection
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPConnection 
+//
+// Get the connection at position @idx in @media.
 func (media *SDPMedia) GetConnection(idx uint) *SDPConnection {
 	var carg0 *C.GstSDPMedia      // in, none, converted
 	var carg1 C.guint             // in, none, casted
@@ -3667,7 +4239,15 @@ func (media *SDPMedia) GetConnection(idx uint) *SDPConnection {
 
 // GetFormat wraps gst_sdp_media_get_format
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_format
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the format information at position @idx in @media.
 func (media *SDPMedia) GetFormat(idx uint) string {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.guint        // in, none, casted
@@ -3689,7 +4269,11 @@ func (media *SDPMedia) GetFormat(idx uint) string {
 
 // GetInformation wraps gst_sdp_media_get_information
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_information
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the information of @media
 func (media *SDPMedia) GetInformation() string {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  *C.gchar       // return, none, string
@@ -3708,7 +4292,11 @@ func (media *SDPMedia) GetInformation() string {
 
 // GetKey wraps gst_sdp_media_get_key
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_key
+// The function returns the following values:
+// 
+// 	- goret *SDPKey 
+//
+// Get the encryption information from @media.
 func (media *SDPMedia) GetKey() *SDPKey {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  *C.GstSDPKey   // return, none, converted
@@ -3727,7 +4315,11 @@ func (media *SDPMedia) GetKey() *SDPKey {
 
 // GetMedia wraps gst_sdp_media_get_media
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_media
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the media description of @media.
 func (media *SDPMedia) GetMedia() string {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  *C.gchar       // return, none, string
@@ -3746,7 +4338,11 @@ func (media *SDPMedia) GetMedia() string {
 
 // GetNumPorts wraps gst_sdp_media_get_num_ports
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_num_ports
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of ports for @media.
 func (media *SDPMedia) GetNumPorts() uint {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  C.guint        // return, none, casted
@@ -3765,7 +4361,11 @@ func (media *SDPMedia) GetNumPorts() uint {
 
 // GetPort wraps gst_sdp_media_get_port
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_port
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the port number for @media.
 func (media *SDPMedia) GetPort() uint {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  C.guint        // return, none, casted
@@ -3784,7 +4384,11 @@ func (media *SDPMedia) GetPort() uint {
 
 // GetProto wraps gst_sdp_media_get_proto
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_get_proto
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the transport protocol of @media
 func (media *SDPMedia) GetProto() string {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  *C.gchar       // return, none, string
@@ -3803,7 +4407,17 @@ func (media *SDPMedia) GetProto() string {
 
 // InsertAttribute wraps gst_sdp_media_insert_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_insert_attribute
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- attr *SDPAttribute: a #GstSDPAttribute 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert the attribute to @media at @idx. When @idx is -1,
+// the attribute is appended.
 func (media *SDPMedia) InsertAttribute(idx int32, attr *SDPAttribute) SDPResult {
 	var carg0 *C.GstSDPMedia     // in, none, converted
 	var carg1 C.gint             // in, none, casted
@@ -3828,7 +4442,17 @@ func (media *SDPMedia) InsertAttribute(idx int32, attr *SDPAttribute) SDPResult 
 
 // InsertBandwidth wraps gst_sdp_media_insert_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_insert_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- bw *SDPBandwidth: a #GstSDPBandwidth 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert the bandwidth information to @media at @idx. When @idx is -1,
+// the bandwidth is appended.
 func (media *SDPMedia) InsertBandwidth(idx int32, bw *SDPBandwidth) SDPResult {
 	var carg0 *C.GstSDPMedia     // in, none, converted
 	var carg1 C.gint             // in, none, casted
@@ -3853,7 +4477,17 @@ func (media *SDPMedia) InsertBandwidth(idx int32, bw *SDPBandwidth) SDPResult {
 
 // InsertConnection wraps gst_sdp_media_insert_connection
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_insert_connection
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- conn *SDPConnection: a #GstSDPConnection 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert the connection information to @media at @idx. When @idx is -1,
+// the connection is appended.
 func (media *SDPMedia) InsertConnection(idx int32, conn *SDPConnection) SDPResult {
 	var carg0 *C.GstSDPMedia      // in, none, converted
 	var carg1 C.gint              // in, none, casted
@@ -3878,7 +4512,17 @@ func (media *SDPMedia) InsertConnection(idx int32, conn *SDPConnection) SDPResul
 
 // InsertFormat wraps gst_sdp_media_insert_format
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_insert_format
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- format string: the format 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert the format information to @media at @idx. When @idx is -1,
+// the format is appended.
 func (media *SDPMedia) InsertFormat(idx int32, format string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.gint         // in, none, casted
@@ -3904,7 +4548,13 @@ func (media *SDPMedia) InsertFormat(idx int32, format string) SDPResult {
 
 // ParseKeymgmt wraps gst_sdp_media_parse_keymgmt
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_parse_keymgmt
+// The function returns the following values:
+// 
+// 	- mikey *MIKEYMessage: pointer to new #GstMIKEYMessage 
+// 	- goret SDPResult 
+//
+// Creates a new #GstMIKEYMessage after parsing the key-mgmt attribute
+// from a #GstSDPMedia.
 func (media *SDPMedia) ParseKeymgmt() (*MIKEYMessage, SDPResult) {
 	var carg0 *C.GstSDPMedia     // in, none, converted
 	var carg1 *C.GstMIKEYMessage // out, full, converted
@@ -3926,7 +4576,15 @@ func (media *SDPMedia) ParseKeymgmt() (*MIKEYMessage, SDPResult) {
 
 // RemoveAttribute wraps gst_sdp_media_remove_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_remove_attribute
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the attribute in @media at @idx.
 func (media *SDPMedia) RemoveAttribute(idx uint) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.guint        // in, none, casted
@@ -3948,7 +4606,15 @@ func (media *SDPMedia) RemoveAttribute(idx uint) SDPResult {
 
 // RemoveBandwidth wraps gst_sdp_media_remove_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_remove_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the bandwidth information in @media at @idx.
 func (media *SDPMedia) RemoveBandwidth(idx uint) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.guint        // in, none, casted
@@ -3970,7 +4636,15 @@ func (media *SDPMedia) RemoveBandwidth(idx uint) SDPResult {
 
 // RemoveConnection wraps gst_sdp_media_remove_connection
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_remove_connection
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the connection information in @media at @idx.
 func (media *SDPMedia) RemoveConnection(idx uint) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.guint        // in, none, casted
@@ -3992,7 +4666,15 @@ func (media *SDPMedia) RemoveConnection(idx uint) SDPResult {
 
 // RemoveFormat wraps gst_sdp_media_remove_format
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_remove_format
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the format information in @media at @idx.
 func (media *SDPMedia) RemoveFormat(idx uint) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.guint        // in, none, casted
@@ -4014,7 +4696,16 @@ func (media *SDPMedia) RemoveFormat(idx uint) SDPResult {
 
 // ReplaceAttribute wraps gst_sdp_media_replace_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_replace_attribute
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 	- attr *SDPAttribute: a #GstSDPAttribute 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the attribute in @media at @idx with @attr.
 func (media *SDPMedia) ReplaceAttribute(idx uint, attr *SDPAttribute) SDPResult {
 	var carg0 *C.GstSDPMedia     // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -4039,7 +4730,16 @@ func (media *SDPMedia) ReplaceAttribute(idx uint, attr *SDPAttribute) SDPResult 
 
 // ReplaceBandwidth wraps gst_sdp_media_replace_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_replace_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 	- bw *SDPBandwidth: a #GstSDPBandwidth 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the bandwidth information in @media at @idx with @bw.
 func (media *SDPMedia) ReplaceBandwidth(idx uint, bw *SDPBandwidth) SDPResult {
 	var carg0 *C.GstSDPMedia     // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -4064,7 +4764,16 @@ func (media *SDPMedia) ReplaceBandwidth(idx uint, bw *SDPBandwidth) SDPResult {
 
 // ReplaceConnection wraps gst_sdp_media_replace_connection
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_replace_connection
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 	- conn *SDPConnection: a #GstSDPConnection 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the connection information in @media at @idx with @conn.
 func (media *SDPMedia) ReplaceConnection(idx uint, conn *SDPConnection) SDPResult {
 	var carg0 *C.GstSDPMedia      // in, none, converted
 	var carg1 C.guint             // in, none, casted
@@ -4089,7 +4798,16 @@ func (media *SDPMedia) ReplaceConnection(idx uint, conn *SDPConnection) SDPResul
 
 // ReplaceFormat wraps gst_sdp_media_replace_format
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_replace_format
+// The function takes the following parameters:
+// 
+// 	- idx uint: an index 
+// 	- format string: the format 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the format information in @media at @idx with @format.
 func (media *SDPMedia) ReplaceFormat(idx uint, format string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.guint        // in, none, casted
@@ -4115,7 +4833,15 @@ func (media *SDPMedia) ReplaceFormat(idx uint, format string) SDPResult {
 
 // SetInformation wraps gst_sdp_media_set_information
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_set_information
+// The function takes the following parameters:
+// 
+// 	- information string: the media information 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the media information of @media to @information.
 func (media *SDPMedia) SetInformation(information string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -4138,7 +4864,16 @@ func (media *SDPMedia) SetInformation(information string) SDPResult {
 
 // SetKey wraps gst_sdp_media_set_key
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_set_key
+// The function takes the following parameters:
+// 
+// 	- typ string: the encryption type 
+// 	- data string: the encryption data 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Adds the encryption information to @media.
 func (media *SDPMedia) SetKey(typ string, data string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -4165,7 +4900,15 @@ func (media *SDPMedia) SetKey(typ string, data string) SDPResult {
 
 // SetMedia wraps gst_sdp_media_set_media
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_set_media
+// The function takes the following parameters:
+// 
+// 	- med string: the media description 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the media description of @media to @med.
 func (media *SDPMedia) SetMedia(med string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -4188,7 +4931,16 @@ func (media *SDPMedia) SetMedia(med string) SDPResult {
 
 // SetPortInfo wraps gst_sdp_media_set_port_info
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_set_port_info
+// The function takes the following parameters:
+// 
+// 	- port uint: the port number 
+// 	- numPorts uint: the number of ports 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the port information in @media.
 func (media *SDPMedia) SetPortInfo(port uint, numPorts uint) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 C.guint        // in, none, casted
@@ -4213,7 +4965,15 @@ func (media *SDPMedia) SetPortInfo(port uint, numPorts uint) SDPResult {
 
 // SetProto wraps gst_sdp_media_set_proto
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_set_proto
+// The function takes the following parameters:
+// 
+// 	- proto string: the media transport protocol 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the media transport protocol of @media to @proto.
 func (media *SDPMedia) SetProto(proto string) SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -4236,7 +4996,13 @@ func (media *SDPMedia) SetProto(proto string) SDPResult {
 
 // Uninit wraps gst_sdp_media_uninit
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_media_uninit
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Free all resources allocated in @media. @media should not be used anymore after
+// this function. This function should be used when @media was allocated on the
+// stack and initialized with gst_sdp_media_init().
 func (media *SDPMedia) Uninit() SDPResult {
 	var carg0 *C.GstSDPMedia // in, none, converted
 	var cret  C.GstSDPResult // return, none, casted
@@ -4254,8 +5020,9 @@ func (media *SDPMedia) Uninit() SDPResult {
 }
 
 // SDPMessage wraps GstSDPMessage
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPMessage
+//
+// The GstSDPMessage helper functions makes it easy to parse and create SDP
+// messages.
 type SDPMessage struct {
 	*sDPMessage
 }
@@ -4352,7 +5119,20 @@ func UnsafeSDPMessageToGlibFull(s *SDPMessage) unsafe.Pointer {
 
 // SDPMessageAsURI wraps gst_sdp_message_as_uri
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_as_uri
+// The function takes the following parameters:
+// 
+// 	- scheme string: the uri scheme 
+// 	- msg *SDPMessage: the #GstSDPMessage 
+// 
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Creates a uri from @msg with the given @scheme. The uri has the format:
+// 
+//  \@scheme:///[#type=value *[&amp;type=value]]
+// 
+//  Where each value is url encoded.
 func SDPMessageAsURI(scheme string, msg *SDPMessage) string {
 	var carg1 *C.gchar         // in, none, string
 	var carg2 *C.GstSDPMessage // in, none, converted
@@ -4376,7 +5156,17 @@ func SDPMessageAsURI(scheme string, msg *SDPMessage) string {
 
 // SDPMessageInit wraps gst_sdp_message_init
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_init
+// The function returns the following values:
+// 
+// 	- msg SDPMessage: a #GstSDPMessage 
+// 	- goret SDPResult 
+//
+// Initialize @msg so that its contents are as if it was freshly allocated
+// with gst_sdp_message_new(). This function is mostly used to initialize a message
+// allocated on the stack. gst_sdp_message_uninit() undoes this operation.
+// 
+// When this function is invoked on newly allocated data (with malloc or on the
+// stack), its contents should be set to 0 before calling this function.
 func SDPMessageInit() (SDPMessage, SDPResult) {
 	var carg1 C.GstSDPMessage // out, transfer: none, C Pointers: 0, Name: SDPMessage, caller-allocates
 	var cret  C.GstSDPResult  // return, none, casted
@@ -4396,7 +5186,12 @@ func SDPMessageInit() (SDPMessage, SDPResult) {
 
 // NewSDPMessage wraps gst_sdp_message_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_new
+// The function returns the following values:
+// 
+// 	- msg *SDPMessage: pointer to new #GstSDPMessage 
+// 	- goret SDPResult 
+//
+// Allocate a new GstSDPMessage and store the result in @msg.
 func NewSDPMessage() (*SDPMessage, SDPResult) {
 	var carg1 *C.GstSDPMessage // out, full, converted
 	var cret  C.GstSDPResult   // return, none, casted
@@ -4414,7 +5209,16 @@ func NewSDPMessage() (*SDPMessage, SDPResult) {
 
 // NewSDPMessageFromText wraps gst_sdp_message_new_from_text
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_new_from_text
+// The function takes the following parameters:
+// 
+// 	- text string: A dynamically allocated string representing the SDP description 
+// 
+// The function returns the following values:
+// 
+// 	- msg *SDPMessage: pointer to new #GstSDPMessage 
+// 	- goret SDPResult 
+//
+// Parse @text and create a new SDPMessage from these.
 func NewSDPMessageFromText(text string) (*SDPMessage, SDPResult) {
 	var carg1 *C.gchar         // in, none, string
 	var carg2 *C.GstSDPMessage // out, full, converted
@@ -4437,7 +5241,17 @@ func NewSDPMessageFromText(text string) (*SDPMessage, SDPResult) {
 
 // SDPMessageParseBuffer wraps gst_sdp_message_parse_buffer
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_parse_buffer
+// The function takes the following parameters:
+// 
+// 	- data []uint8: the start of the buffer 
+// 	- msg *SDPMessage: the result #GstSDPMessage 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Parse the contents of @size bytes pointed to by @data and store the result in
+// @msg.
 func SDPMessageParseBuffer(data []uint8, msg *SDPMessage) SDPResult {
 	var carg1 *C.guint8        // in, transfer: none, C Pointers: 1, Name: array[guint8], array (inner guint8 (*typesystem.CastablePrimitive), length-by: carg2)
 	var carg2 C.guint          // implicit
@@ -4463,7 +5277,24 @@ func SDPMessageParseBuffer(data []uint8, msg *SDPMessage) SDPResult {
 
 // SDPMessageParseURI wraps gst_sdp_message_parse_uri
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_parse_uri
+// The function takes the following parameters:
+// 
+// 	- uri string: the start of the uri 
+// 	- msg *SDPMessage: the result #GstSDPMessage 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Parse the null-terminated @uri and store the result in @msg.
+// 
+// The uri should be of the form:
+// 
+//  scheme://[address[:ttl=ttl][:noa=noa]]/[sessionname]
+//               [#type=value *[&amp;type=value]]
+// 
+//  where value is url encoded. This looslely resembles
+//  http://tools.ietf.org/html/draft-fujikawa-sdp-url-01
 func SDPMessageParseURI(uri string, msg *SDPMessage) SDPResult {
 	var carg1 *C.gchar         // in, none, string
 	var carg2 *C.GstSDPMessage // in, none, converted
@@ -4486,7 +5317,16 @@ func SDPMessageParseURI(uri string, msg *SDPMessage) SDPResult {
 
 // AddAttribute wraps gst_sdp_message_add_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_add_attribute
+// The function takes the following parameters:
+// 
+// 	- key string: the key 
+// 	- value string (nullable): the value 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add the attribute with @key and @value to @msg.
 func (msg *SDPMessage) AddAttribute(key string, value string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4515,7 +5355,16 @@ func (msg *SDPMessage) AddAttribute(key string, value string) SDPResult {
 
 // AddBandwidth wraps gst_sdp_message_add_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_add_bandwidth
+// The function takes the following parameters:
+// 
+// 	- bwtype string: the bandwidth modifier type 
+// 	- bandwidth uint: the bandwidth in kilobits per second 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add the specified bandwidth information to @msg.
 func (msg *SDPMessage) AddBandwidth(bwtype string, bandwidth uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4541,7 +5390,15 @@ func (msg *SDPMessage) AddBandwidth(bwtype string, bandwidth uint) SDPResult {
 
 // AddEmail wraps gst_sdp_message_add_email
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_add_email
+// The function takes the following parameters:
+// 
+// 	- email string: an email 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add @email to the list of emails in @msg.
 func (msg *SDPMessage) AddEmail(email string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4564,7 +5421,17 @@ func (msg *SDPMessage) AddEmail(email string) SDPResult {
 
 // AddMedia wraps gst_sdp_message_add_media
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_add_media
+// The function takes the following parameters:
+// 
+// 	- media *SDPMedia: a #GstSDPMedia to add 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Adds @media to the array of medias in @msg. This function takes ownership of
+// the contents of @media so that @media will have to be reinitialized with
+// gst_sdp_media_init() before it can be used again.
 func (msg *SDPMessage) AddMedia(media *SDPMedia) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.GstSDPMedia   // in, none, converted
@@ -4586,7 +5453,15 @@ func (msg *SDPMessage) AddMedia(media *SDPMedia) SDPResult {
 
 // AddPhone wraps gst_sdp_message_add_phone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_add_phone
+// The function takes the following parameters:
+// 
+// 	- phone string: a phone 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add @phone to the list of phones in @msg.
 func (msg *SDPMessage) AddPhone(phone string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4609,7 +5484,17 @@ func (msg *SDPMessage) AddPhone(phone string) SDPResult {
 
 // AddTime wraps gst_sdp_message_add_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_add_time
+// The function takes the following parameters:
+// 
+// 	- start string: the start time 
+// 	- stop string: the stop time 
+// 	- repeat []string: the repeat times 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add time information @start and @stop to @msg.
 func (msg *SDPMessage) AddTime(start string, stop string, repeat []string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4641,7 +5526,16 @@ func (msg *SDPMessage) AddTime(start string, stop string, repeat []string) SDPRe
 
 // AddZone wraps gst_sdp_message_add_zone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_add_zone
+// The function takes the following parameters:
+// 
+// 	- adjTime string: the NTP time that a time zone adjustment happens 
+// 	- typedTime string: the offset from the time when the session was first scheduled 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Add time zone information to @msg.
 func (msg *SDPMessage) AddZone(adjTime string, typedTime string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4668,7 +5562,11 @@ func (msg *SDPMessage) AddZone(adjTime string, typedTime string) SDPResult {
 
 // AsText wraps gst_sdp_message_as_text
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_as_text
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Convert the contents of @msg to a text string.
 func (msg *SDPMessage) AsText() string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  *C.gchar         // return, full, string
@@ -4688,7 +5586,11 @@ func (msg *SDPMessage) AsText() string {
 
 // AttributesLen wraps gst_sdp_message_attributes_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_attributes_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of attributes in @msg.
 func (msg *SDPMessage) AttributesLen() uint {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.guint          // return, none, casted
@@ -4707,7 +5609,15 @@ func (msg *SDPMessage) AttributesLen() uint {
 
 // AttributesToCaps wraps gst_sdp_message_attributes_to_caps
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_attributes_to_caps
+// The function takes the following parameters:
+// 
+// 	- caps *gst.Caps: a #GstCaps 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Mapping of attributes of #GstSDPMessage to #GstCaps
 func (msg *SDPMessage) AttributesToCaps(caps *gst.Caps) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.GstCaps       // in, none, converted
@@ -4729,7 +5639,11 @@ func (msg *SDPMessage) AttributesToCaps(caps *gst.Caps) SDPResult {
 
 // BandwidthsLen wraps gst_sdp_message_bandwidths_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_bandwidths_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of bandwidth information in @msg.
 func (msg *SDPMessage) BandwidthsLen() uint {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.guint          // return, none, casted
@@ -4748,7 +5662,13 @@ func (msg *SDPMessage) BandwidthsLen() uint {
 
 // Copy wraps gst_sdp_message_copy
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_copy
+// The function returns the following values:
+// 
+// 	- copy *SDPMessage: pointer to new #GstSDPMessage 
+// 	- goret SDPResult 
+//
+// Allocate a new copy of @msg and store the result in @copy. The value in
+// @copy should be release with gst_sdp_message_free function.
 func (msg *SDPMessage) Copy() (*SDPMessage, SDPResult) {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.GstSDPMessage // out, full, converted
@@ -4770,7 +5690,11 @@ func (msg *SDPMessage) Copy() (*SDPMessage, SDPResult) {
 
 // Dump wraps gst_sdp_message_dump
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_dump
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Dump the parsed contents of @msg to stdout.
 func (msg *SDPMessage) Dump() SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.GstSDPResult   // return, none, casted
@@ -4789,7 +5713,11 @@ func (msg *SDPMessage) Dump() SDPResult {
 
 // EmailsLen wraps gst_sdp_message_emails_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_emails_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of emails in @msg.
 func (msg *SDPMessage) EmailsLen() uint {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.guint          // return, none, casted
@@ -4808,7 +5736,15 @@ func (msg *SDPMessage) EmailsLen() uint {
 
 // GetAttribute wraps gst_sdp_message_get_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_attribute
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPAttribute 
+//
+// Get the attribute at position @idx in @msg.
 func (msg *SDPMessage) GetAttribute(idx uint) *SDPAttribute {
 	var carg0 *C.GstSDPMessage   // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -4831,7 +5767,15 @@ func (msg *SDPMessage) GetAttribute(idx uint) *SDPAttribute {
 
 // GetAttributeVal wraps gst_sdp_message_get_attribute_val
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_attribute_val
+// The function takes the following parameters:
+// 
+// 	- key string: the key 
+// 
+// The function returns the following values:
+// 
+// 	- goret string (nullable) 
+//
+// Get the first attribute with key @key in @msg.
 func (msg *SDPMessage) GetAttributeVal(key string) string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4856,7 +5800,16 @@ func (msg *SDPMessage) GetAttributeVal(key string) string {
 
 // GetAttributeValN wraps gst_sdp_message_get_attribute_val_n
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_attribute_val_n
+// The function takes the following parameters:
+// 
+// 	- key string: the key 
+// 	- nth uint: the index 
+// 
+// The function returns the following values:
+// 
+// 	- goret string (nullable) 
+//
+// Get the @nth attribute with key @key in @msg.
 func (msg *SDPMessage) GetAttributeValN(key string, nth uint) string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -4884,7 +5837,15 @@ func (msg *SDPMessage) GetAttributeValN(key string, nth uint) string {
 
 // GetBandwidth wraps gst_sdp_message_get_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx uint: the bandwidth index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPBandwidth 
+//
+// Get the bandwidth at index @idx from @msg.
 func (msg *SDPMessage) GetBandwidth(idx uint) *SDPBandwidth {
 	var carg0 *C.GstSDPMessage   // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -4907,7 +5868,11 @@ func (msg *SDPMessage) GetBandwidth(idx uint) *SDPBandwidth {
 
 // GetConnection wraps gst_sdp_message_get_connection
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_connection
+// The function returns the following values:
+// 
+// 	- goret *SDPConnection 
+//
+// Get the connection of @msg.
 func (msg *SDPMessage) GetConnection() *SDPConnection {
 	var carg0 *C.GstSDPMessage    // in, none, converted
 	var cret  *C.GstSDPConnection // return, none, converted
@@ -4926,7 +5891,15 @@ func (msg *SDPMessage) GetConnection() *SDPConnection {
 
 // GetEmail wraps gst_sdp_message_get_email
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_email
+// The function takes the following parameters:
+// 
+// 	- idx uint: an email index 
+// 
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the email with number @idx from @msg.
 func (msg *SDPMessage) GetEmail(idx uint) string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -4948,7 +5921,11 @@ func (msg *SDPMessage) GetEmail(idx uint) string {
 
 // GetInformation wraps gst_sdp_message_get_information
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_information
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the information in @msg.
 func (msg *SDPMessage) GetInformation() string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  *C.gchar         // return, none, string
@@ -4967,7 +5944,11 @@ func (msg *SDPMessage) GetInformation() string {
 
 // GetKey wraps gst_sdp_message_get_key
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_key
+// The function returns the following values:
+// 
+// 	- goret *SDPKey 
+//
+// Get the encryption information from @msg.
 func (msg *SDPMessage) GetKey() *SDPKey {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  *C.GstSDPKey     // return, none, converted
@@ -4986,7 +5967,15 @@ func (msg *SDPMessage) GetKey() *SDPKey {
 
 // GetMedia wraps gst_sdp_message_get_media
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_media
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPMedia 
+//
+// Get the media description at index @idx in @msg.
 func (msg *SDPMessage) GetMedia(idx uint) *SDPMedia {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5009,7 +5998,11 @@ func (msg *SDPMessage) GetMedia(idx uint) *SDPMedia {
 
 // GetOrigin wraps gst_sdp_message_get_origin
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_origin
+// The function returns the following values:
+// 
+// 	- goret *SDPOrigin 
+//
+// Get the origin of @msg.
 func (msg *SDPMessage) GetOrigin() *SDPOrigin {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  *C.GstSDPOrigin  // return, none, converted
@@ -5028,7 +6021,15 @@ func (msg *SDPMessage) GetOrigin() *SDPOrigin {
 
 // GetPhone wraps gst_sdp_message_get_phone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_phone
+// The function takes the following parameters:
+// 
+// 	- idx uint: a phone index 
+// 
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the phone with number @idx from @msg.
 func (msg *SDPMessage) GetPhone(idx uint) string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5050,7 +6051,11 @@ func (msg *SDPMessage) GetPhone(idx uint) string {
 
 // GetSessionName wraps gst_sdp_message_get_session_name
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_session_name
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the session name in @msg.
 func (msg *SDPMessage) GetSessionName() string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  *C.gchar         // return, none, string
@@ -5069,7 +6074,15 @@ func (msg *SDPMessage) GetSessionName() string {
 
 // GetTime wraps gst_sdp_message_get_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_time
+// The function takes the following parameters:
+// 
+// 	- idx uint: the time index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPTime 
+//
+// Get time information with index @idx from @msg.
 func (msg *SDPMessage) GetTime(idx uint) *SDPTime {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5092,7 +6105,11 @@ func (msg *SDPMessage) GetTime(idx uint) *SDPTime {
 
 // GetURI wraps gst_sdp_message_get_uri
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_uri
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the URI in @msg.
 func (msg *SDPMessage) GetURI() string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  *C.gchar         // return, none, string
@@ -5111,7 +6128,11 @@ func (msg *SDPMessage) GetURI() string {
 
 // GetVersion wraps gst_sdp_message_get_version
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_version
+// The function returns the following values:
+// 
+// 	- goret string 
+//
+// Get the version in @msg.
 func (msg *SDPMessage) GetVersion() string {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  *C.gchar         // return, none, string
@@ -5130,7 +6151,15 @@ func (msg *SDPMessage) GetVersion() string {
 
 // GetZone wraps gst_sdp_message_get_zone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_get_zone
+// The function takes the following parameters:
+// 
+// 	- idx uint: the zone index 
+// 
+// The function returns the following values:
+// 
+// 	- goret *SDPZone 
+//
+// Get time zone information with index @idx from @msg.
 func (msg *SDPMessage) GetZone(idx uint) *SDPZone {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5153,7 +6182,18 @@ func (msg *SDPMessage) GetZone(idx uint) *SDPZone {
 
 // InsertAttribute wraps gst_sdp_message_insert_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_insert_attribute
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- attr *SDPAttribute: a #GstSDPAttribute 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert attribute into the array of attributes in @msg
+// at index @idx.
+// When -1 is given as @idx, the attribute is inserted at the end.
 func (msg *SDPMessage) InsertAttribute(idx int32, attr *SDPAttribute) SDPResult {
 	var carg0 *C.GstSDPMessage   // in, none, converted
 	var carg1 C.gint             // in, none, casted
@@ -5178,7 +6218,18 @@ func (msg *SDPMessage) InsertAttribute(idx int32, attr *SDPAttribute) SDPResult 
 
 // InsertBandwidth wraps gst_sdp_message_insert_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_insert_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- bw *SDPBandwidth: the bandwidth 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert bandwidth parameters into the array of bandwidths in @msg
+// at index @idx.
+// When -1 is given as @idx, the bandwidth is inserted at the end.
 func (msg *SDPMessage) InsertBandwidth(idx int32, bw *SDPBandwidth) SDPResult {
 	var carg0 *C.GstSDPMessage   // in, none, converted
 	var carg1 C.gint             // in, none, casted
@@ -5203,7 +6254,17 @@ func (msg *SDPMessage) InsertBandwidth(idx int32, bw *SDPBandwidth) SDPResult {
 
 // InsertEmail wraps gst_sdp_message_insert_email
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_insert_email
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- email string: an email 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert @email into the array of emails in @msg at index @idx.
+// When -1 is given as @idx, the email is inserted at the end.
 func (msg *SDPMessage) InsertEmail(idx int32, email string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.gint           // in, none, casted
@@ -5229,7 +6290,17 @@ func (msg *SDPMessage) InsertEmail(idx int32, email string) SDPResult {
 
 // InsertPhone wraps gst_sdp_message_insert_phone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_insert_phone
+// The function takes the following parameters:
+// 
+// 	- idx int32: a phone index 
+// 	- phone string: a phone 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert @phone into the array of phone numbers in @msg at index @idx.
+// When -1 is given as @idx, the phone is inserted at the end.
 func (msg *SDPMessage) InsertPhone(idx int32, phone string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.gint           // in, none, casted
@@ -5255,7 +6326,18 @@ func (msg *SDPMessage) InsertPhone(idx int32, phone string) SDPResult {
 
 // InsertTime wraps gst_sdp_message_insert_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_insert_time
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- t *SDPTime: a #GstSDPTime 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert time parameters into the array of times in @msg
+// at index @idx.
+// When -1 is given as @idx, the times are inserted at the end.
 func (msg *SDPMessage) InsertTime(idx int32, t *SDPTime) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.gint           // in, none, casted
@@ -5280,7 +6362,18 @@ func (msg *SDPMessage) InsertTime(idx int32, t *SDPTime) SDPResult {
 
 // InsertZone wraps gst_sdp_message_insert_zone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_insert_zone
+// The function takes the following parameters:
+// 
+// 	- idx int32: an index 
+// 	- zone *SDPZone: a #GstSDPZone 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Insert zone parameters into the array of zones in @msg
+// at index @idx.
+// When -1 is given as @idx, the zone is inserted at the end.
 func (msg *SDPMessage) InsertZone(idx int32, zone *SDPZone) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.gint           // in, none, casted
@@ -5305,7 +6398,11 @@ func (msg *SDPMessage) InsertZone(idx int32, zone *SDPZone) SDPResult {
 
 // MediasLen wraps gst_sdp_message_medias_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_medias_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of media descriptions in @msg.
 func (msg *SDPMessage) MediasLen() uint {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.guint          // return, none, casted
@@ -5324,7 +6421,13 @@ func (msg *SDPMessage) MediasLen() uint {
 
 // ParseKeymgmt wraps gst_sdp_message_parse_keymgmt
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_parse_keymgmt
+// The function returns the following values:
+// 
+// 	- mikey *MIKEYMessage: pointer to new #GstMIKEYMessage 
+// 	- goret SDPResult 
+//
+// Creates a new #GstMIKEYMessage after parsing the key-mgmt attribute
+// from a #GstSDPMessage.
 func (msg *SDPMessage) ParseKeymgmt() (*MIKEYMessage, SDPResult) {
 	var carg0 *C.GstSDPMessage   // in, none, converted
 	var carg1 *C.GstMIKEYMessage // out, full, converted
@@ -5346,7 +6449,11 @@ func (msg *SDPMessage) ParseKeymgmt() (*MIKEYMessage, SDPResult) {
 
 // PhonesLen wraps gst_sdp_message_phones_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_phones_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of phones in @msg.
 func (msg *SDPMessage) PhonesLen() uint {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.guint          // return, none, casted
@@ -5365,7 +6472,15 @@ func (msg *SDPMessage) PhonesLen() uint {
 
 // RemoveAttribute wraps gst_sdp_message_remove_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_remove_attribute
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the attribute in @msg at index @idx.
 func (msg *SDPMessage) RemoveAttribute(idx uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5387,7 +6502,15 @@ func (msg *SDPMessage) RemoveAttribute(idx uint) SDPResult {
 
 // RemoveBandwidth wraps gst_sdp_message_remove_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_remove_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx uint: the bandwidth index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the bandwidth information in @msg at index @idx.
 func (msg *SDPMessage) RemoveBandwidth(idx uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5409,7 +6532,15 @@ func (msg *SDPMessage) RemoveBandwidth(idx uint) SDPResult {
 
 // RemoveEmail wraps gst_sdp_message_remove_email
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_remove_email
+// The function takes the following parameters:
+// 
+// 	- idx uint: an email index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the email in @msg at index @idx.
 func (msg *SDPMessage) RemoveEmail(idx uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5431,7 +6562,15 @@ func (msg *SDPMessage) RemoveEmail(idx uint) SDPResult {
 
 // RemoveMedia wraps gst_sdp_message_remove_media
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_remove_media
+// The function takes the following parameters:
+// 
+// 	- idx uint: the media index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the media at @idx from the array of medias in @msg if found.
 func (msg *SDPMessage) RemoveMedia(idx uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5453,7 +6592,15 @@ func (msg *SDPMessage) RemoveMedia(idx uint) SDPResult {
 
 // RemovePhone wraps gst_sdp_message_remove_phone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_remove_phone
+// The function takes the following parameters:
+// 
+// 	- idx uint: a phone index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the phone number in @msg at index @idx.
 func (msg *SDPMessage) RemovePhone(idx uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5475,7 +6622,15 @@ func (msg *SDPMessage) RemovePhone(idx uint) SDPResult {
 
 // RemoveTime wraps gst_sdp_message_remove_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_remove_time
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the time information in @msg at index @idx.
 func (msg *SDPMessage) RemoveTime(idx uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5497,7 +6652,15 @@ func (msg *SDPMessage) RemoveTime(idx uint) SDPResult {
 
 // RemoveZone wraps gst_sdp_message_remove_zone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_remove_zone
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Remove the zone information in @msg at index @idx.
 func (msg *SDPMessage) RemoveZone(idx uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5519,7 +6682,16 @@ func (msg *SDPMessage) RemoveZone(idx uint) SDPResult {
 
 // ReplaceAttribute wraps gst_sdp_message_replace_attribute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_replace_attribute
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 	- attr *SDPAttribute: a #GstSDPAttribute 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the attribute in @msg at index @idx with @attr.
 func (msg *SDPMessage) ReplaceAttribute(idx uint, attr *SDPAttribute) SDPResult {
 	var carg0 *C.GstSDPMessage   // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -5544,7 +6716,16 @@ func (msg *SDPMessage) ReplaceAttribute(idx uint, attr *SDPAttribute) SDPResult 
 
 // ReplaceBandwidth wraps gst_sdp_message_replace_bandwidth
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_replace_bandwidth
+// The function takes the following parameters:
+// 
+// 	- idx uint: the bandwidth index 
+// 	- bw *SDPBandwidth: the bandwidth 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the bandwidth information in @msg at index @idx with @bw.
 func (msg *SDPMessage) ReplaceBandwidth(idx uint, bw *SDPBandwidth) SDPResult {
 	var carg0 *C.GstSDPMessage   // in, none, converted
 	var carg1 C.guint            // in, none, casted
@@ -5569,7 +6750,16 @@ func (msg *SDPMessage) ReplaceBandwidth(idx uint, bw *SDPBandwidth) SDPResult {
 
 // ReplaceEmail wraps gst_sdp_message_replace_email
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_replace_email
+// The function takes the following parameters:
+// 
+// 	- idx uint: an email index 
+// 	- email string: an email 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the email in @msg at index @idx with @email.
 func (msg *SDPMessage) ReplaceEmail(idx uint, email string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5595,7 +6785,16 @@ func (msg *SDPMessage) ReplaceEmail(idx uint, email string) SDPResult {
 
 // ReplacePhone wraps gst_sdp_message_replace_phone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_replace_phone
+// The function takes the following parameters:
+// 
+// 	- idx uint: a phone index 
+// 	- phone string: a phone 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the phone number in @msg at index @idx with @phone.
 func (msg *SDPMessage) ReplacePhone(idx uint, phone string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5621,7 +6820,16 @@ func (msg *SDPMessage) ReplacePhone(idx uint, phone string) SDPResult {
 
 // ReplaceTime wraps gst_sdp_message_replace_time
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_replace_time
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 	- t *SDPTime: a #GstSDPTime 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the time information in @msg at index @idx with @t.
 func (msg *SDPMessage) ReplaceTime(idx uint, t *SDPTime) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5646,7 +6854,16 @@ func (msg *SDPMessage) ReplaceTime(idx uint, t *SDPTime) SDPResult {
 
 // ReplaceZone wraps gst_sdp_message_replace_zone
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_replace_zone
+// The function takes the following parameters:
+// 
+// 	- idx uint: the index 
+// 	- zone *SDPZone: a #GstSDPZone 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Replace the zone information in @msg at index @idx with @zone.
 func (msg *SDPMessage) ReplaceZone(idx uint, zone *SDPZone) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 C.guint          // in, none, casted
@@ -5671,7 +6888,20 @@ func (msg *SDPMessage) ReplaceZone(idx uint, zone *SDPZone) SDPResult {
 
 // SetConnection wraps gst_sdp_message_set_connection
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_set_connection
+// The function takes the following parameters:
+// 
+// 	- nettype string: the type of network. "IN" is defined to have the meaning
+// "Internet". 
+// 	- addrtype string: the type of address. 
+// 	- address string: the address 
+// 	- ttl uint: the time to live of the address 
+// 	- addrNumber uint: the number of layers 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Configure the SDP connection in @msg with the given parameters.
 func (msg *SDPMessage) SetConnection(nettype string, addrtype string, address string, ttl uint, addrNumber uint) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -5708,7 +6938,15 @@ func (msg *SDPMessage) SetConnection(nettype string, addrtype string, address st
 
 // SetInformation wraps gst_sdp_message_set_information
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_set_information
+// The function takes the following parameters:
+// 
+// 	- information string: the information 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the information in @msg.
 func (msg *SDPMessage) SetInformation(information string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -5731,7 +6969,16 @@ func (msg *SDPMessage) SetInformation(information string) SDPResult {
 
 // SetKey wraps gst_sdp_message_set_key
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_set_key
+// The function takes the following parameters:
+// 
+// 	- typ string: the encryption type 
+// 	- data string: the encryption data 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Adds the encryption information to @msg.
 func (msg *SDPMessage) SetKey(typ string, data string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -5758,7 +7005,20 @@ func (msg *SDPMessage) SetKey(typ string, data string) SDPResult {
 
 // SetOrigin wraps gst_sdp_message_set_origin
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_set_origin
+// The function takes the following parameters:
+// 
+// 	- username string: the user name 
+// 	- sessId string: a session id 
+// 	- sessVersion string: a session version 
+// 	- nettype string: a network type 
+// 	- addrtype string: an address type 
+// 	- addr string: an address 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Configure the SDP origin in @msg with the given parameters.
 func (msg *SDPMessage) SetOrigin(username string, sessId string, sessVersion string, nettype string, addrtype string, addr string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -5801,7 +7061,15 @@ func (msg *SDPMessage) SetOrigin(username string, sessId string, sessVersion str
 
 // SetSessionName wraps gst_sdp_message_set_session_name
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_set_session_name
+// The function takes the following parameters:
+// 
+// 	- sessionName string: the session name 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the session name in @msg.
 func (msg *SDPMessage) SetSessionName(sessionName string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -5824,7 +7092,15 @@ func (msg *SDPMessage) SetSessionName(sessionName string) SDPResult {
 
 // SetURI wraps gst_sdp_message_set_uri
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_set_uri
+// The function takes the following parameters:
+// 
+// 	- uri string: the URI 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the URI in @msg.
 func (msg *SDPMessage) SetURI(uri string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -5847,7 +7123,15 @@ func (msg *SDPMessage) SetURI(uri string) SDPResult {
 
 // SetVersion wraps gst_sdp_message_set_version
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_set_version
+// The function takes the following parameters:
+// 
+// 	- version string: the version 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set the version in @msg.
 func (msg *SDPMessage) SetVersion(version string) SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var carg1 *C.gchar         // in, none, string
@@ -5870,7 +7154,11 @@ func (msg *SDPMessage) SetVersion(version string) SDPResult {
 
 // TimesLen wraps gst_sdp_message_times_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_times_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of time information entries in @msg.
 func (msg *SDPMessage) TimesLen() uint {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.guint          // return, none, casted
@@ -5889,7 +7177,13 @@ func (msg *SDPMessage) TimesLen() uint {
 
 // Uninit wraps gst_sdp_message_uninit
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_uninit
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Free all resources allocated in @msg. @msg should not be used anymore after
+// this function. This function should be used when @msg was allocated on the
+// stack and initialized with gst_sdp_message_init().
 func (msg *SDPMessage) Uninit() SDPResult {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.GstSDPResult   // return, none, casted
@@ -5908,7 +7202,11 @@ func (msg *SDPMessage) Uninit() SDPResult {
 
 // ZonesLen wraps gst_sdp_message_zones_len
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_message_zones_len
+// The function returns the following values:
+// 
+// 	- goret uint 
+//
+// Get the number of time zone information entries in @msg.
 func (msg *SDPMessage) ZonesLen() uint {
 	var carg0 *C.GstSDPMessage // in, none, converted
 	var cret  C.guint          // return, none, casted
@@ -5926,8 +7224,10 @@ func (msg *SDPMessage) ZonesLen() uint {
 }
 
 // SDPOrigin wraps GstSDPOrigin
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPOrigin
+//
+// The contents of the SDP "o=" field which gives the originator of the session
+// (their username and the address of the user's host) plus a session id and
+// session version number.
 type SDPOrigin struct {
 	*sDPOrigin
 }
@@ -6008,8 +7308,9 @@ func UnsafeSDPOriginToGlibFull(s *SDPOrigin) unsafe.Pointer {
 }
 
 // SDPTime wraps GstSDPTime
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPTime
+//
+// The contents of the SDP "t=" field which specify the start and stop times for
+// a conference session.
 type SDPTime struct {
 	*sDPTime
 }
@@ -6091,7 +7392,11 @@ func UnsafeSDPTimeToGlibFull(s *SDPTime) unsafe.Pointer {
 
 // Clear wraps gst_sdp_time_clear
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_time_clear
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Reset the time information in @t.
 func (t *SDPTime) Clear() SDPResult {
 	var carg0 *C.GstSDPTime  // in, none, converted
 	var cret  C.GstSDPResult // return, none, casted
@@ -6110,7 +7415,17 @@ func (t *SDPTime) Clear() SDPResult {
 
 // Set wraps gst_sdp_time_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_time_set
+// The function takes the following parameters:
+// 
+// 	- start string: the start time 
+// 	- stop string: the stop time 
+// 	- repeat []string: the repeat times 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set time information @start, @stop and @repeat in @t.
 func (t *SDPTime) Set(start string, stop string, repeat []string) SDPResult {
 	var carg0 *C.GstSDPTime  // in, none, converted
 	var carg1 *C.gchar       // in, none, string
@@ -6141,8 +7456,10 @@ func (t *SDPTime) Set(start string, stop string, repeat []string) SDPResult {
 }
 
 // SDPZone wraps GstSDPZone
-// 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#GstSDPZone
+//
+// The contents of the SDP "z=" field which allows the sender to
+// specify a list of time zone adjustments and offsets from the base
+// time.
 type SDPZone struct {
 	*sDPZone
 }
@@ -6224,7 +7541,11 @@ func UnsafeSDPZoneToGlibFull(s *SDPZone) unsafe.Pointer {
 
 // Clear wraps gst_sdp_zone_clear
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_zone_clear
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Reset the zone information in @zone.
 func (zone *SDPZone) Clear() SDPResult {
 	var carg0 *C.GstSDPZone  // in, none, converted
 	var cret  C.GstSDPResult // return, none, casted
@@ -6243,7 +7564,16 @@ func (zone *SDPZone) Clear() SDPResult {
 
 // Set wraps gst_sdp_zone_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/sdp/gstsdpmessage.html#gst_sdp_zone_set
+// The function takes the following parameters:
+// 
+// 	- adjTime string: the NTP time that a time zone adjustment happens 
+// 	- typedTime string: the offset from the time when the session was first scheduled 
+// 
+// The function returns the following values:
+// 
+// 	- goret SDPResult 
+//
+// Set zone information in @zone.
 func (zone *SDPZone) Set(adjTime string, typedTime string) SDPResult {
 	var carg0 *C.GstSDPZone  // in, none, converted
 	var carg1 *C.gchar       // in, none, string
