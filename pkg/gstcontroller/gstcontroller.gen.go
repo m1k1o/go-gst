@@ -47,26 +47,29 @@ func init() {
 }
 
 // InterpolationMode wraps GstInterpolationMode
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#GstInterpolationMode
+//
+// The various interpolation modes available.
 type InterpolationMode C.int
 
 const (
 	// InterpolationModeNone wraps GST_INTERPOLATION_MODE_NONE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#GST_INTERPOLATION_MODE_NONE
+	//
+	// steps-like interpolation, default
 	InterpolationModeNone InterpolationMode = 0
 	// InterpolationModeLinear wraps GST_INTERPOLATION_MODE_LINEAR
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#GST_INTERPOLATION_MODE_LINEAR
+	//
+	// linear interpolation
 	InterpolationModeLinear InterpolationMode = 1
 	// InterpolationModeCubic wraps GST_INTERPOLATION_MODE_CUBIC
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#GST_INTERPOLATION_MODE_CUBIC
+	//
+	// cubic interpolation (natural), may overshoot
+	//   the min or max values set by the control point, but is more 'curvy'
 	InterpolationModeCubic InterpolationMode = 2
 	// InterpolationModeCubicMonotonic wraps GST_INTERPOLATION_MODE_CUBIC_MONOTONIC
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#GST_INTERPOLATION_MODE_CUBIC_MONOTONIC
+	//
+	// monotonic cubic interpolation, will not
+	//   produce any values outside of the min-max range set by the control points
+	//   (Since: 1.8)
 	InterpolationModeCubicMonotonic InterpolationMode = 3
 )
 
@@ -95,30 +98,30 @@ func (e InterpolationMode) String() string {
 }
 
 // LFOWaveform wraps GstLFOWaveform
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GstLFOWaveform
+//
+// The various waveform modes available.
 type LFOWaveform C.int
 
 const (
 	// LfoWaveformSine wraps GST_LFO_WAVEFORM_SINE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GST_LFO_WAVEFORM_SINE
+	//
+	// sine waveform
 	LfoWaveformSine LFOWaveform = 0
 	// LfoWaveformSquare wraps GST_LFO_WAVEFORM_SQUARE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GST_LFO_WAVEFORM_SQUARE
+	//
+	// square waveform
 	LfoWaveformSquare LFOWaveform = 1
 	// LfoWaveformSaw wraps GST_LFO_WAVEFORM_SAW
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GST_LFO_WAVEFORM_SAW
+	//
+	// saw waveform
 	LfoWaveformSaw LFOWaveform = 2
 	// LfoWaveformReverseSaw wraps GST_LFO_WAVEFORM_REVERSE_SAW
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GST_LFO_WAVEFORM_REVERSE_SAW
+	//
+	// reverse saw waveform
 	LfoWaveformReverseSaw LFOWaveform = 3
 	// LfoWaveformTriangle wraps GST_LFO_WAVEFORM_TRIANGLE
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GST_LFO_WAVEFORM_TRIANGLE
+	//
+	// triangle waveform
 	LfoWaveformTriangle LFOWaveform = 4
 )
 
@@ -149,7 +152,11 @@ func (e LFOWaveform) String() string {
 
 // TimedValueControlInvalidateCache wraps gst_timed_value_control_invalidate_cache
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller
+// The function takes the following parameters:
+// 
+// 	- self TimedValueControlSource: the #GstTimedValueControlSource 
+//
+// Reset the controlled value cache.
 func TimedValueControlInvalidateCache(self TimedValueControlSource) {
 	var carg1 *C.GstTimedValueControlSource // in, none, converted
 
@@ -168,8 +175,10 @@ type ARGBControlBindingInstance struct {
 var _ ARGBControlBinding = (*ARGBControlBindingInstance)(nil)
 
 // ARGBControlBinding wraps GstARGBControlBinding
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstargbcontrolbinding.html#GstARGBControlBinding
+//
+// A value mapping object that attaches multiple control sources to a guint
+// gobject properties representing a color. A control value of 0.0 will turn the
+// color component off and a value of 1.0 will be the color level.
 type ARGBControlBinding interface {
 	gst.ControlBinding
 	upcastToGstARGBControlBinding() *ARGBControlBindingInstance
@@ -233,7 +242,21 @@ func UnsafeARGBControlBindingToGlibFull(c ARGBControlBinding) unsafe.Pointer {
 
 // NewARGBControlBinding wraps gst_argb_control_binding_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstargbcontrolbinding.html#gst_argb_control_binding_new
+// The function takes the following parameters:
+// 
+// 	- object gst.Object: the object of the property 
+// 	- propertyName string: the property-name to attach the control source 
+// 	- csA gst.ControlSource: the control source for the alpha channel 
+// 	- csR gst.ControlSource: the control source for the red channel 
+// 	- csG gst.ControlSource: the control source for the green channel 
+// 	- csB gst.ControlSource: the control source for the blue channel 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.ControlBinding 
+//
+// Create a new control-binding that attaches the given #GstControlSource to the
+// #GObject property.
 func NewARGBControlBinding(object gst.Object, propertyName string, csA gst.ControlSource, csR gst.ControlSource, csG gst.ControlSource, csB gst.ControlSource) gst.ControlBinding {
 	var carg1 *C.GstObject         // in, none, converted
 	var carg2 *C.gchar             // in, none, string
@@ -315,8 +338,13 @@ type DirectControlBindingInstance struct {
 var _ DirectControlBinding = (*DirectControlBindingInstance)(nil)
 
 // DirectControlBinding wraps GstDirectControlBinding
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstdirectcontrolbinding.html#GstDirectControlBinding
+//
+// A value mapping object that attaches control sources to gobject properties. It
+// will map the control values directly to the target property range. If a
+// non-absolute direct control binding is used, the value range [0.0 ... 1.0]
+// is mapped to full target property range, and all values outside the range
+// will be clipped. An absolute control binding will not do any value
+// transformations.
 type DirectControlBinding interface {
 	gst.ControlBinding
 	upcastToGstDirectControlBinding() *DirectControlBindingInstance
@@ -380,7 +408,19 @@ func UnsafeDirectControlBindingToGlibFull(c DirectControlBinding) unsafe.Pointer
 
 // NewDirectControlBinding wraps gst_direct_control_binding_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstdirectcontrolbinding.html#gst_direct_control_binding_new
+// The function takes the following parameters:
+// 
+// 	- object gst.Object: the object of the property 
+// 	- propertyName string: the property-name to attach the control source 
+// 	- cs gst.ControlSource: the control source 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.ControlBinding 
+//
+// Create a new control-binding that attaches the #GstControlSource to the
+// #GObject property. It will map the control source range [0.0 ... 1.0] to
+// the full target property range, and clip all values outside this range.
 func NewDirectControlBinding(object gst.Object, propertyName string, cs gst.ControlSource) gst.ControlBinding {
 	var carg1 *C.GstObject         // in, none, converted
 	var carg2 *C.gchar             // in, none, string
@@ -406,7 +446,19 @@ func NewDirectControlBinding(object gst.Object, propertyName string, cs gst.Cont
 
 // NewDirectControlBindingAbsolute wraps gst_direct_control_binding_new_absolute
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstdirectcontrolbinding.html#gst_direct_control_binding_new_absolute
+// The function takes the following parameters:
+// 
+// 	- object gst.Object: the object of the property 
+// 	- propertyName string: the property-name to attach the control source 
+// 	- cs gst.ControlSource: the control source 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.ControlBinding 
+//
+// Create a new control-binding that attaches the #GstControlSource to the
+// #GObject property. It will directly map the control source values to the
+// target property range without any transformations.
 func NewDirectControlBindingAbsolute(object gst.Object, propertyName string, cs gst.ControlSource) gst.ControlBinding {
 	var carg1 *C.GstObject         // in, none, converted
 	var carg2 *C.gchar             // in, none, string
@@ -479,8 +531,15 @@ type LFOControlSourceInstance struct {
 var _ LFOControlSource = (*LFOControlSourceInstance)(nil)
 
 // LFOControlSource wraps GstLFOControlSource
+//
+// #GstLFOControlSource is a #GstControlSource, that provides several periodic
+// waveforms as control values.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GstLFOControlSource
+// To use #GstLFOControlSource get a new instance by calling
+// gst_lfo_control_source_new(), bind it to a #GParamSpec and set the relevant
+// properties.
+// 
+// All functions are MT-safe.
 type LFOControlSource interface {
 	gst.ControlSource
 	upcastToGstLFOControlSource() *LFOControlSourceInstance
@@ -544,7 +603,11 @@ func UnsafeLFOControlSourceToGlibFull(c LFOControlSource) unsafe.Pointer {
 
 // NewLFOControlSource wraps gst_lfo_control_source_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#gst_lfo_control_source_new
+// The function returns the following values:
+// 
+// 	- goret gst.ControlSource 
+//
+// This returns a new, unbound #GstLFOControlSource.
 func NewLFOControlSource() gst.ControlSource {
 	var cret *C.GstControlSource // return, full, converted
 
@@ -606,8 +669,8 @@ type ProxyControlBindingInstance struct {
 var _ ProxyControlBinding = (*ProxyControlBindingInstance)(nil)
 
 // ProxyControlBinding wraps GstProxyControlBinding
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstproxycontrolbinding.html#GstProxyControlBinding
+//
+// A #GstControlBinding that forwards requests to another #GstControlBinding
 type ProxyControlBinding interface {
 	gst.ControlBinding
 	upcastToGstProxyControlBinding() *ProxyControlBindingInstance
@@ -671,7 +734,21 @@ func UnsafeProxyControlBindingToGlibFull(c ProxyControlBinding) unsafe.Pointer {
 
 // NewProxyControlBinding wraps gst_proxy_control_binding_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstproxycontrolbinding.html#gst_proxy_control_binding_new
+// The function takes the following parameters:
+// 
+// 	- object gst.Object: a #GstObject 
+// 	- propertyName string: the property name in @object to control 
+// 	- refObject gst.Object: a #GstObject to forward all
+//              #GstControlBinding requests to 
+// 	- refPropertyName string: the property_name in @ref_object to control 
+// 
+// The function returns the following values:
+// 
+// 	- goret gst.ControlBinding 
+//
+// #GstProxyControlBinding forwards all access to data or `sync_values()`
+// requests from @property_name on @object to the control binding at
+// @ref_property_name on @ref_object.
 func NewProxyControlBinding(object gst.Object, propertyName string, refObject gst.Object, refPropertyName string) gst.ControlBinding {
 	var carg1 *C.GstObject         // in, none, converted
 	var carg2 *C.gchar             // in, none, string
@@ -748,47 +825,91 @@ type TimedValueControlSourceInstance struct {
 var _ TimedValueControlSource = (*TimedValueControlSourceInstance)(nil)
 
 // TimedValueControlSource wraps GstTimedValueControlSource
+//
+// Base class for #GstControlSource that use time-stamped values.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#GstTimedValueControlSource
+// When overriding bind, chain up first to give this bind implementation a
+// chance to setup things.
+// 
+// All functions are MT-safe.
 type TimedValueControlSource interface {
 	gst.ControlSource
 	upcastToGstTimedValueControlSource() *TimedValueControlSourceInstance
 
 	// FindControlPointIter wraps gst_timed_value_control_source_find_control_point_iter
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_find_control_point_iter
+	// The function takes the following parameters:
+	// 
+	// 	- timestamp gst.ClockTime: the search key 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret *glib.SequenceIter (nullable) 
+	//
+	// Find last value before given timestamp in control point list.
+	// If all values in the control point list come after the given
+	// timestamp or no values exist, %NULL is returned.
+	// 
+	// For use in control source implementations.
 	FindControlPointIter(gst.ClockTime) *glib.SequenceIter
 	// GetAll wraps gst_timed_value_control_source_get_all
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_get_all
+	// The function returns the following values:
+	// 
+	// 	- goret []*gst.TimedValue 
+	//
+	// Returns a read-only copy of the list of #GstTimedValue for the given property.
+	// Free the list after done with it.
 	GetAll() []*gst.TimedValue
 	// GetCount wraps gst_timed_value_control_source_get_count
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_get_count
+	// The function returns the following values:
+	// 
+	// 	- goret int32 
+	//
+	// Get the number of control points that are set.
 	GetCount() int32
 	// Set wraps gst_timed_value_control_source_set
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_set
+	// The function takes the following parameters:
+	// 
+	// 	- timestamp gst.ClockTime: the time the control-change is scheduled for 
+	// 	- value float64: the control-value 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
+	// Set the value of given controller-handled property at a certain time.
 	Set(gst.ClockTime, float64) bool
 	// Unset wraps gst_timed_value_control_source_unset
 	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_unset
+	// The function takes the following parameters:
+	// 
+	// 	- timestamp gst.ClockTime: the time the control-change should be removed from 
+	// 
+	// The function returns the following values:
+	// 
+	// 	- goret bool 
+	//
+	// Used to remove the value of given controller-handled property at a certain
+	// time.
 	Unset(gst.ClockTime) bool
 	// UnsetAll wraps gst_timed_value_control_source_unset_all
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_unset_all
+	//
+	// Used to remove all time-stamped values of given controller-handled property
 	UnsetAll()
 	// ConnectValueAdded connects the provided callback to the "value-added" signal
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html
+	//
+	// Emitted right after the new value has been added to @self
 	ConnectValueAdded(func(TimedValueControlSource, ControlPoint)) gobject.SignalHandle
 	// ConnectValueChanged connects the provided callback to the "value-changed" signal
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html
+	//
+	// Emitted right after the new value has been set on @timed_signals
 	ConnectValueChanged(func(TimedValueControlSource, ControlPoint)) gobject.SignalHandle
 	// ConnectValueRemoved connects the provided callback to the "value-removed" signal
-	// 
-	// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html
+	//
+	// Emitted when @timed_value is removed from @self
 	ConnectValueRemoved(func(TimedValueControlSource, ControlPoint)) gobject.SignalHandle
 
 	// chain up virtual methods:
@@ -850,7 +971,19 @@ func UnsafeTimedValueControlSourceToGlibFull(c TimedValueControlSource) unsafe.P
 
 // FindControlPointIter wraps gst_timed_value_control_source_find_control_point_iter
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_find_control_point_iter
+// The function takes the following parameters:
+// 
+// 	- timestamp gst.ClockTime: the search key 
+// 
+// The function returns the following values:
+// 
+// 	- goret *glib.SequenceIter (nullable) 
+//
+// Find last value before given timestamp in control point list.
+// If all values in the control point list come after the given
+// timestamp or no values exist, %NULL is returned.
+// 
+// For use in control source implementations.
 func (self *TimedValueControlSourceInstance) FindControlPointIter(timestamp gst.ClockTime) *glib.SequenceIter {
 	var carg0 *C.GstTimedValueControlSource // in, none, converted
 	var carg1 C.GstClockTime                // in, none, casted, alias
@@ -874,7 +1007,12 @@ func (self *TimedValueControlSourceInstance) FindControlPointIter(timestamp gst.
 
 // GetAll wraps gst_timed_value_control_source_get_all
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_get_all
+// The function returns the following values:
+// 
+// 	- goret []*gst.TimedValue 
+//
+// Returns a read-only copy of the list of #GstTimedValue for the given property.
+// Free the list after done with it.
 func (self *TimedValueControlSourceInstance) GetAll() []*gst.TimedValue {
 	var carg0 *C.GstTimedValueControlSource // in, none, converted
 	var cret  *C.GList                      // container, transfer: container
@@ -900,7 +1038,11 @@ func (self *TimedValueControlSourceInstance) GetAll() []*gst.TimedValue {
 
 // GetCount wraps gst_timed_value_control_source_get_count
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_get_count
+// The function returns the following values:
+// 
+// 	- goret int32 
+//
+// Get the number of control points that are set.
 func (self *TimedValueControlSourceInstance) GetCount() int32 {
 	var carg0 *C.GstTimedValueControlSource // in, none, converted
 	var cret  C.gint                        // return, none, casted
@@ -919,7 +1061,16 @@ func (self *TimedValueControlSourceInstance) GetCount() int32 {
 
 // Set wraps gst_timed_value_control_source_set
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_set
+// The function takes the following parameters:
+// 
+// 	- timestamp gst.ClockTime: the time the control-change is scheduled for 
+// 	- value float64: the control-value 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Set the value of given controller-handled property at a certain time.
 func (self *TimedValueControlSourceInstance) Set(timestamp gst.ClockTime, value float64) bool {
 	var carg0 *C.GstTimedValueControlSource // in, none, converted
 	var carg1 C.GstClockTime                // in, none, casted, alias
@@ -946,7 +1097,16 @@ func (self *TimedValueControlSourceInstance) Set(timestamp gst.ClockTime, value 
 
 // Unset wraps gst_timed_value_control_source_unset
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_unset
+// The function takes the following parameters:
+// 
+// 	- timestamp gst.ClockTime: the time the control-change should be removed from 
+// 
+// The function returns the following values:
+// 
+// 	- goret bool 
+//
+// Used to remove the value of given controller-handled property at a certain
+// time.
 func (self *TimedValueControlSourceInstance) Unset(timestamp gst.ClockTime) bool {
 	var carg0 *C.GstTimedValueControlSource // in, none, converted
 	var carg1 C.GstClockTime                // in, none, casted, alias
@@ -969,8 +1129,8 @@ func (self *TimedValueControlSourceInstance) Unset(timestamp gst.ClockTime) bool
 }
 
 // UnsetAll wraps gst_timed_value_control_source_unset_all
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_timed_value_control_source_unset_all
+//
+// Used to remove all time-stamped values of given controller-handled property
 func (self *TimedValueControlSourceInstance) UnsetAll() {
 	var carg0 *C.GstTimedValueControlSource // in, none, converted
 
@@ -981,22 +1141,22 @@ func (self *TimedValueControlSourceInstance) UnsetAll() {
 }
 
 // ConnectValueAdded connects the provided callback to the "value-added" signal
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html
+//
+// Emitted right after the new value has been added to @self
 func (o *TimedValueControlSourceInstance) ConnectValueAdded(fn func(TimedValueControlSource, ControlPoint)) gobject.SignalHandle {
 	return o.Connect("value-added", fn)
 }
 
 // ConnectValueChanged connects the provided callback to the "value-changed" signal
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html
+//
+// Emitted right after the new value has been set on @timed_signals
 func (o *TimedValueControlSourceInstance) ConnectValueChanged(fn func(TimedValueControlSource, ControlPoint)) gobject.SignalHandle {
 	return o.Connect("value-changed", fn)
 }
 
 // ConnectValueRemoved connects the provided callback to the "value-removed" signal
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html
+//
+// Emitted when @timed_value is removed from @self
 func (o *TimedValueControlSourceInstance) ConnectValueRemoved(fn func(TimedValueControlSource, ControlPoint)) gobject.SignalHandle {
 	return o.Connect("value-removed", fn)
 }
@@ -1050,8 +1210,15 @@ type TriggerControlSourceInstance struct {
 var _ TriggerControlSource = (*TriggerControlSourceInstance)(nil)
 
 // TriggerControlSource wraps GstTriggerControlSource
+//
+// #GstTriggerControlSource is a #GstControlSource, that returns values from user-given
+// control points. It allows for a tolerance on the time-stamps.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttriggercontrolsource.html#GstTriggerControlSource
+// To use #GstTriggerControlSource get a new instance by calling
+// gst_trigger_control_source_new(), bind it to a #GParamSpec and set some
+// control points by calling gst_timed_value_control_source_set().
+// 
+// All functions are MT-safe.
 type TriggerControlSource interface {
 	TimedValueControlSource
 	upcastToGstTriggerControlSource() *TriggerControlSourceInstance
@@ -1117,7 +1284,11 @@ func UnsafeTriggerControlSourceToGlibFull(c TriggerControlSource) unsafe.Pointer
 
 // NewTriggerControlSource wraps gst_trigger_control_source_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttriggercontrolsource.html#gst_trigger_control_source_new
+// The function returns the following values:
+// 
+// 	- goret gst.ControlSource 
+//
+// This returns a new, unbound #GstTriggerControlSource.
 func NewTriggerControlSource() gst.ControlSource {
 	var cret *C.GstControlSource // return, full, converted
 
@@ -1179,8 +1350,15 @@ type InterpolationControlSourceInstance struct {
 var _ InterpolationControlSource = (*InterpolationControlSourceInstance)(nil)
 
 // InterpolationControlSource wraps GstInterpolationControlSource
+//
+// #GstInterpolationControlSource is a #GstControlSource, that interpolates values between user-given
+// control points. It supports several interpolation modes and property types.
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#GstInterpolationControlSource
+// To use #GstInterpolationControlSource get a new instance by calling
+// gst_interpolation_control_source_new(), bind it to a #GParamSpec and set some
+// control points by calling gst_timed_value_control_source_set().
+// 
+// All functions are MT-safe.
 type InterpolationControlSource interface {
 	TimedValueControlSource
 	upcastToGstInterpolationControlSource() *InterpolationControlSourceInstance
@@ -1246,7 +1424,11 @@ func UnsafeInterpolationControlSourceToGlibFull(c InterpolationControlSource) un
 
 // NewInterpolationControlSource wraps gst_interpolation_control_source_new
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#gst_interpolation_control_source_new
+// The function returns the following values:
+// 
+// 	- goret gst.ControlSource 
+//
+// This returns a new, unbound #GstInterpolationControlSource.
 func NewInterpolationControlSource() gst.ControlSource {
 	var cret *C.GstControlSource // return, full, converted
 
@@ -1300,8 +1482,8 @@ func RegisterInterpolationControlSourceSubClass[InstanceT InterpolationControlSo
 }
 
 // ARGBControlBindingClass wraps GstARGBControlBindingClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstargbcontrolbinding.html#GstARGBControlBindingClass
+//
+// The class structure of #GstARGBControlBinding.
 // 
 // ARGBControlBindingClass is the type struct for [ARGBControlBinding]
 type ARGBControlBindingClass struct {
@@ -1355,8 +1537,10 @@ func (a *ARGBControlBindingClass) ParentClass() *gst.ControlBindingClass {
 }
 
 // ControlPoint wraps GstControlPoint
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#GstControlPoint
+//
+// An internal structure for value+time and various temporary
+// values used for interpolation. This "inherits" from
+// GstTimedValue.
 type ControlPoint struct {
 	*controlPoint
 }
@@ -1453,7 +1637,11 @@ func UnsafeControlPointToGlibFull(c *ControlPoint) unsafe.Pointer {
 
 // Copy wraps gst_control_point_copy
 // 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#gst_control_point_copy
+// The function returns the following values:
+// 
+// 	- goret *ControlPoint 
+//
+// Copies a #GstControlPoint
 func (cp *ControlPoint) Copy() *ControlPoint {
 	var carg0 *C.GstControlPoint // in, none, converted
 	var cret  *C.GstControlPoint // return, full, converted
@@ -1471,8 +1659,8 @@ func (cp *ControlPoint) Copy() *ControlPoint {
 }
 
 // DirectControlBindingClass wraps GstDirectControlBindingClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstdirectcontrolbinding.html#GstDirectControlBindingClass
+//
+// The class structure of #GstDirectControlBinding.
 // 
 // DirectControlBindingClass is the type struct for [DirectControlBinding]
 type DirectControlBindingClass struct {
@@ -1526,8 +1714,7 @@ func (d *DirectControlBindingClass) ParentClass() *gst.ControlBindingClass {
 }
 
 // InterpolationControlSourceClass wraps GstInterpolationControlSourceClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstinterpolationcontrolsource.html#GstInterpolationControlSourceClass
+//
 // 
 // InterpolationControlSourceClass is the type struct for [InterpolationControlSource]
 type InterpolationControlSourceClass struct {
@@ -1581,8 +1768,7 @@ func (i *InterpolationControlSourceClass) ParentClass() *TimedValueControlSource
 }
 
 // LFOControlSourceClass wraps GstLFOControlSourceClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstlfocontrolsource.html#GstLFOControlSourceClass
+//
 // 
 // LFOControlSourceClass is the type struct for [LFOControlSource]
 type LFOControlSourceClass struct {
@@ -1636,8 +1822,8 @@ func (l *LFOControlSourceClass) ParentClass() *gst.ControlSourceClass {
 }
 
 // ProxyControlBindingClass wraps GstProxyControlBindingClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gstproxycontrolbinding.html#GstProxyControlBindingClass
+//
+// Opaque #GstProxyControlBindingClass struct
 // 
 // ProxyControlBindingClass is the type struct for [ProxyControlBinding]
 type ProxyControlBindingClass struct {
@@ -1691,8 +1877,7 @@ func (p *ProxyControlBindingClass) ParentClass() *gst.ControlBindingClass {
 }
 
 // TimedValueControlSourceClass wraps GstTimedValueControlSourceClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttimedvaluecontrolsource.html#GstTimedValueControlSourceClass
+//
 // 
 // TimedValueControlSourceClass is the type struct for [TimedValueControlSource]
 type TimedValueControlSourceClass struct {
@@ -1746,8 +1931,7 @@ func (t *TimedValueControlSourceClass) ParentClass() *gst.ControlSourceClass {
 }
 
 // TriggerControlSourceClass wraps GstTriggerControlSourceClass
-// 
-// see also https://gstreamer.freedesktop.org/documentation/controller/gsttriggercontrolsource.html#GstTriggerControlSourceClass
+//
 // 
 // TriggerControlSourceClass is the type struct for [TriggerControlSource]
 type TriggerControlSourceClass struct {
