@@ -12,7 +12,6 @@ import (
 	"github.com/go-gst/go-glib/gir"
 	"github.com/go-gst/go-glib/gir/cmd/gir-generate/gendata"
 	"github.com/go-gst/go-glib/gir/cmd/gir-generate/genmain"
-	"github.com/go-gst/go-glib/gir/girgen/generators"
 	"github.com/go-gst/go-glib/gir/girgen/strcases"
 	"github.com/go-gst/go-glib/gir/girgen/typesystem"
 	girfiles_gst "github.com/go-gst/go-gst/girs"
@@ -25,15 +24,6 @@ const GstreamerDocsBaseURL = "https://gstreamer.freedesktop.org/documentation"
 var Data = genmain.Data{
 	Module:   Module,
 	GirFiles: girfiles_gst.GirFiles,
-
-	Documentation: generators.NewHotDocGodocGeneratorFactory(GstreamerDocsBaseURL, func(s string) string {
-		switch s {
-		case "Gst":
-			return "gstreamer"
-		default:
-			return strings.ToLower(strings.TrimPrefix(s, "Gst"))
-		}
-	}),
 
 	Preprocessors: []gir.Preprocessor{
 		gir.MustIntrospect("Gst-1.Message.copy"),
@@ -108,8 +98,8 @@ var Data = genmain.Data{
 	Config: typesystem.Config{
 		Namespaces: map[string]typesystem.NamespaceConfig{
 			"Gst-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 				ManualTypes: []typesystem.Type{
 					&typesystem.Alias{
 						BaseType: typesystem.BaseType{
@@ -207,48 +197,48 @@ var Data = genmain.Data{
 				},
 			},
 			"GstAllocators-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstApp-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstAudio-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstBase-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 				IgnoredDefinitions: []typesystem.IgnoreFunc{
 					// has unexported free function that crashes the linker when compiling the examples:
 					typesystem.IgnoreMatching("TypeFindData"),
 				},
 			},
 			"GstCheck-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstController-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstGL-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstMpegts-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstNet-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstPbutils-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 				IgnoredDefinitions: []typesystem.IgnoreFunc{
 					// Resolve to ObjectClass:
 					typesystem.IgnoreMatching("DiscovererAudioInfoClass"),
@@ -261,32 +251,32 @@ var Data = genmain.Data{
 				},
 			},
 			"GstPlay-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstPlayer-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstRtp-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstRtsp-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstSdp-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstTag-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 			"GstVideo-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 				IgnoredDefinitions: []typesystem.IgnoreFunc{
 					// must be implemented manually
 					typesystem.IgnoreMatching("VideoCodecFrame.set_user_data"),
@@ -296,8 +286,8 @@ var Data = genmain.Data{
 				},
 			},
 			"GstWebRTC-1": {
-				MinVersion: "1.26",
-				MaxVersion: "1.26",
+				MinVersion: "1.24",
+				MaxVersion: "1.24",
 			},
 		},
 	},
